@@ -105,6 +105,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
       if (selectedChannelId) {
         const { data } = await supabase.from("channels").select("*").eq("id", selectedChannelId).single();
         setChannelDetails(data);
+        setEditedDescription(data?.description || "");
         setRecipientDetails(null);
       } else if (selectedRecipientId) {
         const { data } = await supabase.from("profiles").select("*").eq("id", selectedRecipientId).single();
@@ -115,6 +116,23 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
     fetchDetails();
   }, [selectedChannelId, selectedRecipientId]);
+
+  const handleUpdateDescription = async () => {
+    if (!channelDetails) return;
+    
+    const { error } = await supabase
+      .from("channels")
+      .update({ description: editedDescription })
+      .eq("id", channelDetails.id);
+
+    if (error) {
+      toast.error("Failed to update description");
+    } else {
+      toast.success("Description updated");
+      setChannelDetails(prev => prev ? { ...prev, description: editedDescription } : null);
+      setIsEditingDescription(false);
+    }
+  };
 
   if (loading) {
     return (
