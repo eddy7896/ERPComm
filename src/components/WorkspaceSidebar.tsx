@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Hash, Lock, MessageSquare, Plus, Settings, LogOut, ChevronDown, UserPlus, Layout } from "lucide-react";
+import { Hash, Lock, Plus, Settings, LogOut, ChevronDown, UserPlus, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
