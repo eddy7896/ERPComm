@@ -25,20 +25,20 @@ interface User {
 
 export default function WorkspacesPage() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const fetchWorkspaces = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      if (authLoading) return;
+      
       if (!user) {
-        router.push("/login");
+        router.push("/");
         return;
       }
-      setUser(user as User);
 
       const { data, error } = await supabase
         .from("workspace_members")
@@ -61,7 +61,7 @@ export default function WorkspacesPage() {
     };
 
     fetchWorkspaces();
-  }, [router]);
+  }, [router, user, authLoading]);
 
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
