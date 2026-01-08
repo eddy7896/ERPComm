@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { generateUserKeyPair, getPrivateKey } from "@/lib/crypto";
 
 type Profile = {
   id: string;
@@ -12,6 +13,7 @@ type Profile = {
   status_text: string | null;
   status_emoji: string | null;
   badge: string | null;
+  public_key: string | null;
 };
 
 type AuthContextType = {
