@@ -111,8 +111,18 @@ export function WorkspaceSidebar({
               const { data: ws } = await supabase.from("workspaces").select("*").eq("id", workspaceId).single();
               setWorkspace(ws);
 
-              const { data: chans } = await supabase.from("channels").select("*").eq("workspace_id", workspaceId).order("name");
-              setChannels(chans || []);
+                const { data: chans } = await supabase.from("channels").select("*").eq("workspace_id", workspaceId).order("name");
+                
+                // Fetch user's channel memberships for fallback filtering
+                const { data: memberships } = await supabase
+                  .from("channel_members")
+                  .select("channel_id")
+                  .eq("user_id", user.id);
+
+                const memberChannelIds = new Set(memberships?.map(m => m.channel_id) || []);
+                const filteredChannels = chans?.filter(c => !c.is_private || memberChannelIds.has(c.id)) || [];
+                
+                setChannels(filteredChannels);
 
               const { data: mems } = await supabase
                 .from("workspace_members")
