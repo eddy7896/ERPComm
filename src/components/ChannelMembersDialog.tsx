@@ -77,9 +77,9 @@ export function ChannelMembersDialog({
           .filter((p) => !memberIds.has(p.id));
 
       setNonMembers(others);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching data:", error);
-        const errorMessage = error?.message || "Unknown error";
+        const errorMessage = (error as { message?: string })?.message || "Unknown error";
         toast.error("Failed to load members: " + errorMessage);
       } finally {
       setLoading(false);
