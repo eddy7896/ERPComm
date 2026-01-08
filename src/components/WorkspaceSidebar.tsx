@@ -258,16 +258,20 @@ export function WorkspaceSidebar({
         <div className="flex items-center gap-3 px-1">
           <div className="relative group cursor-pointer">
             <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800 transition-transform group-hover:scale-105">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback className="bg-primary/10 text-primary">{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</AvatarFallback>
+              <AvatarImage src={profile?.avatar_url} />
+              <AvatarFallback className="bg-primary/10 text-primary">{profile?.full_name?.[0] || profile?.id?.[0]}</AvatarFallback>
             </Avatar>
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-100 dark:border-zinc-900 bg-emerald-500" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-none mb-1">
-              {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+              {profile?.full_name || "User"}
             </p>
-            <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-500 leading-none">Online</p>
+            <StatusPicker 
+              currentStatus={profile?.status_text} 
+              currentEmoji={profile?.status_emoji}
+              onStatusUpdate={(text, emoji) => setProfile(prev => prev ? { ...prev, status_text: text, status_emoji: emoji } : null)}
+            />
           </div>
           <ThemeToggle />
         </div>
