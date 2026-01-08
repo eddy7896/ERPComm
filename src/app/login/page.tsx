@@ -76,10 +76,13 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button type="button" variant="outline" className="w-full" onClick={autofillDemo}>
+                Use Mock Credentials
+              </Button>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign in"}
+              </Button>
             <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
               Don&apos;t have an account?{" "}
               <Link href="/register" className="font-medium text-primary hover:underline">
