@@ -11,11 +11,12 @@ const gf = new GiphyFetch(process.env.NEXT_PUBLIC_GIPHY_API_KEY || "dc6zaTOxFJmz
 
 interface GiphyPickerProps {
   onSelect: (url: string) => void;
+  defaultTab?: "gifs" | "stickers";
 }
 
-export function GiphyPicker({ onSelect }: GiphyPickerProps) {
+export function GiphyPicker({ onSelect, defaultTab = "gifs" }: GiphyPickerProps) {
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState("gifs");
+  const [activeTab, setActiveTab] = useState(defaultTab);
 
   const fetchGifs = (offset: number) => 
     gf.search(search || "trending", { offset, limit: 10, type: activeTab === "gifs" ? "gifs" : "stickers" });
