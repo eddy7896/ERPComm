@@ -72,9 +72,10 @@ export function WorkspaceSidebar({
   onSelectDM 
 }: WorkspaceSidebarProps) {
   const { profile, refreshProfile } = useAuth();
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+    const [channels, setChannels] = useState<Channel[]>([]);
+    const [members, setMembers] = useState<Member[]>([]);
+    const [unreadCounts, setUnreadCounts] = useState<UnreadCount[]>([]);
+    const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
