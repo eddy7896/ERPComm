@@ -70,6 +70,7 @@ interface Workspace {
 import { ProfileSettingsDialog, BADGE_OPTIONS } from "./ProfileSettingsDialog";
 import { useAuth } from "@/components/AuthProvider";
 import { cn } from "@/lib/utils";
+import { NotificationsPopover } from "./NotificationsPopover";
 
 export function WorkspaceSidebar({ 
   workspaceId, 
