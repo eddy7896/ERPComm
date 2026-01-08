@@ -443,9 +443,11 @@ export function MessageInput({
           </div>
         </div>
       </div>
-      <p className="hidden md:block text-[10px] text-zinc-400 mt-2 ml-1">
-        <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line{replyingTo && <>, <strong>Esc</strong> to cancel reply</>}
-      </p>
+        <p className="hidden md:block text-[10px] text-zinc-400 mt-2 ml-1">
+          <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line{replyingTo && <>, <strong>Esc</strong> to cancel reply</>}
+        </p>
+        </>
+      )}
     </div>
   );
 }
