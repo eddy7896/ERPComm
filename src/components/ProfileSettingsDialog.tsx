@@ -166,13 +166,16 @@ export function ProfileSettingsDialog({ open, onOpenChange }: ProfileSettingsDia
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a badge" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {BADGE_OPTIONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                    <SelectContent>
+                      {BADGE_OPTIONS.map((option) => (
+                        <SelectItem key={option.label} value={option.label}>
+                          <div className="flex items-center gap-2">
+                            <div className={cn("w-2 h-2 rounded-full border", option.color.split(' ')[0].replace('/10', ''))} />
+                            {option.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                 </Select>
                 <p className="text-[10px] text-zinc-500">This badge will appear next to your name</p>
               </div>
