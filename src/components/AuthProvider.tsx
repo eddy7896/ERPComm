@@ -49,6 +49,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!error && data) {
       setProfile(data);
+      
+      // Handle Encryption Key Generation
+      if (!data.public_key) {
+        try {
+          // Check if private key exists in IDB
+          const existingPrivKey = await getPrivateKey();
+          if (!existingPrivKey) {
+            const publicKeyJWK = await generateUserKeyPair();
+            await supabase
+              .from("profiles")
+              .update({ public_key: publicKeyJWK })
+              .eq("id", userId);
+            
+            // Refresh profile after update
+            const { data: updatedData } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", userId)
+              .single();
+            if (updatedData) setProfile(updatedData);
+          }
+        } catch (err) {
+          console.error("Failed to generate encryption keys:", err);
+        }
+      }
     }
   };
 
