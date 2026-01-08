@@ -545,7 +545,7 @@ export function MessageInput({
                 onBlur={() => onStopTyping?.()}
               />
               
-              <div className="flex items-center justify-between px-3 pb-3 md:pb-3 md:pr-4">
+                <div className="flex items-center justify-between px-3 py-3 md:pb-3 md:pt-0 md:pr-4">
                 <div className="flex items-center gap-1">
                   <Popover>
                     <PopoverTrigger asChild>
