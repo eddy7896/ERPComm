@@ -205,10 +205,10 @@ export function WorkspaceSidebar({
 
     return (
       <div className="flex h-full w-[280px] flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800">
-      <div className="p-3">
+      <div className="p-3 flex items-center justify-between gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex h-12 w-full items-center justify-between px-3 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-lg transition-all active:scale-[0.98]">
+            <Button variant="ghost" className="flex h-12 flex-1 items-center justify-between px-3 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-lg transition-all active:scale-[0.98]">
               <div className="flex items-center gap-2 truncate">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm shrink-0">
                   {workspace?.name?.[0].toUpperCase() || "W"}
@@ -232,9 +232,20 @@ export function WorkspaceSidebar({
                 <LogOut className="mr-3 h-4 w-4" /> Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
-
         </DropdownMenu>
+
+        <NotificationsPopover 
+          workspaceId={workspaceId} 
+          onNotificationClick={(n) => {
+            if (n.channel_id) {
+              onSelectChannel(n.channel_id);
+            } else if (n.actor_id) {
+              onSelectDM(n.actor_id);
+            }
+          }}
+        />
       </div>
+
 
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-6 py-2">
