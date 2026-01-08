@@ -34,40 +34,39 @@ interface RecipientDetails {
   status?: string;
 }
 
-  export default function WorkspacePage({ params }: { params: Promise<{ workspaceId: string }> }) {
-    const { workspaceId } = use(params);
-    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
-    const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
-    const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
-    const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
-    const [membersDialogOpen, setMembersDialogOpen] = useState(false);
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-    const { user, loading: authLoading } = useAuth();
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
-  
-    useEffect(() => {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-          e.preventDefault();
-          setSearchOpen(prev => !prev);
-        }
-        if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-          e.preventDefault();
-          setIsSidebarVisible(prev => !prev);
-        }
-      };
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
-
+export default function WorkspacePage({ params }: { params: Promise<{ workspaceId: string }> }) {
+  const { workspaceId } = use(params);
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+  const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
+  const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
+  const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const { typingUsers, handleTyping, stopTyping } = useTypingIndicator(
     workspaceId,
     selectedChannelId || undefined,
     selectedRecipientId || undefined
   );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+        e.preventDefault();
+        setIsSidebarVisible(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -152,6 +151,33 @@ interface RecipientDetails {
             >
               <Menu className="h-5 w-5" />
             </Button>
+            
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-72">
+                  <WorkspaceSidebar 
+                    workspaceId={workspaceId}
+                    selectedChannelId={selectedChannelId}
+                    selectedRecipientId={selectedRecipientId}
+                    onSelectChannel={(id) => {
+                      setSelectedChannelId(id);
+                      setSelectedRecipientId(null);
+                    }}
+                    onSelectDM={(id) => {
+                      setSelectedRecipientId(id);
+                      setSelectedChannelId(null);
+                    }}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            <div className="flex items-center gap-2 overflow-hidden">
               {channelDetails ? (
                 <>
                   {channelDetails.is_private ? (
