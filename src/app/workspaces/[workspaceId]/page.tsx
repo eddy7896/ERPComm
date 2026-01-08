@@ -35,7 +35,7 @@ interface RecipientDetails {
   status?: string;
 }
 
-export default function WorkspacePage({ params }: { params: Promise<{ workspaceId: string }> }) {
+export default function WorkspacePage({ params }: {params: Promise<{workspaceId: string;}>;}) {
   const { workspaceId } = use(params);
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
@@ -62,11 +62,11 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setSearchOpen(prev => !prev);
+        setSearchOpen((prev) => !prev);
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
         e.preventDefault();
-        setIsSidebarVisible(prev => !prev);
+        setIsSidebarVisible((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -75,7 +75,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       router.push("/");
       return;
@@ -86,27 +86,27 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   useEffect(() => {
     const fetchInitialChannel = async () => {
       if (!user) return;
-      
+
       // Fetch all channels in workspace
-      const { data: allChannels } = await supabase
-        .from("channels")
-        .select("*")
-        .eq("workspace_id", workspaceId)
-        .order("name");
-      
+      const { data: allChannels } = await supabase.
+      from("channels").
+      select("*").
+      eq("workspace_id", workspaceId).
+      order("name");
+
       if (!allChannels || allChannels.length === 0) return;
 
       // Fetch user's channel memberships
-      const { data: memberships } = await supabase
-        .from("channel_members")
-        .select("channel_id")
-        .eq("user_id", user.id);
+      const { data: memberships } = await supabase.
+      from("channel_members").
+      select("channel_id").
+      eq("user_id", user.id);
 
-      const memberChannelIds = new Set(memberships?.map(m => m.channel_id) || []);
-      
+      const memberChannelIds = new Set(memberships?.map((m) => m.channel_id) || []);
+
       // Find first accessible channel
-      const firstAccessible = allChannels.find(c => !c.is_private || memberChannelIds.has(c.id));
-      
+      const firstAccessible = allChannels.find((c) => !c.is_private || memberChannelIds.has(c.id));
+
       if (firstAccessible) {
         setSelectedChannelId(firstAccessible.id);
         setChannelDetails(firstAccessible);
@@ -124,16 +124,16 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
       if (selectedChannelId) {
         const { data: channel } = await supabase.from("channels").select("*").eq("id", selectedChannelId).single();
-        
+
         if (channel?.is_private) {
           // Verify membership
-          const { data: membership } = await supabase
-            .from("channel_members")
-            .select("id")
-            .eq("channel_id", selectedChannelId)
-            .eq("user_id", user.id)
-            .single();
-          
+          const { data: membership } = await supabase.
+          from("channel_members").
+          select("id").
+          eq("channel_id", selectedChannelId).
+          eq("user_id", user.id).
+          single();
+
           if (!membership) {
             toast.error("You don't have access to this private channel");
             setSelectedChannelId(null);
@@ -146,12 +146,12 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
         setRecipientDetails(null);
 
         // Fetch pinned messages
-        const { data: pinned } = await supabase
-          .from("messages")
-          .select("*, sender:profiles!sender_id(*)")
-          .eq("channel_id", selectedChannelId)
-          .eq("is_pinned", true)
-          .order("created_at", { ascending: false });
+        const { data: pinned } = await supabase.
+        from("messages").
+        select("*, sender:profiles!sender_id(*)").
+        eq("channel_id", selectedChannelId).
+        eq("is_pinned", true).
+        order("created_at", { ascending: false });
         setPinnedMessages(pinned || []);
       } else if (selectedRecipientId) {
         const { data } = await supabase.from("profiles").select("*").eq("id", selectedRecipientId).single();
@@ -162,32 +162,32 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
     fetchDetails();
 
-    const messageSubscription = supabase
-      .channel(`pinned:${selectedChannelId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'messages',
-        filter: `channel_id=eq.${selectedChannelId}`
-      }, (payload) => {
-        if (payload.new.is_pinned !== payload.old.is_pinned) {
-          fetchDetails();
-        }
-      })
-      .subscribe();
+    const messageSubscription = supabase.
+    channel(`pinned:${selectedChannelId}`).
+    on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'messages',
+      filter: `channel_id=eq.${selectedChannelId}`
+    }, (payload) => {
+      if (payload.new.is_pinned !== payload.old.is_pinned) {
+        fetchDetails();
+      }
+    }).
+    subscribe();
 
-    const channelSubscription = supabase
-      .channel(`channel_details:${selectedChannelId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'channels',
-        filter: `id=eq.${selectedChannelId}`
-      }, (payload) => {
-        setChannelDetails(prev => prev ? { ...prev, ...payload.new } : payload.new as ChannelDetails);
-        setEditedDescription(payload.new.description || "");
-      })
-      .subscribe();
+    const channelSubscription = supabase.
+    channel(`channel_details:${selectedChannelId}`).
+    on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'channels',
+      filter: `id=eq.${selectedChannelId}`
+    }, (payload) => {
+      setChannelDetails((prev) => prev ? { ...prev, ...payload.new } : payload.new as ChannelDetails);
+      setEditedDescription(payload.new.description || "");
+    }).
+    subscribe();
 
     return () => {
       supabase.removeChannel(messageSubscription);
@@ -197,17 +197,17 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
   const handleUpdateDescription = async () => {
     if (!channelDetails) return;
-    
-    const { error } = await supabase
-      .from("channels")
-      .update({ description: editedDescription })
-      .eq("id", channelDetails.id);
+
+    const { error } = await supabase.
+    from("channels").
+    update({ description: editedDescription }).
+    eq("id", channelDetails.id);
 
     if (error) {
       toast.error("Failed to update description");
     } else {
       toast.success("Description updated");
-      setChannelDetails(prev => prev ? { ...prev, description: editedDescription } : null);
+      setChannelDetails((prev) => prev ? { ...prev, description: editedDescription } : null);
       setIsEditingDescription(false);
     }
   };
@@ -216,14 +216,14 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100">
       <div className={cn("hidden md:flex transition-all duration-300 ease-in-out", !isSidebarVisible && "md:w-0 overflow-hidden opacity-0")}>
-        <WorkspaceSidebar 
+        <WorkspaceSidebar
           workspaceId={workspaceId}
           selectedChannelId={selectedChannelId}
           selectedRecipientId={selectedRecipientId}
@@ -234,20 +234,20 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
           onSelectDM={(id) => {
             setSelectedRecipientId(id);
             setSelectedChannelId(null);
-          }}
-        />
+          }} />
+
       </div>
 
       <main className="flex flex-1 flex-col min-w-0 h-full relative">
         <header className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
           <div className="flex items-center gap-2 overflow-hidden">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="hidden md:flex h-9 w-9 text-zinc-500"
-              onClick={() => setIsSidebarVisible(prev => !prev)}
-              title="Toggle Sidebar (Cmd+B)"
-            >
+              onClick={() => setIsSidebarVisible((prev) => !prev)}
+              title="Toggle Sidebar (Cmd+B)">
+
               <Menu className="h-5 w-5" />
             </Button>
             
@@ -258,8 +258,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-72">
-                  <WorkspaceSidebar 
+                <SheetContent side="left" className="p-0 !w-0 !h-0">
+                  <WorkspaceSidebar
                     workspaceId={workspaceId}
                     selectedChannelId={selectedChannelId}
                     selectedRecipientId={selectedRecipientId}
@@ -270,63 +270,63 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                     onSelectDM={(id) => {
                       setSelectedRecipientId(id);
                       setSelectedChannelId(null);
-                    }}
-                  />
+                    }} />
+
                 </SheetContent>
               </Sheet>
             </div>
 
             <div className="flex items-center gap-2 overflow-hidden">
-              {channelDetails ? (
-                <>
-                  {channelDetails.is_private ? (
-                    <Lock className="h-5 w-5 text-zinc-500 shrink-0" />
-                  ) : (
-                    <Hash className="h-5 w-5 text-zinc-500 shrink-0" />
-                  )}
+              {channelDetails ?
+              <>
+                  {channelDetails.is_private ?
+                <Lock className="h-5 w-5 text-zinc-500 shrink-0" /> :
+
+                <Hash className="h-5 w-5 text-zinc-500 shrink-0" />
+                }
                   <h2 className="font-bold text-lg truncate">{channelDetails.name}</h2>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 ml-1"
-                    onClick={() => setMembersDialogOpen(true)}
-                  >
+                  <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 ml-1"
+                  onClick={() => setMembersDialogOpen(true)}>
+
                     <Users className="h-4 w-4 text-zinc-400" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
                     <Star className="h-4 w-4 text-zinc-400" />
                   </Button>
-                  {channelDetails.description && (
-                    <span className="text-sm text-zinc-500 hidden lg:inline truncate">
+                  {channelDetails.description &&
+                <span className="text-sm text-zinc-500 hidden lg:inline truncate">
                       | {channelDetails.description}
                     </span>
-                  )}
-                </>
-              ) : recipientDetails ? (
-                <>
+                }
+                </> :
+              recipientDetails ?
+              <>
                   <h2 className="font-bold text-lg truncate">{recipientDetails.full_name || recipientDetails.username}</h2>
                   <div className={`h-2 w-2 rounded-full shrink-0 ${recipientDetails.status === 'online' ? 'bg-green-500' : 'bg-zinc-400'}`} />
-                </>
-              ) : (
-                <div className="h-6 w-32 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded" />
-              )}
+                </> :
+
+              <div className="h-6 w-32 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded" />
+              }
             </div>
           </div>
 
           <div className="flex items-center gap-1 md:gap-2">
-            <div 
+            <div
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex items-center bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-            >
+              className="hidden sm:flex items-center bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+
               <Search className="h-3 w-3 mr-2" />
               <span>Search...</span>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8 sm:hidden"
-              onClick={() => setSearchOpen(true)}
-            >
+              onClick={() => setSearchOpen(true)}>
+
               <Search className="h-4 w-4" />
             </Button>
             
@@ -348,47 +348,47 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                   </SheetTitle>
                 </SheetHeader>
                 <ScrollArea className="flex-1">
-                  {channelDetails ? (
-                    <div className="p-6 space-y-6">
+                  {channelDetails ?
+                  <div className="p-6 space-y-6">
                       <div className="space-y-2 text-center">
                         <div className="h-20 w-20 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto text-3xl font-bold text-zinc-400">
                           {channelDetails.name[0].toUpperCase()}
                         </div>
                           <h3 className="text-xl font-bold">{channelDetails.name}</h3>
-                          {isEditingDescription ? (
-                            <div className="space-y-2">
+                          {isEditingDescription ?
+                      <div className="space-y-2">
                               <textarea
-                                className="w-full min-h-[80px] p-2 text-sm bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                                value={editedDescription}
-                                onChange={(e) => setEditedDescription(e.target.value)}
-                                placeholder="Add a description..."
-                                autoFocus
-                              />
+                          className="w-full min-h-[80px] p-2 text-sm bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                          value={editedDescription}
+                          onChange={(e) => setEditedDescription(e.target.value)}
+                          placeholder="Add a description..."
+                          autoFocus />
+
                               <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => {
-                                    setIsEditingDescription(false);
-                                    setEditedDescription(channelDetails.description || "");
-                                  }}
-                                >
+                                <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIsEditingDescription(false);
+                              setEditedDescription(channelDetails.description || "");
+                            }}>
+
                                   Cancel
                                 </Button>
                                 <Button size="sm" onClick={handleUpdateDescription}>Save</Button>
                               </div>
-                            </div>
-                          ) : (
-                            <div 
-                              className="group relative cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 p-2 rounded-md transition-colors"
-                              onClick={() => setIsEditingDescription(true)}
-                            >
+                            </div> :
+
+                      <div
+                        className="group relative cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 p-2 rounded-md transition-colors"
+                        onClick={() => setIsEditingDescription(true)}>
+
                               <p className="text-sm text-zinc-500">{channelDetails.description || "No description set"}</p>
                               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Pencil className="h-3 w-3 text-zinc-400" />
                               </div>
                             </div>
-                          )}
+                      }
                         </div>
 
                       <Separator />
@@ -415,11 +415,11 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                             <Badge variant="secondary" className="text-[10px] h-4 px-1">{pinnedMessages.length}</Badge>
                           </div>
                           <div className="space-y-3">
-                            {pinnedMessages.length === 0 ? (
-                              <p className="text-xs text-zinc-500 italic">No pinned messages yet.</p>
-                            ) : (
-                              pinnedMessages.map((msg) => (
-                                <div key={msg.id} className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-100 dark:border-zinc-800 space-y-1">
+                            {pinnedMessages.length === 0 ?
+                        <p className="text-xs text-zinc-500 italic">No pinned messages yet.</p> :
+
+                        pinnedMessages.map((msg) =>
+                        <div key={msg.id} className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-100 dark:border-zinc-800 space-y-1">
                                   <div className="flex items-center gap-2">
                                     <Avatar className="h-5 w-5">
                                       <AvatarFallback className="text-[8px]">{msg.sender?.full_name?.[0] || msg.sender?.username?.[0]}</AvatarFallback>
@@ -429,8 +429,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                                   </div>
                                   <p className="text-xs text-zinc-700 dark:text-zinc-300 line-clamp-3">{msg.content}</p>
                                 </div>
-                              ))
-                            )}
+                        )
+                        }
                           </div>
                         </div>
 
@@ -440,13 +440,13 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                         <Button variant="outline" className="w-full text-xs h-9">Edit Channel</Button>
                         <Button variant="outline" className="w-full text-xs h-9 text-red-500 hover:text-red-600">Archive</Button>
                       </div>
-                    </div>
-                  ) : recipientDetails ? (
-                    <div className="p-6 space-y-6">
+                    </div> :
+                  recipientDetails ?
+                  <div className="p-6 space-y-6">
                       <div className="space-y-2 text-center">
                         <Avatar className="h-24 w-24 mx-auto rounded-2xl">
                           <AvatarFallback className="text-3xl rounded-2xl">
-                            {recipientDetails.full_name?.split(" ").map(n => n[0]).join("") || recipientDetails.username?.[0]}
+                            {recipientDetails.full_name?.split(" ").map((n) => n[0]).join("") || recipientDetails.username?.[0]}
                           </AvatarFallback>
                         </Avatar>
                         <h3 className="text-xl font-bold pt-2">{recipientDetails.full_name || recipientDetails.username}</h3>
@@ -485,34 +485,34 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                       <div className="space-y-3">
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Recent Media</h4>
                         <div className="grid grid-cols-3 gap-2">
-                          {[1, 2, 3].map(i => (
-                            <div key={i} className="aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-md" />
-                          ))}
+                          {[1, 2, 3].map((i) =>
+                        <div key={i} className="aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-md" />
+                        )}
                         </div>
                       </div>
-                    </div>
-                  ) : null}
+                    </div> :
+                  null}
                 </ScrollArea>
               </SheetContent>
             </Sheet>
           </div>
 
-          <SearchDialog 
-            workspaceId={workspaceId} 
-            open={searchOpen} 
-            onOpenChange={setSearchOpen} 
-          />
+          <SearchDialog
+            workspaceId={workspaceId}
+            open={searchOpen}
+            onOpenChange={setSearchOpen} />
+
         </header>
 
-        <MessageList 
-          workspaceId={workspaceId} 
+        <MessageList
+          workspaceId={workspaceId}
           channelId={selectedChannelId || undefined}
           recipientId={selectedRecipientId || undefined}
           typingUsers={typingUsers}
-          onReply={setReplyingTo}
-        />
+          onReply={setReplyingTo} />
 
-        <MessageInput 
+
+        <MessageInput
           workspaceId={workspaceId}
           channelId={selectedChannelId || undefined}
           recipientId={selectedRecipientId || undefined}
@@ -521,19 +521,19 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
           onTyping={handleTyping}
           onStopTyping={stopTyping}
           replyingTo={replyingTo}
-          onCancelReply={() => setReplyingTo(null)}
-        />
+          onCancelReply={() => setReplyingTo(null)} />
 
-        {channelDetails && (
-          <ChannelMembersDialog
-            channelId={channelDetails.id}
-            workspaceId={workspaceId}
-            channelName={channelDetails.name}
-            open={membersDialogOpen}
-            onOpenChange={setMembersDialogOpen}
-          />
-        )}
+
+        {channelDetails &&
+        <ChannelMembersDialog
+          channelId={channelDetails.id}
+          workspaceId={workspaceId}
+          channelName={channelDetails.name}
+          open={membersDialogOpen}
+          onOpenChange={setMembersDialogOpen} />
+
+        }
       </main>
-    </div>
-  );
+    </div>);
+
 }
