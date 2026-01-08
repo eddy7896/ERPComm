@@ -95,14 +95,19 @@ export function SearchDialog({ workspaceId, open, onOpenChange }: SearchDialogPr
                 }}
                 className="flex flex-col items-start gap-1 py-3"
               >
-                <div className="flex items-center gap-2 w-full">
-                  <span className="font-semibold text-xs text-zinc-500">
-                    {result.sender.full_name || result.sender.username}
-                  </span>
-                  <span className="text-[10px] text-zinc-400">
-                    {new Date(result.created_at).toLocaleDateString()}
-                  </span>
-                </div>
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-xs text-zinc-900 dark:text-zinc-100">
+                        {result.sender.full_name || result.sender.username}
+                      </span>
+                      {result.sender.username && (
+                        <span className="text-[10px] text-zinc-500 font-medium">@{result.sender.username}</span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-zinc-400">
+                      {new Date(result.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 <p className="text-sm line-clamp-2">{result.content}</p>
               </CommandItem>
             ))}
