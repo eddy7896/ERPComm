@@ -6,13 +6,18 @@ import { MessageList } from "@/components/MessageList";
 import { MessageInput } from "@/components/MessageInput";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
-import { Hash, Lock, Info, Search, Bell, Star, AtSign, Menu, Users } from "lucide-react";
+import { Hash, Lock, Info, Search, Bell, Star, AtSign, Menu, Users, X, Calendar, MapPin, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useRouter } from "next/navigation";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ChannelMembersDialog } from "@/components/ChannelMembersDialog";
+import { SearchDialog } from "@/components/SearchDialog";
+import { NotificationsPopover } from "@/components/NotificationsPopover";
+import { MentionsPopover } from "@/components/MentionsPopover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChannelDetails {
   id: string;
