@@ -1,126 +1,83 @@
-# EnterpriseChat Deployment Guide
+# Deployment Guide for VPS
 
-This document outlines the architecture and deployment steps for the EnterpriseChat platform.
+This guide explains how to deploy the Enterprise Communication Platform on a Linux VPS (Ubuntu) using Docker, Nginx, and Let's Encrypt.
 
-## System Architecture
+## Prerequisites
 
-```mermaid
-graph TD
-    User((User))
-    LB[Nginx Reverse Proxy]
-    FE[Next.js Frontend / API Routes]
-    SB[Supabase Backend]
-    
-    User --> LB
-    LB --> FE
-    FE --> SB
-    
-    subgraph "Supabase (Cloud or Self-Hosted)"
-        Auth[Auth Service]
-        DB[(PostgreSQL)]
-        RT[Realtime / WebSockets]
-        ST[Storage]
-    end
-    
-    FE -.-> Auth
-    FE -.-> DB
-    FE -.-> RT
-```
+- A Linux VPS (Ubuntu 22.04 recommended)
+- Docker and Docker Compose installed
+- A domain name pointing to your VPS IP address
+- Supabase project credentials (URL, Anon Key, Service Role Key)
 
-## API Design (Rest + Realtime)
+## Step 1: Initial Setup
 
-### REST Endpoints (via Supabase Client)
-- `POST /auth/v1/signup`: User registration
-- `POST /auth/v1/login`: User authentication
-- `GET /rest/v1/workspaces`: Fetch user workspaces
-- `POST /rest/v1/workspaces`: Create new workspace
-- `GET /rest/v1/channels`: Fetch workspace channels
-- `POST /rest/v1/messages`: Send a message
-
-### Realtime Events (via WebSockets)
-- `postgres_changes (table: messages)`: New message notifications
-- `postgres_changes (table: profiles)`: Presence and status updates
-- `presence`: Real-time user online/offline status
-
-## Docker Deployment
-
-### Dockerfile
-```dockerfile
-FROM node:18-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json yarn.lock* package-lock.json* bun.lockb* ./
-RUN npm install
-
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build
-
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV production
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-USER nextjs
-EXPOSE 3000
-ENV PORT 3000
-CMD ["node", "server.js"]
-```
-
-### Docker Compose
-```yaml
-version: '3.8'
-
-services:
-  enterprise-chat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-    restart: always
-```
-
-## VPS Deployment Steps (Ubuntu)
-
-1. **Install Docker & Docker Compose**
-   ```bash
-   sudo apt update
-   sudo apt install docker.io docker-compose -y
-   ```
-
-2. **Clone the Repository**
+1. **Clone the repository** to your VPS:
    ```bash
    git clone <your-repo-url>
    cd enterprise-chat
    ```
 
-3. **Configure Environment Variables**
-   Create a `.env` file with your Supabase credentials.
-
-4. **Start the System**
+2. **Create a `.env` file** in the root directory:
    ```bash
-   docker-compose up -d
+   touch .env
+   ```
+   Add the following variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   DATABASE_URL=your_postgresql_connection_string
    ```
 
-5. **Setup Nginx Reverse Proxy**
-   Install Nginx and configure a site to proxy requests to `http://localhost:3000`.
+## Step 2: SSL Certificate (Let's Encrypt)
 
-6. **SSL with Let's Encrypt**
+1. **Install Certbot**:
    ```bash
-   sudo apt install certbot python3-certbot-nginx -y
-   sudo certbot --nginx -d yourdomain.com
+   sudo apt update
+   sudo apt install certbot
    ```
+
+2. **Obtain SSL Certificate**:
+   ```bash
+   sudo certbot certonly --manual -d yourdomain.com
+   ```
+   *Note: Follow the instructions to verify domain ownership. Alternatively, use the Nginx plugin if Nginx is already installed on the host.*
+
+3. **Link certificates** to the project directory:
+   The `docker-compose.yml` expects certificates in `./certbot/conf`. You can symlink them:
+   ```bash
+   mkdir -p certbot/conf
+   sudo ln -s /etc/letsencrypt/live/yourdomain.com certbot/conf/live/yourdomain.com
+   ```
+
+## Step 3: Nginx Configuration
+
+1. **Update `nginx.conf`**:
+   Replace `yourdomain.com` with your actual domain name in the `nginx.conf` file.
+
+## Step 4: Deploy with Docker Compose
+
+1. **Build and start the containers**:
+   ```bash
+   docker compose up -d --build
+   ```
+
+2. **Verify the deployment**:
+   Check the logs to ensure everything is running correctly:
+   ```bash
+   docker compose logs -f
+   ```
+
+## Step 5: Horizontal Scaling (Optional)
+
+To scale the application service:
+```bash
+docker compose up -d --scale app=3
+```
+*Note: Nginx will automatically load balance between the `app` containers if configured correctly, but the current setup uses a simple upstream. For true horizontal scaling across multiple servers, consider using a cloud load balancer.*
+
+## Security Recommendations
+
+- **Firewall**: Enable `ufw` and only allow ports 22, 80, and 443.
+- **Fail2Ban**: Install Fail2Ban to protect against brute-force attacks.
+- **Backups**: Regularly back up your Supabase database using their dashboard or CLI.
