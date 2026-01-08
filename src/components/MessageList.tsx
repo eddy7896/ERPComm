@@ -555,13 +555,16 @@ function MessageItem({
                               <p className="text-sm font-medium truncate">{file.name}</p>
                               <p className="text-[10px] text-zinc-500">{formatFileSize(file.size)}</p>
                             </div>
-                            <a 
-                              href={file.url} 
-                              download={file.name}
-                              className="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                            >
-                              <Download className="h-4 w-4" />
-                            </a>
+                              <button 
+                                className="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  downloadFile(file.url, file.name);
+                                }}
+                              >
+                                <Download className="h-4 w-4" />
+                              </button>
+
                           </div>
                         )}
                       </div>
