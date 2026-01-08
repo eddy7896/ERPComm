@@ -15,7 +15,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Loader2, User, Image as ImageIcon, Award } from "lucide-react";
+import { Loader2, User, ImageIcon, Award, Check } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+
+const ANIMAL_AVATARS = [
+  "Lion", "Tiger", "Bear", "Wolf", "Fox", 
+  "Deer", "Eagle", "Owl", "Shark", "Dolphin",
+  "Panda", "Koala", "Rabbit", "Cat", "Dog",
+  "Elephant", "Giraffe", "Zebra", "Monkey", "Penguin"
+].map(animal => `https://api.dicebear.com/9.x/big-ears-neutral/svg?seed=${animal}`);
 
 interface ProfileSettingsDialogProps {
   open: boolean;
