@@ -58,17 +58,47 @@ export function MessageInput({
     checkEncryption();
   }, [channelId]);
 
-  const handleSendMessage = async (overrideContent?: string, type: "text" | "image" | "gif" | "sticker" = "text") => {
-    const finalMsgContent = overrideContent || content.trim();
-    if (!finalMsgContent && type === "text") return;
-    if (loading || !user) return;
-    setLoading(true);
-    onStopTyping?.();
+    const handleSendMessage = async (overrideContent?: string, type: "text" | "image" | "gif" | "sticker" = "text") => {
+      const finalMsgContent = overrideContent || content.trim();
+      if (!finalMsgContent && type === "text") return;
+      if (loading || !user) return;
+      
+      const optimisticId = `opt-${Date.now()}`;
+      const tempContent = finalMsgContent;
+      
+      // Dispatch local optimistic update
+      const optimisticMessage = {
+        id: optimisticId,
+        content: tempContent,
+        created_at: new Date().toISOString(),
+        sender_id: user.id,
+        workspace_id: workspaceId,
+        channel_id: channelId,
+        recipient_id: recipientId,
+        payload: { type },
+        is_optimistic: true
+      };
 
-    try {
-      let messageContent = finalMsgContent;
-      let payload: any = { type };
-      let isEncrypted = false;
+      window.dispatchEvent(new CustomEvent('optimistic_message', { 
+        detail: { message: optimisticMessage } 
+      }));
+
+      // Broadcast optimistic update to other clients/tabs
+      supabase.channel(`room:${channelId || recipientId || 'global'}`).send({
+        type: 'broadcast',
+        event: 'optimistic_message',
+        payload: optimisticMessage
+      });
+
+      if (!overrideContent) setContent("");
+      setLoading(true);
+      onStopTyping?.();
+
+      try {
+        let messageContent = finalMsgContent;
+        let payload: any = { type, optimistic_id: optimisticId };
+        let isEncrypted = false;
+
 
       if (isEncryptionActive && channelId) {
         let channelKey = keyCache[channelId];
