@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { RealtimeChannel } from "@supabase/supabase-js";
+import { getProfile } from "@/lib/profile-cache";
 
 interface TypingUser {
   id: string;
