@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Send, Smile, Paperclip, Mic } from "lucide-react";
+import { Send, Smile, Paperclip, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -10,15 +10,28 @@ interface MessageInputProps {
   workspaceId: string;
   channelId?: string;
   recipientId?: string;
+  channelName?: string;
+  recipientName?: string;
+  onTyping?: () => void;
+  onStopTyping?: () => void;
 }
 
-export function MessageInput({ workspaceId, channelId, recipientId }: MessageInputProps) {
+export function MessageInput({ 
+  workspaceId, 
+  channelId, 
+  recipientId, 
+  channelName,
+  recipientName,
+  onTyping,
+  onStopTyping 
+}: MessageInputProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSendMessage = async () => {
     if (!content.trim() || loading) return;
     setLoading(true);
+    onStopTyping?.();
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -45,15 +58,29 @@ export function MessageInput({ workspaceId, channelId, recipientId }: MessageInp
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    if (e.target.value.trim()) {
+      onTyping?.();
+    } else {
+      onStopTyping?.();
+    }
+  };
+
+  const placeholder = channelId 
+    ? `Message #${channelName || 'channel'}` 
+    : `Message ${recipientName || 'user'}`;
+
   return (
     <div className="px-4 pb-4">
       <div className="relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 transition-shadow">
         <Textarea
-          placeholder={channelId ? `Message #channel` : `Message user`}
+          placeholder={placeholder}
           className="min-h-[44px] h-auto max-h-[200px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-4 pt-3 pb-2 text-sm"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onBlur={() => onStopTyping?.()}
         />
         
         <div className="flex items-center justify-between px-2 pb-2">
@@ -88,5 +115,3 @@ export function MessageInput({ workspaceId, channelId, recipientId }: MessageInp
     </div>
   );
 }
-
-import { Plus } from "lucide-react";
