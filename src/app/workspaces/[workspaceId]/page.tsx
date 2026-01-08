@@ -40,6 +40,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
   const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
