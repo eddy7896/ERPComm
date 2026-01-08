@@ -297,12 +297,17 @@ export function WorkspaceSidebar({
                     </Avatar>
                       <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-50 dark:border-zinc-950 ${getStatusColor(member.id)}`} />
                     </div>
-                      <span className="truncate flex-1">{member.full_name || member.username}</span>
-                      {getUnreadCount(member.id, false) > 0 && (
-                        <Badge className="mr-1.5 h-5 w-5 p-0 flex items-center justify-center bg-primary text-[10px]">
-                          {getUnreadCount(member.id, false)}
-                        </Badge>
-                      )}
+                        <div className="flex flex-col truncate flex-1">
+                          <span className="truncate">{member.full_name || member.username}</span>
+                          {member.username && (
+                            <span className="text-[10px] text-zinc-500 font-medium truncate">@{member.username}</span>
+                          )}
+                        </div>
+                        {getUnreadCount(member.id, false) > 0 && (
+                          <Badge className="mr-1.5 h-5 w-5 p-0 flex items-center justify-center bg-primary text-[10px]">
+                            {getUnreadCount(member.id, false)}
+                          </Badge>
+                        )}
                       {member.badge && (() => {
                       const badgeOption = BADGE_OPTIONS.find(b => b.label === member.badge);
                       return (
