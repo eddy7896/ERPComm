@@ -46,6 +46,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   const [replyingTo, setReplyingTo] = useState<any>(null);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
+  const [pinnedMessages, setPinnedMessages] = useState<any[]>([]);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
