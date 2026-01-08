@@ -53,7 +53,7 @@ export function usePresence(workspaceId: string) {
             if (newPresences && newPresences.length > 0) {
               newMap.set(key, {
                 id: key,
-                status: (newPresences[0] as any).status || "online",
+                status: (newPresences[0] as { status?: PresenceState }).status || "online",
                 lastSeen: new Date().toISOString(),
               });
             }
