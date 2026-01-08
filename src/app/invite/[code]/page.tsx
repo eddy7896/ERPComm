@@ -145,7 +145,7 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
             </p>
           ) : (
             <p className="text-sm text-zinc-500 text-center">
-              You'll need to sign in or create an account to join
+                You&apos;ll need to sign in or create an account to join
             </p>
           )}
         </CardContent>
