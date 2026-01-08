@@ -258,8 +258,8 @@ export default function WorkspacePage({ params }: {params: Promise<{workspaceId:
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 !w-0 !h-0">
-                  <WorkspaceSidebar
+                <SheetContent side="left" className="p-0 w-[280px] gap-0">
+                  <WorkspaceSidebar 
                     workspaceId={workspaceId}
                     selectedChannelId={selectedChannelId}
                     selectedRecipientId={selectedRecipientId}
@@ -270,8 +270,8 @@ export default function WorkspacePage({ params }: {params: Promise<{workspaceId:
                     onSelectDM={(id) => {
                       setSelectedRecipientId(id);
                       setSelectedChannelId(null);
-                    }} />
-
+                    }}
+                  />
                 </SheetContent>
               </Sheet>
             </div>
