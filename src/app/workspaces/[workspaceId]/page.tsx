@@ -123,7 +123,7 @@ interface RecipientDetails {
 
   return (
     <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100">
-      <div className="hidden md:flex">
+      <div className={cn("hidden md:flex transition-all duration-300 ease-in-out", !isSidebarVisible && "md:w-0 overflow-hidden opacity-0")}>
         <WorkspaceSidebar 
           workspaceId={workspaceId}
           selectedChannelId={selectedChannelId}
@@ -139,35 +139,18 @@ interface RecipientDetails {
         />
       </div>
 
-      <main className="flex flex-1 flex-col min-w-0 h-full">
-        <header className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
+      <main className="flex flex-1 flex-col min-w-0 h-full relative">
+        <header className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="md:hidden">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-72">
-                  <WorkspaceSidebar 
-                    workspaceId={workspaceId}
-                    selectedChannelId={selectedChannelId}
-                    selectedRecipientId={selectedRecipientId}
-                    onSelectChannel={(id) => {
-                      setSelectedChannelId(id);
-                      setSelectedRecipientId(null);
-                    }}
-                    onSelectDM={(id) => {
-                      setSelectedRecipientId(id);
-                      setSelectedChannelId(null);
-                    }}
-                  />
-                </SheetContent>
-              </Sheet>
-            </div>
-            
-            <div className="flex items-center gap-2 overflow-hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hidden md:flex h-9 w-9 text-zinc-500"
+              onClick={() => setIsSidebarVisible(prev => !prev)}
+              title="Toggle Sidebar (Cmd+B)"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
               {channelDetails ? (
                 <>
                   {channelDetails.is_private ? (
