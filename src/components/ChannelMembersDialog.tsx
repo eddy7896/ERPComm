@@ -313,6 +313,33 @@ export function ChannelMembersDialog({
           </Tabs>
         </div>
       </DialogContent>
+
+      <AlertDialog open={!!removingMember} onOpenChange={(open) => !open && setRemovingMember(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove member from channel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {removingMember?.full_name || removingMember?.username} from #{channelName}. They will lose access to all messages and files in this channel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemoving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isRemoving}
+              onClick={(e) => {
+                e.preventDefault();
+                if (removingMember) removeMember(removingMember.id);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isRemoving ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
