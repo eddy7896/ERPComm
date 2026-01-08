@@ -90,7 +90,14 @@ export function useTypingIndicator(
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      stopTyping();
+      if (channelRef.current && currentUserId) {
+        isTypingRef.current = false;
+        channelRef.current.send({
+          type: "broadcast",
+          event: "stop_typing",
+          payload: { userId: currentUserId },
+        });
+      }
     }, 3000);
   }, [currentUserId]);
 
