@@ -54,17 +54,47 @@ export function MessageInput({
 }: MessageInputProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isEncryptionActive, setIsEncryptionActive] = useState(false);
-  const [members, setMembers] = useState<Profile[]>([]);
-  const [showMentions, setShowMentions] = useState(false);
-  const [mentionSearch, setMentionSearch] = useState("");
-  const [mentionIndex, setMentionIndex] = useState(-1);
-  const [cursorPos, setCursorPos] = useState(0);
-  const { user } = useAuth();
-  const { theme } = useTheme();
-
-  useEffect(() => {
-    async function fetchMembers() {
+    const [isEncryptionActive, setIsEncryptionActive] = useState(false);
+    const [isMember, setIsMember] = useState(true);
+    const [members, setMembers] = useState<Profile[]>([]);
+    const [showMentions, setShowMentions] = useState(false);
+    const [mentionSearch, setMentionSearch] = useState("");
+    const [mentionIndex, setMentionIndex] = useState(-1);
+    const [cursorPos, setCursorPos] = useState(0);
+    const { user } = useAuth();
+    const { theme } = useTheme();
+  
+    useEffect(() => {
+      async function checkAccess() {
+        if (!user || !channelId) {
+          setIsMember(true);
+          return;
+        }
+  
+        const { data: channel } = await supabase
+          .from("channels")
+          .select("is_private")
+          .eq("id", channelId)
+          .single();
+  
+        if (channel?.is_private) {
+          const { data: membership } = await supabase
+            .from("channel_members")
+            .select("id")
+            .eq("channel_id", channelId)
+            .eq("user_id", user.id)
+            .single();
+          
+          setIsMember(!!membership);
+        } else {
+          setIsMember(true);
+        }
+      }
+      checkAccess();
+    }, [channelId, user]);
+  
+    useEffect(() => {
+      async function fetchMembers() {
       if (!channelId) {
         setMembers([]);
         return;
