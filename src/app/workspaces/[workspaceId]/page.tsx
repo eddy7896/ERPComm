@@ -127,7 +127,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
     fetchDetails();
 
-    const channel = supabase
+    const messageSubscription = supabase
       .channel(`pinned:${selectedChannelId}`)
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -141,8 +141,22 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
       })
       .subscribe();
 
+    const channelSubscription = supabase
+      .channel(`channel_details:${selectedChannelId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'channels',
+        filter: `id=eq.${selectedChannelId}`
+      }, (payload) => {
+        setChannelDetails(prev => prev ? { ...prev, ...payload.new } : payload.new as ChannelDetails);
+        setEditedDescription(payload.new.description || "");
+      })
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messageSubscription);
+      supabase.removeChannel(channelSubscription);
     };
   }, [selectedChannelId, selectedRecipientId]);
 
