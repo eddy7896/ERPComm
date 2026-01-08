@@ -13,6 +13,13 @@ import { GiphyPicker } from "./GiphyPicker";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
+interface Profile {
+  id: string;
+  username: string;
+  full_name?: string;
+  avatar_url?: string;
+}
+
 interface MessageInputProps {
   workspaceId: string;
   channelId?: string;
@@ -21,7 +28,14 @@ interface MessageInputProps {
   recipientName?: string;
   onTyping?: () => void;
   onStopTyping?: () => void;
-  replyingTo?: any;
+  replyingTo?: {
+    id: string;
+    content: string;
+    sender?: {
+      full_name?: string;
+      username?: string;
+    };
+  };
   onCancelReply?: () => void;
 }
 
@@ -41,7 +55,7 @@ export function MessageInput({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [isEncryptionActive, setIsEncryptionActive] = useState(false);
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Profile[]>([]);
   const [showMentions, setShowMentions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState("");
   const [mentionIndex, setMentionIndex] = useState(-1);
@@ -57,7 +71,7 @@ export function MessageInput({
       }
       const { data, error } = await supabase
         .from("channel_members")
-        .select("user_id, profiles!user_id(id, username, full_name, avatar_url)")
+        .select("profiles!user_id(id, username, full_name, avatar_url)")
         .eq("channel_id", channelId);
       
       if (!error && data) {
