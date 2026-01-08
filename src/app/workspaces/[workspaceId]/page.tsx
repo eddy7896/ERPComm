@@ -276,9 +276,42 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                         <div className="h-20 w-20 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto text-3xl font-bold text-zinc-400">
                           {channelDetails.name[0].toUpperCase()}
                         </div>
-                        <h3 className="text-xl font-bold">{channelDetails.name}</h3>
-                        <p className="text-sm text-zinc-500">{channelDetails.description || "No description set"}</p>
-                      </div>
+                          <h3 className="text-xl font-bold">{channelDetails.name}</h3>
+                          {isEditingDescription ? (
+                            <div className="space-y-2">
+                              <textarea
+                                className="w-full min-h-[80px] p-2 text-sm bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                                value={editedDescription}
+                                onChange={(e) => setEditedDescription(e.target.value)}
+                                placeholder="Add a description..."
+                                autoFocus
+                              />
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    setIsEditingDescription(false);
+                                    setEditedDescription(channelDetails.description || "");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button size="sm" onClick={handleUpdateDescription}>Save</Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div 
+                              className="group relative cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 p-2 rounded-md transition-colors"
+                              onClick={() => setIsEditingDescription(true)}
+                            >
+                              <p className="text-sm text-zinc-500">{channelDetails.description || "No description set"}</p>
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Pencil className="h-3 w-3 text-zinc-400" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
                       <Separator />
 
