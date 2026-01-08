@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Loader2, Hash, MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react";
+import { decryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
+import { Loader2, Hash, MoreHorizontal, Pencil, Trash2, Check, X, ShieldCheck, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const getBadgeColor = (badge: string) => {
@@ -45,6 +46,8 @@ interface Message {
   created_at: string;
   is_edited?: boolean;
   sender_id: string;
+  is_encrypted?: boolean;
+  payload?: any;
   sender?: {
     id: string;
     avatar_url?: string;
@@ -52,7 +55,10 @@ interface Message {
     username?: string;
     badge?: string;
   };
+  decryptedContent?: string;
 }
+
+const keyCache: Record<string, CryptoKey> = {};
 
 export function MessageList({ workspaceId, channelId, recipientId, typingUsers = [] }: MessageListProps) {
   const [messages, setMessages] = useState<Message[]>([]);
