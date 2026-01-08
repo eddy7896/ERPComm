@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Shield, LayoutDashboard, Globe, Lock, ArrowRight, Loader2, Code, Palette, Zap, Users } from "lucide-react";
+import { Shield, LayoutDashboard, Globe, Lock, ArrowRight, Loader2, Code, Palette, Zap } from "lucide-react";
 
 const DEMO_ACCOUNTS = [
   { email: "admin@enterprise.com", role: "Admin", icon: Shield, color: "text-blue-500" },
@@ -184,49 +184,6 @@ export default function Home() {
           </div>
         </motion.div>
       </div>
-
-      {/* Right side: Hero/Visual area */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-zinc-50 dark:bg-zinc-900 items-center justify-center">
-        {/* Subtle geometric pattern */}
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative z-10 max-w-lg px-8 text-center"
-        >
-          <div className="mb-6 inline-flex p-3 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl border border-zinc-100 dark:border-zinc-700">
-            <LayoutDashboard className="h-12 w-12 text-zinc-900 dark:text-white" />
-          </div>
-          <h2 className="text-4xl font-bold text-zinc-900 dark:text-white mb-4 leading-tight">
-            Connect your team in one secure platform.
-          </h2>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8">
-            The all-in-one workspace for enterprise collaboration, real-time messaging, and project management.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Uptime", value: "99.9%" },
-              { label: "Active Users", value: "2M+" }
-            ].map((stat, i) => (
-              <div key={i} className="p-4 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 shadow-sm">
-                <div className="text-2xl font-bold text-zinc-900 dark:text-white">{stat.value}</div>
-                <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Decorative elements */}
-        <div className="absolute -bottom-24 -right-24 h-96 w-96 bg-zinc-200/50 dark:bg-zinc-800/50 blur-3xl rounded-full" />
-        <div className="absolute -top-24 -left-24 h-96 w-96 bg-zinc-200/50 dark:bg-zinc-800/50 blur-3xl rounded-full" />
-      </div>
-    </div>
-  );
-}
-
 
       {/* Right side: Hero/Visual area */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-zinc-50 dark:bg-zinc-900 items-center justify-center">
