@@ -75,7 +75,7 @@ export function MessageInput({
         .eq("channel_id", channelId);
       
       if (!error && data) {
-        setMembers(data.map((m: any) => m.profiles));
+        setMembers(data.map((m: any) => m.profiles).filter(Boolean));
       }
     }
     fetchMembers();
