@@ -351,6 +351,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
           channelId={selectedChannelId || undefined}
           recipientId={selectedRecipientId || undefined}
           typingUsers={typingUsers}
+          onReply={setReplyingTo}
         />
 
         <MessageInput 
@@ -361,6 +362,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
           recipientName={recipientDetails?.full_name || recipientDetails?.username}
           onTyping={handleTyping}
           onStopTyping={stopTyping}
+          replyingTo={replyingTo}
+          onCancelReply={() => setReplyingTo(null)}
         />
 
         {channelDetails && (
