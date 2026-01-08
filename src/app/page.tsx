@@ -8,33 +8,34 @@ import { motion } from "framer-motion";
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-zinc-950">
-      <header className="flex h-16 items-center justify-between px-6 border-b border-zinc-100 dark:border-zinc-800">
+      <header className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <MessageSquare className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold tracking-tight">EnterpriseChat</span>
+          <span className="text-xl font-bold tracking-tight hidden xs:inline-block">EnterpriseChat</span>
+          <span className="text-xl font-bold tracking-tight xs:hidden">EC</span>
         </div>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2 sm:gap-4">
           <Link href="/login">
-            <Button variant="ghost">Login</Button>
+            <Button variant="ghost" size="sm" className="sm:text-base">Login</Button>
           </Link>
           <Link href="/register">
-            <Button>Get Started</Button>
+            <Button size="sm" className="sm:text-base">Get Started</Button>
           </Link>
         </nav>
       </header>
 
       <main className="flex-1">
-        <section className="relative py-24 px-6 text-center">
+        <section className="relative py-12 sm:py-24 px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="mx-auto max-w-3xl"
           >
-            <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl mb-6">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-7xl mb-6">
               The communication platform for <span className="text-primary">enterprise teams.</span>
             </h1>
-            <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed">
+            <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed max-w-2xl mx-auto">
               Real-time messaging, channels, and role-based access control built for scale.
               Secure, fast, and designed for professional organizations.
             </p>
@@ -53,9 +54,9 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section className="py-24 bg-zinc-50 dark:bg-zinc-900/50 px-6">
-          <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="flex flex-col items-center text-center p-6">
+        <section className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-900/50 px-6">
+          <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            <div className="flex flex-col items-center text-center p-4 sm:p-6">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 text-primary">
                 <Zap className="h-6 w-6" />
               </div>
