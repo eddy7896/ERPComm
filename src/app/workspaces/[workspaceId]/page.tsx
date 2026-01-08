@@ -188,24 +188,134 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
           </div>
 
           <div className="flex items-center gap-1 md:gap-2">
-            <div className="hidden sm:flex items-center bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+            <div 
+              onClick={() => setSearchOpen(true)}
+              className="hidden sm:flex items-center bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            >
               <Search className="h-3 w-3 mr-2" />
               <span>Search...</span>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 sm:hidden"
+              onClick={() => setSearchOpen(true)}
+            >
               <Search className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Bell className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 hidden xs:flex">
-              <AtSign className="h-4 w-4" />
-            </Button>
+            
+            <NotificationsPopover />
+            <MentionsPopover workspaceId={workspaceId} />
+            
             <Separator orientation="vertical" className="h-4 mx-1 hidden sm:block" />
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Info className="h-4 w-4" />
-            </Button>
+            
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-80 sm:w-96 p-0 overflow-hidden flex flex-col">
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle className="text-lg font-bold">
+                    {channelDetails ? "Channel Details" : "User Profile"}
+                  </SheetTitle>
+                </SheetHeader>
+                <ScrollArea className="flex-1">
+                  {channelDetails ? (
+                    <div className="p-6 space-y-6">
+                      <div className="space-y-2 text-center">
+                        <div className="h-20 w-20 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto text-3xl font-bold text-zinc-400">
+                          {channelDetails.name[0].toUpperCase()}
+                        </div>
+                        <h3 className="text-xl font-bold">{channelDetails.name}</h3>
+                        <p className="text-sm text-zinc-500">{channelDetails.description || "No description set"}</p>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Channel Info</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 text-sm">
+                            <Lock className="h-4 w-4 text-zinc-400" />
+                            <span>{channelDetails.is_private ? "Private Channel" : "Public Channel"}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm">
+                            <Calendar className="h-4 w-4 text-zinc-400" />
+                            <span>Created August 2024</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" className="w-full text-xs h-9">Edit Channel</Button>
+                        <Button variant="outline" className="w-full text-xs h-9 text-red-500 hover:text-red-600">Archive</Button>
+                      </div>
+                    </div>
+                  ) : recipientDetails ? (
+                    <div className="p-6 space-y-6">
+                      <div className="space-y-2 text-center">
+                        <Avatar className="h-24 w-24 mx-auto rounded-2xl">
+                          <AvatarFallback className="text-3xl rounded-2xl">
+                            {recipientDetails.full_name?.split(" ").map(n => n[0]).join("") || recipientDetails.username?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <h3 className="text-xl font-bold pt-2">{recipientDetails.full_name || recipientDetails.username}</h3>
+                        <p className="text-sm text-zinc-500">@{recipientDetails.username}</p>
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                          <div className={`h-2 w-2 rounded-full ${recipientDetails.status === 'online' ? 'bg-green-500' : 'bg-zinc-400'}`} />
+                          <span className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                            {recipientDetails.status || 'offline'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button className="flex-1 bg-zinc-900 dark:bg-white dark:text-zinc-900">Message</Button>
+                        <Button variant="outline" size="icon"><Users className="h-4 w-4" /></Button>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Contact Information</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 text-sm">
+                            <MapPin className="h-4 w-4 text-zinc-400" />
+                            <span>San Francisco, CA</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm">
+                            <Link2 className="h-4 w-4 text-zinc-400" />
+                            <span className="text-blue-500">github.com/profile</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Recent Media</h4>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[1, 2, 3].map(i => (
+                            <div key={i} className="aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-md" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
           </div>
+
+          <SearchDialog 
+            workspaceId={workspaceId} 
+            open={searchOpen} 
+            onOpenChange={setSearchOpen} 
+          />
         </header>
 
         <MessageList 
