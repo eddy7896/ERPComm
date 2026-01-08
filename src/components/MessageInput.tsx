@@ -207,10 +207,19 @@ export function MessageInput({
     onCancelReply?.();
     onStopTyping?.();
 
-    try {
-      let uploadedFiles: { url: string, name: string, type: string, size: number }[] = [];
+      try {
+        let uploadedFiles: { url: string, name: string, type: string, size: number }[] = [];
 
-      for (const pending of pendingFiles) {
+        // Extract mentions from content
+        const mentions: string[] = [];
+        const mentionRegex = /@(\w+)/g;
+        let match;
+        while ((match = mentionRegex.exec(finalMsgContent)) !== null) {
+          mentions.push(match[1]);
+        }
+
+        for (const pending of pendingFiles) {
+
         const fileExt = pending.file.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${workspaceId}/${fileName}`;
