@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Hash, MessageSquare, Plus, Settings, LogOut, ChevronDown, UserCircle } from "lucide-react";
+import { Hash, Lock, MessageSquare, Plus, Settings, LogOut, ChevronDown, UserPlus, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   DropdownMenu, 
@@ -16,6 +15,10 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { CreateChannelDialog } from "./CreateChannelDialog";
+import { InviteDialog } from "./InviteDialog";
+import { ThemeToggle } from "./ThemeToggle";
+import { usePresence } from "@/hooks/usePresence";
 
 interface WorkspaceSidebarProps {
   workspaceId: string;
@@ -36,38 +39,39 @@ export function WorkspaceSidebar({
   const [members, setMembers] = useState<any[]>([]);
   const [workspace, setWorkspace] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  const [showCreateChannel, setShowCreateChannel] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const router = useRouter();
+  const { getPresence, isOnline } = usePresence(workspaceId);
 
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
 
-      // Fetch workspace details
       const { data: ws } = await supabase.from("workspaces").select("*").eq("id", workspaceId).single();
       setWorkspace(ws);
 
-      // Fetch channels
-      const { data: chans } = await supabase.from("channels").select("*").eq("workspace_id", workspaceId);
+      const { data: chans } = await supabase.from("channels").select("*").eq("workspace_id", workspaceId).order("name");
       setChannels(chans || []);
 
-      // Fetch workspace members (for DMs)
       const { data: mems } = await supabase
         .from("workspace_members")
         .select("profiles(*)")
         .eq("workspace_id", workspaceId);
       
-      setMembers(mems?.map((m: any) => m.profiles).filter(p => p.id !== user?.id) || []);
+      setMembers(mems?.map((m: any) => m.profiles).filter((p: any) => p && p.id !== user?.id) || []);
     };
 
     fetchData();
 
-    // Subscribe to channel changes
     const channelSub = supabase
       .channel('public:channels')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'channels', filter: `workspace_id=eq.${workspaceId}` }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          setChannels(prev => [...prev, payload.new]);
+          setChannels(prev => [...prev, payload.new].sort((a, b) => a.name.localeCompare(b.name)));
+        } else if (payload.eventType === 'DELETE') {
+          setChannels(prev => prev.filter(c => c.id !== payload.old.id));
         }
       })
       .subscribe();
@@ -82,9 +86,16 @@ export function WorkspaceSidebar({
     router.push("/login");
   };
 
+  const getStatusColor = (userId: string) => {
+    const presence = getPresence(userId);
+    if (!presence) return "bg-zinc-400";
+    if (presence.status === "online") return "bg-green-500";
+    if (presence.status === "idle") return "bg-yellow-500";
+    return "bg-zinc-400";
+  };
+
   return (
     <div className="flex h-full w-64 flex-col bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800">
-      {/* Workspace Header */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex h-14 w-full items-center justify-between px-4 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-none border-b border-zinc-200 dark:border-zinc-800">
@@ -95,6 +106,9 @@ export function WorkspaceSidebar({
         <DropdownMenuContent className="w-56" align="start">
           <DropdownMenuLabel>Workspace Options</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setShowInvite(true)}>
+            <UserPlus className="mr-2 h-4 w-4" /> Invite People
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/workspaces")}>
             <Layout className="mr-2 h-4 w-4" /> Switch Workspace
           </DropdownMenuItem>
@@ -109,11 +123,15 @@ export function WorkspaceSidebar({
       </DropdownMenu>
 
       <ScrollArea className="flex-1 px-2 py-4">
-        {/* Channels Section */}
         <div className="mb-6">
           <div className="flex items-center justify-between px-2 mb-2">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Channels</span>
-            <Button variant="ghost" size="icon" className="h-5 w-5 hover:bg-zinc-200 dark:hover:bg-zinc-800">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-5 w-5 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+              onClick={() => setShowCreateChannel(true)}
+            >
               <Plus className="h-3 w-3" />
             </Button>
           </div>
@@ -125,14 +143,17 @@ export function WorkspaceSidebar({
                 className={`w-full justify-start h-8 px-2 font-medium ${selectedChannelId === channel.id ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50" : "text-zinc-600 dark:text-zinc-400"}`}
                 onClick={() => onSelectChannel(channel.id)}
               >
-                <Hash className="mr-2 h-4 w-4 opacity-70" />
+                {channel.is_private ? (
+                  <Lock className="mr-2 h-4 w-4 opacity-70" />
+                ) : (
+                  <Hash className="mr-2 h-4 w-4 opacity-70" />
+                )}
                 {channel.name}
               </Button>
             ))}
           </div>
         </div>
 
-        {/* Direct Messages Section */}
         <div>
           <div className="flex items-center justify-between px-2 mb-2">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Direct Messages</span>
@@ -153,33 +174,48 @@ export function WorkspaceSidebar({
                     <AvatarImage src={member.avatar_url} />
                     <AvatarFallback className="text-[10px]">{member.full_name?.[0] || member.username?.[0]}</AvatarFallback>
                   </Avatar>
-                  <div className={`absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full border border-white dark:border-zinc-900 ${member.status === 'online' ? 'bg-green-500' : 'bg-zinc-400'}`} />
+                  <div className={`absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full border border-white dark:border-zinc-900 ${getStatusColor(member.id)}`} />
                 </div>
                 <span className="truncate">{member.full_name || member.username}</span>
               </Button>
             ))}
+            {members.length === 0 && (
+              <p className="text-xs text-zinc-500 px-2 py-2">No other members yet</p>
+            )}
           </div>
         </div>
       </ScrollArea>
 
-      {/* User Profile Footer */}
       <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
-            <AvatarFallback>{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarFallback>{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</AvatarFallback>
+            </Avatar>
+            <div className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-zinc-50 dark:border-zinc-900 bg-green-500" />
+          </div>
           <div className="flex-1 truncate">
             <p className="text-sm font-medium leading-none truncate">{user?.user_metadata?.full_name || user?.email}</p>
-            <p className="text-xs text-zinc-500 truncate">{user?.status_message || "Active"}</p>
+            <p className="text-xs text-zinc-500 truncate">Online</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Settings className="h-4 w-4" />
-          </Button>
+          <ThemeToggle />
         </div>
       </div>
+
+      <CreateChannelDialog
+        workspaceId={workspaceId}
+        open={showCreateChannel}
+        onOpenChange={setShowCreateChannel}
+        onChannelCreated={(channel) => onSelectChannel(channel.id)}
+      />
+
+      <InviteDialog
+        workspaceId={workspaceId}
+        workspaceName={workspace?.name || ""}
+        open={showInvite}
+        onOpenChange={setShowInvite}
+      />
     </div>
   );
 }
-
-import { Layout } from "lucide-react";
