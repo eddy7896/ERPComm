@@ -218,6 +218,16 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
           onTyping={handleTyping}
           onStopTyping={stopTyping}
         />
+
+        {channelDetails && (
+          <ChannelMembersDialog
+            channelId={channelDetails.id}
+            workspaceId={workspaceId}
+            channelName={channelDetails.name}
+            open={membersDialogOpen}
+            onOpenChange={setMembersDialogOpen}
+          />
+        )}
       </main>
     </div>
   );
