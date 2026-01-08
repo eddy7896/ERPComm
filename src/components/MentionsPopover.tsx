@@ -95,13 +95,16 @@ export function MentionsPopover({ workspaceId }: { workspaceId: string }) {
                       {mention.sender.full_name?.split(" ").map(n => n[0]).join("") || mention.sender.username[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-xs">
-                      <span className="font-bold">{mention.sender.full_name || mention.sender.username}</span>
-                    </p>
-                    <p className="text-[11px] text-zinc-500 line-clamp-2">
-                      {mention.content}
-                    </p>
+                    <div className="flex-1 space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-xs">{mention.sender.full_name || mention.sender.username}</span>
+                        {mention.sender.username && (
+                          <span className="text-[10px] text-zinc-500 font-medium">@{mention.sender.username}</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-zinc-500 line-clamp-2">
+                        {mention.content}
+                      </p>
                     <p className="text-[10px] text-zinc-400">
                       {new Date(mention.created_at).toLocaleDateString()}
                     </p>
