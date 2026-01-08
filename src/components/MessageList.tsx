@@ -323,6 +323,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             setEditContent={setEditContent}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
+            handleTogglePin={handleTogglePin}
             handleToggleReaction={handleToggleReaction}
             onReply={onReply}
             theme={theme}
