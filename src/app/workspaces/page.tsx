@@ -9,13 +9,25 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Plus, Layout, ArrowRight, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+interface Workspace {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+}
 
 export default function WorkspacesPage() {
-  const [workspaces, setWorkspaces] = useState<any[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,7 +37,7 @@ export default function WorkspacesPage() {
         router.push("/login");
         return;
       }
-      setUser(user);
+      setUser(user as User);
 
       const { data, error } = await supabase
         .from("workspace_members")
@@ -35,7 +47,7 @@ export default function WorkspacesPage() {
       if (error) {
         toast.error("Failed to load workspaces");
       } else {
-        setWorkspaces(data.map((item: any) => item.workspaces));
+        setWorkspaces(data.map((item: { workspaces: Workspace }) => item.workspaces));
       }
       setLoading(false);
     };
