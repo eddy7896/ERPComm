@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS public.messages (
     content text NOT NULL,
     is_edited boolean DEFAULT false,
     is_encrypted boolean DEFAULT false,
+    payload jsonb,
+    topic text,
+    extension text,
+    event text,
+    private boolean DEFAULT false,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now()
 );
