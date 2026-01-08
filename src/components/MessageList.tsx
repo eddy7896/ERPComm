@@ -61,10 +61,29 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   const currentUserId = user?.id;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+  
+    useEffect(() => {
+      const updateLastRead = async () => {
+        if (!user || !workspaceId) return;
+        const { error } = await supabase.from("member_last_read").upsert({
+          user_id: user.id,
+          workspace_id: workspaceId,
+          channel_id: channelId || null,
+          recipient_id: recipientId || null,
+          last_read_at: new Date().toISOString()
+        }, {
+          onConflict: channelId ? 'user_id,workspace_id,channel_id' : 'user_id,workspace_id,recipient_id'
+        });
+      };
+  
+      if (messages.length > 0) {
+        updateLastRead();
+      }
+    }, [messages, user, workspaceId, channelId, recipientId]);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
+    useEffect(() => {
+      const fetchMessages = async () => {
       if (!user) return;
       setLoading(true);
 
