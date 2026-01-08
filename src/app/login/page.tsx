@@ -34,6 +34,11 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const autofillDemo = () => {
+    setEmail("admin@enterprise.com");
+    setPassword("password123");
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
       <Card className="w-full max-w-md shadow-xl border-zinc-200 dark:border-zinc-800">
