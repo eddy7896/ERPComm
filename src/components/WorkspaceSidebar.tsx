@@ -53,8 +53,9 @@ interface Profile {
   status_emoji?: string;
 }
 
-import { ProfileSettingsDialog } from "./ProfileSettingsDialog";
+import { ProfileSettingsDialog, BADGE_OPTIONS } from "./ProfileSettingsDialog";
 import { useAuth } from "@/components/AuthProvider";
+import { cn } from "@/lib/utils";
 
 export function WorkspaceSidebar({ 
   workspaceId, 
