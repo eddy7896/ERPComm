@@ -247,11 +247,13 @@ export function MessageInput({
 
       const optimisticId = `opt-${Date.now()}`;
       let messageContent = finalMsgContent;
-      let payload: Record<string, any> = { 
-        type: uploadedFiles.length > 0 ? (uploadedFiles[0].type.startsWith('image/') ? 'image' : 'file') : type, 
-        optimistic_id: optimisticId,
-        files: uploadedFiles 
-      };
+        let payload: Record<string, any> = { 
+          type: uploadedFiles.length > 0 ? (uploadedFiles[0].type.startsWith('image/') ? 'image' : 'file') : type, 
+          optimistic_id: optimisticId,
+          files: uploadedFiles,
+          mentions
+        };
+
       let isEncrypted = false;
 
       const optimisticMessage = {
