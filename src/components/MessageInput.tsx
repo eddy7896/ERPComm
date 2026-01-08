@@ -104,7 +104,7 @@ export function MessageInput({
     m.full_name?.toLowerCase().includes(mentionSearch.toLowerCase())
   );
 
-  const insertMention = (member: any) => {
+  const insertMention = (member: Profile) => {
     const before = content.slice(0, cursorPos - mentionSearch.length - 1);
     const after = content.slice(cursorPos);
     const newContent = `${before}@${member.username} ${after}`;
@@ -146,7 +146,7 @@ export function MessageInput({
 
     try {
       let messageContent = finalMsgContent;
-      let payload: any = { type, optimistic_id: optimisticId };
+      let payload: Record<string, any> = { type, optimistic_id: optimisticId };
       let isEncrypted = false;
 
       if (isEncryptionActive && channelId) {
