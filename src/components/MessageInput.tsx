@@ -85,6 +85,20 @@ export function MessageInput({
     checkEncryption();
   }, [channelId]);
 
+  const filteredMembers = members.filter(m => 
+    m.username.toLowerCase().includes(mentionSearch.toLowerCase()) || 
+    m.full_name?.toLowerCase().includes(mentionSearch.toLowerCase())
+  );
+
+  const insertMention = (member: any) => {
+    const before = content.slice(0, cursorPos - mentionSearch.length - 1);
+    const after = content.slice(cursorPos);
+    const newContent = `${before}@${member.username} ${after}`;
+    setContent(newContent);
+    setShowMentions(false);
+    setMentionSearch("");
+  };
+
   const handleSendMessage = async (overrideContent?: string, type: "text" | "image" | "gif" | "sticker" = "text") => {
     const finalMsgContent = overrideContent || content.trim();
     if (!finalMsgContent && type === "text") return;
