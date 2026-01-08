@@ -85,29 +85,64 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
   useEffect(() => {
     const fetchInitialChannel = async () => {
-      const { data } = await supabase
+      if (!user) return;
+      
+      // Fetch all channels in workspace
+      const { data: allChannels } = await supabase
         .from("channels")
         .select("*")
         .eq("workspace_id", workspaceId)
-        .order("name")
-        .limit(1)
-        .single();
+        .order("name");
       
-      if (data) {
-        setSelectedChannelId(data.id);
-        setChannelDetails(data);
+      if (!allChannels || allChannels.length === 0) return;
+
+      // Fetch user's channel memberships
+      const { data: memberships } = await supabase
+        .from("channel_members")
+        .select("channel_id")
+        .eq("user_id", user.id);
+
+      const memberChannelIds = new Set(memberships?.map(m => m.channel_id) || []);
+      
+      // Find first accessible channel
+      const firstAccessible = allChannels.find(c => !c.is_private || memberChannelIds.has(c.id));
+      
+      if (firstAccessible) {
+        setSelectedChannelId(firstAccessible.id);
+        setChannelDetails(firstAccessible);
       }
     };
 
-    fetchInitialChannel();
-  }, [workspaceId]);
+    if (!authLoading && user) {
+      fetchInitialChannel();
+    }
+  }, [workspaceId, user, authLoading]);
 
   useEffect(() => {
     const fetchDetails = async () => {
+      if (!user) return;
+
       if (selectedChannelId) {
-        const { data } = await supabase.from("channels").select("*").eq("id", selectedChannelId).single();
-        setChannelDetails(data);
-        setEditedDescription(data?.description || "");
+        const { data: channel } = await supabase.from("channels").select("*").eq("id", selectedChannelId).single();
+        
+        if (channel?.is_private) {
+          // Verify membership
+          const { data: membership } = await supabase
+            .from("channel_members")
+            .select("id")
+            .eq("channel_id", selectedChannelId)
+            .eq("user_id", user.id)
+            .single();
+          
+          if (!membership) {
+            toast.error("You don't have access to this private channel");
+            setSelectedChannelId(null);
+            return;
+          }
+        }
+
+        setChannelDetails(channel);
+        setEditedDescription(channel?.description || "");
         setRecipientDetails(null);
 
         // Fetch pinned messages
