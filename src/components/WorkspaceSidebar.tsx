@@ -123,6 +123,11 @@ export function WorkspaceSidebar({
     return "bg-zinc-400";
   };
 
+  const filteredMembers = members.filter(member => 
+    (member.full_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+    (member.username?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="flex h-full w-[280px] flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800">
       <div className="p-3">
