@@ -8,7 +8,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Shield, LayoutDashboard, Globe, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Shield, LayoutDashboard, Globe, Lock, ArrowRight, Loader2, Code, Palette, Zap, Users } from "lucide-react";
+
+const DEMO_ACCOUNTS = [
+  { email: "admin@enterprise.com", role: "Admin", icon: Shield, color: "text-blue-500" },
+  { email: "product@enterprise.com", role: "Product", icon: LayoutDashboard, color: "text-purple-500" },
+  { email: "engineering@enterprise.com", role: "Eng", icon: Code, color: "text-emerald-500" },
+  { email: "design@enterprise.com", role: "Design", icon: Palette, color: "text-pink-500" },
+  { email: "marketing@enterprise.com", role: "Marketing", icon: Zap, color: "text-amber-500" },
+];
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -34,8 +42,8 @@ export default function Home() {
     setLoading(false);
   };
 
-  const autofillDemo = () => {
-    setEmail("admin@enterprise.com");
+  const autofillDemo = (demoEmail: string) => {
+    setEmail(demoEmail);
     setPassword("password123");
   };
 
@@ -98,7 +106,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="space-y-3 pt-2">
+            <div className="space-y-4 pt-2">
               <Button 
                 type="submit" 
                 className="w-full h-11 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 transition-colors"
@@ -113,14 +121,30 @@ export default function Home() {
                 )}
               </Button>
               
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="w-full h-11 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                onClick={autofillDemo}
-              >
-                Use Demo Credentials
-              </Button>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-800" />
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">Quick Access</span>
+                  <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-800" />
+                </div>
+                
+                <div className="grid grid-cols-5 gap-2">
+                  {DEMO_ACCOUNTS.map((account) => (
+                    <button
+                      key={account.email}
+                      type="button"
+                      onClick={() => autofillDemo(account.email)}
+                      className="group flex flex-col items-center gap-1.5 p-2 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-zinc-900 dark:hover:border-white transition-all hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      title={account.role}
+                    >
+                      <account.icon className={`h-4 w-4 ${account.color} group-hover:scale-110 transition-transform`} />
+                      <span className="text-[10px] font-medium text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white truncate w-full text-center">
+                        {account.role}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </form>
 
