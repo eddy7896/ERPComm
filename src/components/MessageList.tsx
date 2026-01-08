@@ -93,11 +93,11 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       if (!user) return;
       setLoading(true);
 
-        let query = supabase
-          .from("messages")
-          .select("*, sender:profiles!sender_id(*)")
-          .eq("workspace_id", workspaceId)
-          .order("created_at", { ascending: true });
+      let query = supabase
+        .from("messages")
+        .select("*, sender:profiles!sender_id(*)")
+        .eq("workspace_id", workspaceId)
+        .order("created_at", { ascending: true });
 
       if (channelId) {
         query = query.eq("channel_id", channelId);
@@ -109,7 +109,42 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       if (error) {
         console.error("Error fetching messages:", error);
       } else {
-        setMessages(data || []);
+        const fetchedMessages = data || [];
+        
+        // Decrypt messages if needed
+        const decryptedMessages = await Promise.all(fetchedMessages.map(async (msg) => {
+          if (msg.is_encrypted && msg.payload?.iv && channelId) {
+            try {
+              let channelKey = keyCache[channelId];
+              if (!channelKey) {
+                const { data: member } = await supabase
+                  .from("channel_members")
+                  .select("encrypted_key")
+                  .eq("channel_id", channelId)
+                  .eq("user_id", user.id)
+                  .single();
+                
+                if (member?.encrypted_key) {
+                  const privateKey = await getPrivateKey();
+                  if (privateKey) {
+                    channelKey = await unwrapChannelKey(member.encrypted_key, privateKey);
+                    keyCache[channelId] = channelKey;
+                  }
+                }
+              }
+
+              if (channelKey) {
+                const decrypted = await decryptMessage(msg.content, msg.payload.iv, channelKey);
+                return { ...msg, decryptedContent: decrypted };
+              }
+            } catch (err) {
+              console.error("Decryption failed for message", msg.id, err);
+            }
+          }
+          return msg;
+        }));
+        
+        setMessages(decryptedMessages);
       }
       setLoading(false);
     };
