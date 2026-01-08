@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/AuthProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -40,16 +41,15 @@ interface Message {
 export function MessageList({ workspaceId, channelId, recipientId, typingUsers = [] }: MessageListProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { user } = useAuth();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
+      if (!user) return;
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
 
       let query = supabase
         .from("messages")
@@ -60,7 +60,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       if (channelId) {
         query = query.eq("channel_id", channelId);
       } else if (recipientId) {
-        query = query.or(`and(sender_id.eq.${user?.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user?.id})`);
+        query = query.or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`);
       }
 
       const { data, error } = await query;
@@ -75,7 +75,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
     fetchMessages();
 
     const channel = supabase
-      .channel(`room:${channelId || recipientId}`)
+      .channel(`room:${channelId || recipientId || 'global'}`)
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
@@ -83,17 +83,25 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         filter: channelId ? `channel_id=eq.${channelId}` : undefined
       }, async (payload) => {
         if (payload.eventType === 'INSERT') {
+          const msg = payload.new;
+          
+          // Filter for DMs if needed
           if (recipientId) {
-            const { data: { user } } = await supabase.auth.getUser();
-            const msg = payload.new;
             const isRelated = (msg.sender_id === user?.id && msg.recipient_id === recipientId) || 
                              (msg.sender_id === recipientId && msg.recipient_id === user?.id);
             if (!isRelated) return;
           }
 
-          const { data: sender } = await supabase.from("profiles").select("*").eq("id", payload.new.sender_id).single();
-          const newMessage = { ...payload.new, sender };
-          setMessages(prev => [...prev, newMessage]);
+          // If it's a channel message and we are in a different channel, the filter should handle it
+          // but we check anyway if channelId is present
+          if (channelId && msg.channel_id !== channelId) return;
+
+          const { data: sender } = await supabase.from("profiles").select("*").eq("id", msg.sender_id).single();
+          const newMessage = { ...msg, sender };
+          setMessages(prev => {
+            if (prev.find(m => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
         } else if (payload.eventType === 'UPDATE') {
           setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
         } else if (payload.eventType === 'DELETE') {
@@ -105,7 +113,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [workspaceId, channelId, recipientId]);
+  }, [workspaceId, channelId, recipientId, user?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
