@@ -54,15 +54,29 @@ export function ChannelMembersDialog({
   onOpenChange,
   channelName,
 }: ChannelMembersDialogProps) {
+  const { user } = useAuth();
   const [members, setMembers] = useState<Profile[]>([]);
   const [nonMembers, setNonMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingMember, setAddingMember] = useState<string | null>(null);
+  const [removingMember, setRemovingMember] = useState<Profile | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [channelCreator, setChannelCreator] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Fetch channel details to find creator
+      const { data: channelData, error: cError } = await supabase
+        .from("channels")
+        .select("created_by")
+        .eq("id", channelId)
+        .single();
+
+      if (cError) throw cError;
+      setChannelCreator(channelData.created_by);
+
       // Fetch channel members
       const { data: channelMembersData, error: cmError } = await supabase
         .from("channel_members")
