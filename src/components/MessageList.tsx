@@ -366,6 +366,7 @@ interface MessageItemProps {
   setEditContent: (content: string) => void;
   handleEdit: (id: string) => void;
   handleDelete: (id: string) => void;
+  handleTogglePin: (id: string, currentPinStatus: boolean) => void;
   handleToggleReaction: (id: string, emoji: string) => void;
   onReply?: (message: Message) => void;
   theme?: string;
@@ -380,6 +381,7 @@ function MessageItem({
   setEditContent, 
   handleEdit, 
   handleDelete,
+  handleTogglePin,
   handleToggleReaction,
   onReply,
   theme
