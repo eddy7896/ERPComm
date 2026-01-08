@@ -44,6 +44,9 @@ export default function WorkspacesPage() {
         .select("workspaces(*)")
         .eq("user_id", user.id);
 
+      if (error) {
+        toast.error("Failed to load workspaces");
+      } else {
         const userWorkspaces = data.map((item: { workspaces: Workspace }) => item.workspaces);
         setWorkspaces(userWorkspaces);
         
@@ -72,7 +75,7 @@ export default function WorkspacesPage() {
       .insert({
         name: newWorkspaceName,
         slug,
-        owner_id: user.id,
+        owner_id: user?.id,
       })
       .select()
       .single();
@@ -88,7 +91,7 @@ export default function WorkspacesPage() {
       .from("workspace_members")
       .insert({
         workspace_id: workspace.id,
-        user_id: user.id,
+        user_id: user?.id,
         role: "OWNER",
       });
 
@@ -99,7 +102,7 @@ export default function WorkspacesPage() {
       await supabase.from("channels").insert({
         workspace_id: workspace.id,
         name: "general",
-        created_by: user.id,
+        created_by: user?.id,
       });
 
       toast.success("Workspace created!");
@@ -124,10 +127,12 @@ export default function WorkspacesPage() {
             <h1 className="text-3xl font-bold tracking-tight">Your Workspaces</h1>
             <p className="text-zinc-600 dark:text-zinc-400">Select a workspace to start communicating</p>
           </div>
-          <Button onClick={() => setCreating(true)} disabled={creating}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Workspace
-          </Button>
+          {workspaces.length === 0 && (
+            <Button onClick={() => setCreating(true)} disabled={creating}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Workspace
+            </Button>
+          )}
         </div>
 
         {creating && (
