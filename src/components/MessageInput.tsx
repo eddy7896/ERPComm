@@ -100,8 +100,8 @@ export function MessageInput({
   }, [channelId]);
 
   const filteredMembers = members.filter(m => 
-    m.username.toLowerCase().includes(mentionSearch.toLowerCase()) || 
-    m.full_name?.toLowerCase().includes(mentionSearch.toLowerCase())
+    m?.username?.toLowerCase().includes(mentionSearch.toLowerCase()) || 
+    m?.full_name?.toLowerCase().includes(mentionSearch.toLowerCase())
   );
 
   const insertMention = (member: Profile) => {
