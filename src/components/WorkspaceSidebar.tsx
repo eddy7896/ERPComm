@@ -143,23 +143,21 @@ export function WorkspaceSidebar({
               <ChevronDown className="h-4 w-4 opacity-40 shrink-0" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64" align="start" sideOffset={8}>
-            <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Workspace</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800" onClick={() => setShowInvite(true)}>
-              <UserPlus className="mr-3 h-4 w-4 opacity-70" /> Invite People
-            </DropdownMenuItem>
-            <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800" onClick={() => router.push("/workspaces")}>
-              <Layout className="mr-3 h-4 w-4 opacity-70" /> Switch Workspace
-            </DropdownMenuItem>
-            <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800">
-              <Settings className="mr-3 h-4 w-4 opacity-70" /> Workspace Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="px-3 py-2 text-red-600 focus:bg-red-50 dark:focus:bg-red-950/30" onClick={handleLogout}>
-              <LogOut className="mr-3 h-4 w-4" /> Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+            <DropdownMenuContent className="w-64" align="start" sideOffset={8}>
+              <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Workspace</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800" onClick={() => setShowInvite(true)}>
+                <UserPlus className="mr-3 h-4 w-4 opacity-70" /> Invite People
+              </DropdownMenuItem>
+              <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800">
+                <Settings className="mr-3 h-4 w-4 opacity-70" /> Workspace Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="px-3 py-2 text-red-600 focus:bg-red-50 dark:focus:bg-red-950/30" onClick={handleLogout}>
+                <LogOut className="mr-3 h-4 w-4" /> Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+
         </DropdownMenu>
       </div>
 
