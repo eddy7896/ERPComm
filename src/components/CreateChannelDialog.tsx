@@ -22,7 +22,7 @@ interface CreateChannelDialogProps {
   workspaceId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onChannelCreated?: (channel: any) => void;
+  onChannelCreated?: (channel: { id: string; name: string }) => void;
 }
 
 export function CreateChannelDialog({
