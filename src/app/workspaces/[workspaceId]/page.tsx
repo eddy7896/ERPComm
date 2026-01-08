@@ -33,6 +33,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
   const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
   const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -43,16 +44,14 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   );
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-      setLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push("/");
+      return;
+    }
+    setLoading(false);
+  }, [router, user, authLoading]);
 
   useEffect(() => {
     const fetchInitialChannel = async () => {
