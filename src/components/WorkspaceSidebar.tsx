@@ -229,10 +229,15 @@ export function WorkspaceSidebar({
                     <Lock className={`mr-2.5 h-4 w-4 ${selectedChannelId === channel.id ? "opacity-100" : "opacity-60"}`} />
                   ) : (
                     <Hash className={`mr-2.5 h-4 w-4 ${selectedChannelId === channel.id ? "opacity-100" : "opacity-60"}`} />
-                  )}
-                  <span className="truncate">{channel.name}</span>
-                </Button>
-              ))}
+                    )}
+                    <span className="truncate flex-1">{channel.name}</span>
+                    {getUnreadCount(channel.id, true) > 0 && (
+                      <Badge className="ml-auto h-5 w-5 p-0 flex items-center justify-center bg-primary text-[10px]">
+                        {getUnreadCount(channel.id, true)}
+                      </Badge>
+                    )}
+                  </Button>
+                ))}
             </div>
           </div>
 
