@@ -9,6 +9,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { Hash, Lock, Info, Search, Bell, Star, AtSign, Menu, Users, X, Calendar, MapPin, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
