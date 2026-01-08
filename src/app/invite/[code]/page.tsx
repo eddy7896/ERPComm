@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Users, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Users, XCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function InvitePage({ params }: { params: Promise<{ code: string }> }) {
