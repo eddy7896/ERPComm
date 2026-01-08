@@ -516,18 +516,18 @@ function MessageItem({
                     className="w-full h-auto object-contain"
                   />
                 </div>
-              ) : (
-                <p className={cn(
-                  "text-sm leading-relaxed whitespace-pre-wrap break-words",
-                  message.is_encrypted && !message.decryptedContent 
-                    ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
-                    : "text-zinc-800 dark:text-zinc-200"
-                )}>
-                  {message.is_encrypted 
-                    ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
-                    : message.content}
-                </p>
-              )}
+                ) : (
+                  <p className={cn(
+                    "text-sm leading-relaxed whitespace-pre-wrap break-words",
+                    message.is_encrypted && !message.decryptedContent 
+                      ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
+                      : "text-zinc-800 dark:text-zinc-200"
+                  )}>
+                    {message.is_encrypted 
+                      ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
+                      : <MessageContent content={message.content} />}
+                  </p>
+                )}
               
               {groupedReactions && Object.keys(groupedReactions).length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1.5">
