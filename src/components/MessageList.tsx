@@ -357,6 +357,24 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   );
 }
 
+function MessageContent({ content }: { content: string }) {
+  const parts = content.split(/(@\w+)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("@") && part.length > 1) {
+          return (
+            <span key={i} className="font-bold text-primary hover:underline cursor-pointer">
+              {part}
+            </span>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+}
+
 interface MessageItemProps {
   message: Message;
   currentUserId?: string;
