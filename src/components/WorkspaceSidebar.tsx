@@ -211,11 +211,11 @@ export function WorkspaceSidebar({
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <div className="space-y-0.5">
-              {members.map((member) => (
-                <Button
-                  key={member.id}
-                  variant="ghost"
+              <div className="space-y-0.5">
+                {filteredMembers.map((member) => (
+                  <Button
+                    key={member.id}
+                    variant="ghost"
                   className={`w-full justify-start h-9 px-2.5 font-medium transition-all group rounded-lg ${
                     selectedRecipientId === member.id 
                       ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
