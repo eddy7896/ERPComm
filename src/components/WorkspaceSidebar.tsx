@@ -43,6 +43,7 @@ interface Member {
   username?: string;
   status_text?: string;
   status_emoji?: string;
+  badge?: string;
 }
 
 interface Profile {
