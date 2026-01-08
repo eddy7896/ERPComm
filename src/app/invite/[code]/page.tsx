@@ -127,9 +127,9 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
             {workspace?.name?.[0]?.toUpperCase()}
           </div>
           <CardTitle className="text-2xl">Join {workspace?.name}</CardTitle>
-          <CardDescription>
-            You've been invited to join this workspace
-          </CardDescription>
+            <CardDescription>
+              You&apos;ve been invited to join this workspace
+            </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3 p-4 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
