@@ -20,6 +20,7 @@ import { CreateChannelDialog } from "./CreateChannelDialog";
 import { InviteDialog } from "./InviteDialog";
 import { ThemeToggle } from "./ThemeToggle";
 import { usePresence } from "@/hooks/usePresence";
+import { StatusPicker } from "./StatusPicker";
 
 interface WorkspaceSidebarProps {
   workspaceId: string;
