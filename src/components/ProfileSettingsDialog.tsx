@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, User, ImageIcon, Award, Check } from "lucide-react";
 
-const BADGE_OPTIONS = [
+export const BADGE_OPTIONS = [
   { label: "Founder", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800" },
   { label: "Co-Founder", color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800" },
   { label: "CEO", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
