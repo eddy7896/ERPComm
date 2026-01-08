@@ -192,25 +192,12 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
               if (prev.find(m => m.id === newMessage.id)) return prev;
               return [...prev, newMessage];
             });
+          } else if (payload.eventType === 'UPDATE') {
+            setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
+          } else if (payload.eventType === 'DELETE') {
+            setMessages(prev => prev.filter(m => m.id !== payload.old.id));
           }
-
-
-          // If it's a channel message and we are in a different channel, the filter should handle it
-          // but we check anyway if channelId is present
-          if (channelId && msg.channel_id !== channelId) return;
-
-          const { data: sender } = await supabase.from("profiles").select("*").eq("id", msg.sender_id).single();
-          const newMessage = { ...msg, sender };
-          setMessages(prev => {
-            if (prev.find(m => m.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
-          });
-        } else if (payload.eventType === 'UPDATE') {
-          setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
-        } else if (payload.eventType === 'DELETE') {
-          setMessages(prev => prev.filter(m => m.id !== payload.old.id));
-        }
-      })
+        })
       .subscribe();
 
     return () => {
