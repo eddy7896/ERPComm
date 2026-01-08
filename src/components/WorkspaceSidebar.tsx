@@ -100,7 +100,7 @@ export function WorkspaceSidebar({
         .select("profiles(*)")
         .eq("workspace_id", workspaceId);
       
-      setMembers(mems?.map((m: any) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
+        setMembers(mems?.map((m: { profiles: Member }) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
 
       const { data: unreads } = await supabase.rpc("get_unread_counts", {
         p_workspace_id: workspaceId,
