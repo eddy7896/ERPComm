@@ -28,6 +28,33 @@ interface WorkspaceSidebarProps {
   onSelectDM: (id: string) => void;
 }
 
+interface Channel {
+  id: string;
+  name: string;
+  is_private?: boolean;
+}
+
+interface Member {
+  id: string;
+  avatar_url?: string;
+  full_name?: string;
+  username?: string;
+}
+
+interface Workspace {
+  id: string;
+  name: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  user_metadata?: {
+    avatar_url?: string;
+    full_name?: string;
+  };
+}
+
 export function WorkspaceSidebar({ 
   workspaceId, 
   selectedChannelId, 
@@ -35,14 +62,14 @@ export function WorkspaceSidebar({
   onSelectChannel, 
   onSelectDM 
 }: WorkspaceSidebarProps) {
-  const [channels, setChannels] = useState<any[]>([]);
-  const [members, setMembers] = useState<any[]>([]);
-  const [workspace, setWorkspace] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const router = useRouter();
-  const { getPresence, isOnline } = usePresence(workspaceId);
+  const { getPresence } = usePresence(workspaceId);
 
   useEffect(() => {
     const fetchData = async () => {
