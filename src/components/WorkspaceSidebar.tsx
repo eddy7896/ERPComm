@@ -53,6 +53,9 @@ interface Profile {
   status_emoji?: string;
 }
 
+import { ProfileSettingsDialog } from "./ProfileSettingsDialog";
+import { useAuth } from "@/components/AuthProvider";
+
 export function WorkspaceSidebar({ 
   workspaceId, 
   selectedChannelId, 
@@ -60,12 +63,13 @@ export function WorkspaceSidebar({
   onSelectChannel, 
   onSelectDM 
 }: WorkspaceSidebarProps) {
+  const { profile, refreshProfile } = useAuth();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { getPresence } = usePresence(workspaceId);
@@ -74,9 +78,6 @@ export function WorkspaceSidebar({
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
-      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setProfile(prof);
 
       const { data: ws } = await supabase.from("workspaces").select("*").eq("id", workspaceId).single();
       setWorkspace(ws);
@@ -89,7 +90,7 @@ export function WorkspaceSidebar({
         .select("profiles(*)")
         .eq("workspace_id", workspaceId);
       
-      setMembers(mems?.map((m: { profiles: Member }) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
+      setMembers(mems?.map((m: any) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
     };
 
     fetchData();
