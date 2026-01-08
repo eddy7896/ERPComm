@@ -23,8 +23,22 @@ interface MessageListProps {
   typingUsers?: Array<{ id: string; full_name?: string; username?: string }>;
 }
 
+interface Message {
+  id: string;
+  content: string;
+  created_at: string;
+  is_edited?: boolean;
+  sender_id: string;
+  sender?: {
+    id: string;
+    avatar_url?: string;
+    full_name?: string;
+    username?: string;
+  };
+}
+
 export function MessageList({ workspaceId, channelId, recipientId, typingUsers = [] }: MessageListProps) {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
