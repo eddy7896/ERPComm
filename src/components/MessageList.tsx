@@ -76,9 +76,10 @@ export interface Message {
     username?: string;
     badge?: string;
   };
-  reactions?: Reaction[];
-  decryptedContent?: string;
-}
+    reactions?: Reaction[];
+    decryptedContent?: string;
+    is_pinned?: boolean;
+  }
 
 interface MessageListProps {
   workspaceId: string;
