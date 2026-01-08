@@ -53,10 +53,11 @@ export function StatusPicker({ currentStatus = "", currentEmoji = "", onStatusUp
       onStatusUpdate(statusText, statusEmoji);
       setOpen(false);
       toast.success("Status updated");
-    } catch (error: any) {
-      console.error("Error updating status:", error);
-      toast.error("Failed to update status. Please make sure the profiles table has status_text and status_emoji columns.");
-    } finally {
+      } catch (error: unknown) {
+        console.error("Error updating status:", error);
+        const errorMessage = (error as { message?: string })?.message || "";
+        toast.error("Failed to update status: " + errorMessage);
+      } finally {
       setLoading(false);
     }
   };
