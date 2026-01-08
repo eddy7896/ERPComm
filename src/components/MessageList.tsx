@@ -444,6 +444,12 @@ function MessageItem({
             {message.is_edited && (
               <span className="text-[10px] text-zinc-400">(edited)</span>
             )}
+            {message.is_pinned && (
+              <div className="flex items-center gap-1 text-[10px] text-zinc-400">
+                <Pin className="h-3 w-3 fill-zinc-400" />
+                <span>Pinned</span>
+              </div>
+            )}
           </div>
 
           {message.parent_message && (
