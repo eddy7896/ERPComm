@@ -153,17 +153,41 @@ export function MessageInput({
           />
           
             <div className="flex items-center justify-between px-2 pb-2">
-              <div className="flex items-center gap-0.5 md:gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800 mx-1" />
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hidden xs:flex">
-                  <Smile className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                  <Paperclip className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-0.5 md:gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800 mx-1" />
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                        <Smile className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                      <EmojiPicker 
+                        theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                        onEmojiClick={(emojiData) => setContent(prev => prev + emojiData.emoji)}
+                        autoFocusSearch={false}
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                        <StickerIcon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                      <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
                 {isEncryptionActive && (
                   <div className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
                     <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
