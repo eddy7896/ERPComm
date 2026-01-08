@@ -44,6 +44,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   const [searchOpen, setSearchOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [replyingTo, setReplyingTo] = useState<any>(null);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState("");
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
