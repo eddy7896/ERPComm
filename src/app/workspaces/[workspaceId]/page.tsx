@@ -98,62 +98,94 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
 
   return (
     <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100">
-      <WorkspaceSidebar 
-        workspaceId={workspaceId}
-        selectedChannelId={selectedChannelId}
-        selectedRecipientId={selectedRecipientId}
-        onSelectChannel={(id) => {
-          setSelectedChannelId(id);
-          setSelectedRecipientId(null);
-        }}
-        onSelectDM={(id) => {
-          setSelectedRecipientId(id);
-          setSelectedChannelId(null);
-        }}
-      />
+      <div className="hidden md:flex">
+        <WorkspaceSidebar 
+          workspaceId={workspaceId}
+          selectedChannelId={selectedChannelId}
+          selectedRecipientId={selectedRecipientId}
+          onSelectChannel={(id) => {
+            setSelectedChannelId(id);
+            setSelectedRecipientId(null);
+          }}
+          onSelectDM={(id) => {
+            setSelectedRecipientId(id);
+            setSelectedChannelId(null);
+          }}
+        />
+      </div>
 
-      <main className="flex flex-1 flex-col min-w-0">
+      <main className="flex flex-1 flex-col min-w-0 h-full">
         <header className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex items-center gap-2">
-            {channelDetails ? (
-              <>
-                {channelDetails.is_private ? (
-                  <Lock className="h-5 w-5 text-zinc-500" />
-                ) : (
-                  <Hash className="h-5 w-5 text-zinc-500" />
-                )}
-                <h2 className="font-bold text-lg">{channelDetails.name}</h2>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <Star className="h-4 w-4 text-zinc-400" />
-                </Button>
-                {channelDetails.description && (
-                  <span className="text-sm text-zinc-500 hidden md:inline">
-                    | {channelDetails.description}
-                  </span>
-                )}
-              </>
-            ) : recipientDetails ? (
-              <>
-                <h2 className="font-bold text-lg">{recipientDetails.full_name || recipientDetails.username}</h2>
-                <div className={`h-2 w-2 rounded-full ${recipientDetails.status === 'online' ? 'bg-green-500' : 'bg-zinc-400'}`} />
-              </>
-            ) : (
-              <div className="h-6 w-32 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded" />
-            )}
+          <div className="flex items-center gap-2 overflow-hidden">
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-72">
+                  <WorkspaceSidebar 
+                    workspaceId={workspaceId}
+                    selectedChannelId={selectedChannelId}
+                    selectedRecipientId={selectedRecipientId}
+                    onSelectChannel={(id) => {
+                      setSelectedChannelId(id);
+                      setSelectedRecipientId(null);
+                    }}
+                    onSelectDM={(id) => {
+                      setSelectedRecipientId(id);
+                      setSelectedChannelId(null);
+                    }}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
+            
+            <div className="flex items-center gap-2 overflow-hidden">
+              {channelDetails ? (
+                <>
+                  {channelDetails.is_private ? (
+                    <Lock className="h-5 w-5 text-zinc-500 shrink-0" />
+                  ) : (
+                    <Hash className="h-5 w-5 text-zinc-500 shrink-0" />
+                  )}
+                  <h2 className="font-bold text-lg truncate">{channelDetails.name}</h2>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
+                    <Star className="h-4 w-4 text-zinc-400" />
+                  </Button>
+                  {channelDetails.description && (
+                    <span className="text-sm text-zinc-500 hidden lg:inline truncate">
+                      | {channelDetails.description}
+                    </span>
+                  )}
+                </>
+              ) : recipientDetails ? (
+                <>
+                  <h2 className="font-bold text-lg truncate">{recipientDetails.full_name || recipientDetails.username}</h2>
+                  <div className={`h-2 w-2 rounded-full shrink-0 ${recipientDetails.status === 'online' ? 'bg-green-500' : 'bg-zinc-400'}`} />
+                </>
+              ) : (
+                <div className="h-6 w-32 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded" />
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="hidden sm:flex items-center bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
               <Search className="h-3 w-3 mr-2" />
               <span>Search...</span>
             </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden">
+              <Search className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Bell className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8 hidden xs:flex">
               <AtSign className="h-4 w-4" />
             </Button>
-            <Separator orientation="vertical" className="h-4 mx-1" />
+            <Separator orientation="vertical" className="h-4 mx-1 hidden sm:block" />
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Info className="h-4 w-4" />
             </Button>
