@@ -85,7 +85,7 @@ export function CreateChannelDialog({
               Create a channel
             </DialogTitle>
             <DialogDescription>
-              Channels are where your team communicates. They're best organized around a topic.
+                Channels are where your team communicates. They&apos;re best organized around a topic.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
