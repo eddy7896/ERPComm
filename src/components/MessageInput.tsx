@@ -41,8 +41,31 @@ export function MessageInput({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [isEncryptionActive, setIsEncryptionActive] = useState(false);
+  const [members, setMembers] = useState<any[]>([]);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionIndex, setMentionIndex] = useState(-1);
+  const [cursorPos, setCursorPos] = useState(0);
   const { user } = useAuth();
   const { theme } = useTheme();
+
+  useEffect(() => {
+    async function fetchMembers() {
+      if (!channelId) {
+        setMembers([]);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("channel_members")
+        .select("user_id, profiles!user_id(id, username, full_name, avatar_url)")
+        .eq("channel_id", channelId);
+      
+      if (!error && data) {
+        setMembers(data.map((m: any) => m.profiles));
+      }
+    }
+    fetchMembers();
+  }, [channelId]);
 
   useEffect(() => {
     async function checkEncryption() {
