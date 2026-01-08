@@ -256,41 +256,53 @@ export function WorkspaceSidebar({
       </div>
 
       <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/30">
-        <div className="flex items-center gap-3 px-1">
-          <div className="relative group cursor-pointer">
-            <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800 transition-transform group-hover:scale-105">
-              <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-primary/10 text-primary">{profile?.full_name?.[0] || profile?.id?.[0]}</AvatarFallback>
-            </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-100 dark:border-zinc-900 bg-emerald-500" />
+          <div className="flex items-center gap-3 px-1">
+            <div className="relative group cursor-pointer" onClick={() => setShowProfileSettings(true)}>
+              <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800 transition-transform group-hover:scale-105">
+                <AvatarImage src={profile?.avatar_url} />
+                <AvatarFallback className="bg-primary/10 text-primary">{profile?.full_name?.[0] || profile?.id?.[0]}</AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-100 dark:border-zinc-900 bg-emerald-500" />
+            </div>
+            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowProfileSettings(true)}>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-none">
+                  {profile?.full_name || "User"}
+                </p>
+                {profile?.badge && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider">
+                    {profile.badge}
+                  </span>
+                )}
+              </div>
+              <StatusPicker 
+                currentStatus={profile?.status_text} 
+                currentEmoji={profile?.status_emoji}
+                onStatusUpdate={(text, emoji) => refreshProfile()}
+              />
+            </div>
+            <ThemeToggle />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-none mb-1">
-              {profile?.full_name || "User"}
-            </p>
-            <StatusPicker 
-              currentStatus={profile?.status_text} 
-              currentEmoji={profile?.status_emoji}
-              onStatusUpdate={(text, emoji) => setProfile(prev => prev ? { ...prev, status_text: text, status_emoji: emoji } : null)}
-            />
-          </div>
-          <ThemeToggle />
         </div>
+
+        <CreateChannelDialog
+          workspaceId={workspaceId}
+          open={showCreateChannel}
+          onOpenChange={setShowCreateChannel}
+          onChannelCreated={(channel) => onSelectChannel(channel.id)}
+        />
+
+        <InviteDialog
+          workspaceId={workspaceId}
+          workspaceName={workspace?.name || ""}
+          open={showInvite}
+          onOpenChange={setShowInvite}
+        />
+
+        <ProfileSettingsDialog 
+          open={showProfileSettings}
+          onOpenChange={setShowProfileSettings}
+        />
       </div>
-
-      <CreateChannelDialog
-        workspaceId={workspaceId}
-        open={showCreateChannel}
-        onOpenChange={setShowCreateChannel}
-        onChannelCreated={(channel) => onSelectChannel(channel.id)}
-      />
-
-      <InviteDialog
-        workspaceId={workspaceId}
-        workspaceName={workspace?.name || ""}
-        open={showInvite}
-        onOpenChange={setShowInvite}
-      />
-    </div>
   );
 }
