@@ -138,6 +138,28 @@ export function ChannelMembersDialog({
     }
   };
 
+  const removeMember = async (userId: string) => {
+    setIsRemoving(true);
+    try {
+      const { error } = await supabase
+        .from("channel_members")
+        .delete()
+        .eq("channel_id", channelId)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast.success("Member removed from channel");
+      setRemovingMember(null);
+      fetchData();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Failed to remove member: " + errorMessage);
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
   const filteredMembers = members.filter((m) =>
     (m.full_name || m.username || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
