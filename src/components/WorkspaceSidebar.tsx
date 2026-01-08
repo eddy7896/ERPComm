@@ -41,20 +41,16 @@ interface Member {
   avatar_url?: string;
   full_name?: string;
   username?: string;
+  status_text?: string;
+  status_emoji?: string;
 }
 
-interface Workspace {
+interface Profile {
   id: string;
-  name: string;
-}
-
-interface User {
-  id: string;
-  email: string;
-  user_metadata?: {
-    avatar_url?: string;
-    full_name?: string;
-  };
+  full_name?: string;
+  avatar_url?: string;
+  status_text?: string;
+  status_emoji?: string;
 }
 
 export function WorkspaceSidebar({ 
@@ -67,7 +63,7 @@ export function WorkspaceSidebar({
   const [channels, setChannels] = useState<Channel[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,7 +73,10 @@ export function WorkspaceSidebar({
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      if (!user) return;
+
+      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      setProfile(prof);
 
       const { data: ws } = await supabase.from("workspaces").select("*").eq("id", workspaceId).single();
       setWorkspace(ws);
