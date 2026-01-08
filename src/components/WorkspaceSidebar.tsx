@@ -241,6 +241,18 @@ export function WorkspaceSidebar({
         </div>
       </ScrollArea>
 
+      <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/30 dark:bg-zinc-900/10">
+        <div className="relative group">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
+          <Input
+            placeholder="Search members..."
+            className="pl-9 h-9 bg-transparent border-zinc-200 dark:border-zinc-800 focus-visible:ring-1 focus-visible:ring-primary/20 text-xs"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/30">
         <div className="flex items-center gap-3 px-1">
           <div className="relative group cursor-pointer">
