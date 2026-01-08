@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EnterpriseChat
 
-## Getting Started
+Connect your team in one secure, high-performance platform. The all-in-one workspace for enterprise collaboration, real-time messaging, and efficient project management.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Real-time Messaging**: Instant communication with support for multiple channels and direct messaging.
+- **Workspace Management**: Organize your team into workspaces with dedicated channels and roles.
+- **Enterprise Security**: Role-based access control (RBAC), SSO-ready architecture, and global compliance standards.
+- **Modern UI/UX**: Built with a focus on speed, accessibility, and a delightful user experience using Tailwind CSS and Framer Motion.
+- **Optimized Caching**: High-performance data retrieval with Redis-backed caching.
+- **Robust Backend**: Powered by Supabase for real-time database capabilities and secure authentication.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: Next.js 15 (App Router), React, Tailwind CSS, Lucide Icons, Framer Motion
+- **Backend/Auth**: Supabase (PostgreSQL, Auth, Realtime)
+- **Caching**: Redis
+- **Deployment**: Docker, Nginx, Let's Encrypt
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏁 Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+ or Bun
+- A Supabase account and project
+- A Redis instance (included in Docker setup)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Local Development
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd enterprise-chat
+   ```
 
-## Deploy on Vercel
+2. **Install dependencies**:
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Configure environment variables**:
+   Create a `.env.local` file with your Supabase credentials:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   DATABASE_URL=your_postgresql_connection_string
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   # or
+   bun dev
+   ```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application in action.
+
+## 📦 Deployment
+
+For detailed instructions on deploying to a VPS using Docker and Nginx, please refer to the [DEPLOYMENT.md](./DEPLOYMENT.md) guide.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
