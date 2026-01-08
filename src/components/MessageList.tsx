@@ -540,62 +540,65 @@ function MessageItem({
           )}
         </div>
         
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 absolute right-2 top-1 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm p-0.5 z-10">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                <SmilePlus className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0 border-none shadow-xl" side="top" align="end">
-              <EmojiPicker 
-                theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
-                onEmojiClick={(emojiData) => handleToggleReaction(message.id, emojiData.emoji)}
-                autoFocusSearch={false}
-                skinTonesDisabled
-                previewConfig={{ showPreview: false }}
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 absolute right-2 top-1 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm p-0.5 z-10">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                  <SmilePlus className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0 border-none shadow-xl" side="top" align="end">
+                <EmojiPicker 
+                  theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                  onEmojiClick={(emojiData) => handleToggleReaction(message.id, emojiData.emoji)}
+                  autoFocusSearch={false}
+                  skinTonesDisabled
+                  previewConfig={{ showPreview: false }}
+                />
+              </PopoverContent>
+            </Popover>
 
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-            onClick={() => onReply?.(message)}
-          >
-            <Reply className="h-4 w-4" />
-          </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+              onClick={() => onReply?.(message)}
+            >
+              <Reply className="h-4 w-4" />
+            </Button>
 
-          {currentUserId === message.sender_id && editingId !== message.id && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleTogglePin(message.id, !!message.is_pinned)}>
-                    {message.is_pinned ? (
-                      <>
-                        <PinOff className="mr-2 h-4 w-4" /> Unpin
-                      </>
-                    ) : (
-                      <>
-                        <Pin className="mr-2 h-4 w-4" /> Pin
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { setEditingId(message.id); setEditContent(message.content); }}>
-                    <Pencil className="mr-2 h-4 w-4" /> Edit
-                  </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(message.id)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleTogglePin(message.id, !!message.is_pinned)}>
+                  {message.is_pinned ? (
+                    <>
+                      <PinOff className="mr-2 h-4 w-4" /> Unpin
+                    </>
+                  ) : (
+                    <>
+                      <Pin className="mr-2 h-4 w-4" /> Pin
+                    </>
+                  )}
                 </DropdownMenuItem>
+                
+                {currentUserId === message.sender_id && editingId !== message.id && (
+                  <>
+                    <DropdownMenuItem onClick={() => { setEditingId(message.id); setEditContent(message.content); }}>
+                      <Pencil className="mr-2 h-4 w-4" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(message.id)}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
-        </div>
+          </div>
       </div>
     </motion.div>
   );
