@@ -187,11 +187,12 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
                     <span className="font-bold text-sm hover:underline cursor-pointer">
                       {message.sender?.full_name || message.sender?.username}
                     </span>
-                    {message.sender?.badge && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider">
-                        {message.sender.badge}
-                      </span>
-                    )}
+                      {message.sender?.badge && (
+                        <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 uppercase tracking-wider font-bold h-4 border", getBadgeColor(message.sender.badge))}>
+                          {message.sender.badge}
+                        </Badge>
+                      )}
+
                   </div>
                   <span className="text-[10px] text-zinc-500 font-medium">
                     {format(new Date(message.created_at), "h:mm a")}
