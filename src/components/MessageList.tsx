@@ -522,27 +522,74 @@ function MessageItem({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-start gap-1 group/msg">
-              {message.payload?.type === "gif" || message.payload?.type === "sticker" ? (
-                <div className="relative mt-1 max-w-[300px] rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
-                  <img 
-                    src={message.is_encrypted ? message.decryptedContent : message.content} 
-                    alt="GIF" 
-                    className="w-full h-auto object-contain"
-                  />
-                </div>
-                ) : (
-                  <p className={cn(
-                    "text-sm leading-relaxed whitespace-pre-wrap break-words",
-                    message.is_encrypted && !message.decryptedContent 
-                      ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
-                      : "text-zinc-800 dark:text-zinc-200"
-                  )}>
-                    {message.is_encrypted 
-                      ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
-                      : <MessageContent content={message.content} />}
-                  </p>
+              <div className="flex flex-col items-start gap-1 group/msg">
+                {message.payload?.files && message.payload.files.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2 w-full max-w-2xl">
+                    {message.payload.files.map((file: any, i: number) => (
+                      <div key={i} className="flex flex-col gap-1 w-full max-w-sm">
+                        {file.type.startsWith('image/') ? (
+                          <div className="relative rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 group/image">
+                            <img 
+                              src={file.url} 
+                              alt={file.name} 
+                              className="max-h-[400px] w-auto object-contain cursor-pointer"
+                              onClick={() => window.open(file.url, '_blank')}
+                            />
+                            <a 
+                              href={file.url} 
+                              download={file.name}
+                              className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-900/50 text-white opacity-0 group-hover/image:opacity-100 transition-opacity hover:bg-zinc-900"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 group/file">
+                            <div className="h-10 w-10 rounded bg-white dark:bg-zinc-800 flex items-center justify-center border border-zinc-100 dark:border-zinc-700">
+                              <FileIcon className="h-5 w-5 text-zinc-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{file.name}</p>
+                              <p className="text-[10px] text-zinc-500">{formatFileSize(file.size)}</p>
+                            </div>
+                            <a 
+                              href={file.url} 
+                              download={file.name}
+                              className="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
+                
+                {message.payload?.type === "gif" || message.payload?.type === "sticker" ? (
+                  <div className="relative mt-1 max-w-[300px] rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                    <img 
+                      src={message.is_encrypted ? message.decryptedContent : message.content} 
+                      alt="GIF" 
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                ) : (
+                  (message.content || (message.is_encrypted && !message.decryptedContent)) && (
+                    <p className={cn(
+                      "text-sm leading-relaxed whitespace-pre-wrap break-words",
+                      message.is_encrypted && !message.decryptedContent 
+                        ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
+                        : "text-zinc-800 dark:text-zinc-200"
+                    )}>
+                      {message.is_encrypted 
+                        ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
+                        : <MessageContent content={message.content} />}
+                    </p>
+                  )
+                )}
+
               
               {groupedReactions && Object.keys(groupedReactions).length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1.5">
