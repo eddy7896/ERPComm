@@ -1,95 +1,90 @@
 "use client";
 
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { MessageSquare, Users, Shield, Zap } from "lucide-react";
-import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Logged in successfully!");
+      router.push("/workspaces");
+    }
+    setLoading(false);
+  };
+
+  const autofillDemo = () => {
+    setEmail("admin@enterprise.com");
+    setPassword("password123");
+  };
+
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-zinc-950">
-      <header className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold tracking-tight hidden xs:inline-block">EnterpriseChat</span>
-          <span className="text-xl font-bold tracking-tight xs:hidden">EC</span>
-        </div>
-        <nav className="flex items-center gap-2 sm:gap-4">
-          <Link href="/login">
-            <Button variant="ghost" size="sm" className="sm:text-base">Login</Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm" className="sm:text-base">Get Started</Button>
-          </Link>
-        </nav>
-      </header>
-
-      <main className="flex-1">
-        <section className="relative py-12 sm:py-24 px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto max-w-3xl"
-          >
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-7xl mb-6">
-              The communication platform for <span className="text-primary">enterprise teams.</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed max-w-2xl mx-auto">
-              Real-time messaging, channels, and role-based access control built for scale.
-              Secure, fast, and designed for professional organizations.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto px-8 text-lg h-14">
-                  Start your workspace
-                </Button>
-              </Link>
-              <Link href="/login" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto px-8 text-lg h-14">
-                  View Demo
-                </Button>
-              </Link>
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
+      <Card className="w-full max-w-md shadow-xl border-zinc-200 dark:border-zinc-800">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight">EnterpriseChat</CardTitle>
+          <CardDescription>
+            Enter your email to sign in to your workspace
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleLogin}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="m@example.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+                className="bg-white dark:bg-zinc-900"
+              />
             </div>
-          </motion.div>
-        </section>
-
-        <section className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-900/50 px-6">
-          <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            <div className="flex flex-col items-center text-center p-4 sm:p-6">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 text-primary">
-                <Zap className="h-6 w-6" />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
               </div>
-              <h3 className="text-xl font-bold mb-3">Real-time Performance</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
-                Instantly sync messages across all devices with our high-performance WebSocket architecture.
-              </p>
+              <Input 
+                id="password" 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+                className="bg-white dark:bg-zinc-900"
+              />
             </div>
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 text-primary">
-                <Users className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Role-based Access</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
-                Granular permissions for Owners, Admins, and Members to keep your organization organized.
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 text-primary">
-                <Shield className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Enterprise Security</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
-                End-to-end data isolation and secure authentication methods to protect your company data.
-              </p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="py-12 border-t border-zinc-100 dark:border-zinc-800 text-center text-sm text-zinc-500">
-        <p>&copy; 2024 EnterpriseChat Inc. All rights reserved.</p>
-      </footer>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button type="button" variant="outline" className="w-full" onClick={autofillDemo}>
+              Use Mock Credentials
+            </Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign in"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   );
 }
