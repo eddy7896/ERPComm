@@ -116,115 +116,138 @@ export function WorkspaceSidebar({
   const getStatusColor = (userId: string) => {
     const presence = getPresence(userId);
     if (!presence) return "bg-zinc-400";
-    if (presence.status === "online") return "bg-green-500";
-    if (presence.status === "idle") return "bg-yellow-500";
+    if (presence.status === "online") return "bg-emerald-500";
+    if (presence.status === "idle") return "bg-amber-500";
     return "bg-zinc-400";
   };
 
   return (
-    <div className="flex h-full w-64 flex-col bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex h-14 w-full items-center justify-between px-4 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-none border-b border-zinc-200 dark:border-zinc-800">
-            <span className="font-bold truncate">{workspace?.name || "Workspace"}</span>
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
-          <DropdownMenuLabel>Workspace Options</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowInvite(true)}>
-            <UserPlus className="mr-2 h-4 w-4" /> Invite People
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/workspaces")}>
-            <Layout className="mr-2 h-4 w-4" /> Switch Workspace
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" /> Workspace Settings
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" /> Logout
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ScrollArea className="flex-1 px-2 py-4">
-        <div className="mb-6">
-          <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Channels</span>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-5 w-5 hover:bg-zinc-200 dark:hover:bg-zinc-800"
-              onClick={() => setShowCreateChannel(true)}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
-          <div className="space-y-0.5">
-            {channels.map((channel) => (
-              <Button
-                key={channel.id}
-                variant={selectedChannelId === channel.id ? "secondary" : "ghost"}
-                className={`w-full justify-start h-8 px-2 font-medium ${selectedChannelId === channel.id ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50" : "text-zinc-600 dark:text-zinc-400"}`}
-                onClick={() => onSelectChannel(channel.id)}
-              >
-                {channel.is_private ? (
-                  <Lock className="mr-2 h-4 w-4 opacity-70" />
-                ) : (
-                  <Hash className="mr-2 h-4 w-4 opacity-70" />
-                )}
-                {channel.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Direct Messages</span>
-            <Button variant="ghost" size="icon" className="h-5 w-5 hover:bg-zinc-200 dark:hover:bg-zinc-800">
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
-          <div className="space-y-0.5">
-            {members.map((member) => (
-              <Button
-                key={member.id}
-                variant={selectedRecipientId === member.id ? "secondary" : "ghost"}
-                className={`w-full justify-start h-8 px-2 font-medium ${selectedRecipientId === member.id ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50" : "text-zinc-600 dark:text-zinc-400"}`}
-                onClick={() => onSelectDM(member.id)}
-              >
-                <div className="relative mr-2">
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={member.avatar_url} />
-                    <AvatarFallback className="text-[10px]">{member.full_name?.[0] || member.username?.[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className={`absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full border border-white dark:border-zinc-900 ${getStatusColor(member.id)}`} />
+    <div className="flex h-full w-[280px] flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800">
+      <div className="p-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex h-12 w-full items-center justify-between px-3 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-lg transition-all active:scale-[0.98]">
+              <div className="flex items-center gap-2 truncate">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm shrink-0">
+                  {workspace?.name?.[0].toUpperCase() || "W"}
                 </div>
-                <span className="truncate">{member.full_name || member.username}</span>
+                <span className="font-bold text-base truncate">{workspace?.name || "Workspace"}</span>
+              </div>
+              <ChevronDown className="h-4 w-4 opacity-40 shrink-0" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="start" sideOffset={8}>
+            <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Workspace</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800" onClick={() => setShowInvite(true)}>
+              <UserPlus className="mr-3 h-4 w-4 opacity-70" /> Invite People
+            </DropdownMenuItem>
+            <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800" onClick={() => router.push("/workspaces")}>
+              <Layout className="mr-3 h-4 w-4 opacity-70" /> Switch Workspace
+            </DropdownMenuItem>
+            <DropdownMenuItem className="px-3 py-2 focus:bg-zinc-100 dark:focus:bg-zinc-800">
+              <Settings className="mr-3 h-4 w-4 opacity-70" /> Workspace Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="px-3 py-2 text-red-600 focus:bg-red-50 dark:focus:bg-red-950/30" onClick={handleLogout}>
+              <LogOut className="mr-3 h-4 w-4" /> Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <ScrollArea className="flex-1 px-3">
+        <div className="space-y-6 py-2">
+          <div>
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Channels</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 opacity-60 hover:opacity-100 transition-opacity"
+                onClick={() => setShowCreateChannel(true)}
+              >
+                <Plus className="h-4 w-4" />
               </Button>
-            ))}
-            {members.length === 0 && (
-              <p className="text-xs text-zinc-500 px-2 py-2">No other members yet</p>
-            )}
+            </div>
+            <div className="space-y-0.5">
+              {channels.map((channel) => (
+                <Button
+                  key={channel.id}
+                  variant="ghost"
+                  className={`w-full justify-start h-9 px-3 font-medium transition-all group rounded-lg ${
+                    selectedChannelId === channel.id 
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                  }`}
+                  onClick={() => onSelectChannel(channel.id)}
+                >
+                  {channel.is_private ? (
+                    <Lock className={`mr-2.5 h-4 w-4 ${selectedChannelId === channel.id ? "opacity-100" : "opacity-60"}`} />
+                  ) : (
+                    <Hash className={`mr-2.5 h-4 w-4 ${selectedChannelId === channel.id ? "opacity-100" : "opacity-60"}`} />
+                  )}
+                  <span className="truncate">{channel.name}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Direct Messages</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 opacity-60 hover:opacity-100 transition-opacity"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-0.5">
+              {members.map((member) => (
+                <Button
+                  key={member.id}
+                  variant="ghost"
+                  className={`w-full justify-start h-9 px-2.5 font-medium transition-all group rounded-lg ${
+                    selectedRecipientId === member.id 
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                  }`}
+                  onClick={() => onSelectDM(member.id)}
+                >
+                  <div className="relative mr-2.5">
+                    <Avatar className="h-6 w-6 border border-zinc-200 dark:border-zinc-800">
+                      <AvatarImage src={member.avatar_url} />
+                      <AvatarFallback className="text-[10px] bg-zinc-200 dark:bg-zinc-800">{member.full_name?.[0] || member.username?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-50 dark:border-zinc-950 ${getStatusColor(member.id)}`} />
+                  </div>
+                  <span className="truncate">{member.full_name || member.username}</span>
+                </Button>
+              ))}
+              {members.length === 0 && (
+                <p className="text-xs text-zinc-500 px-3 py-2 italic opacity-60">No other members</p>
+              )}
+            </div>
           </div>
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Avatar className="h-8 w-8">
+      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/30">
+        <div className="flex items-center gap-3 px-1">
+          <div className="relative group cursor-pointer">
+            <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800 transition-transform group-hover:scale-105">
               <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback>{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary">{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</AvatarFallback>
             </Avatar>
-            <div className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-zinc-50 dark:border-zinc-900 bg-green-500" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-100 dark:border-zinc-900 bg-emerald-500" />
           </div>
-          <div className="flex-1 truncate">
-            <p className="text-sm font-medium leading-none truncate">{user?.user_metadata?.full_name || user?.email}</p>
-            <p className="text-xs text-zinc-500 truncate">Online</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-none mb-1">
+              {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+            </p>
+            <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-500 leading-none">Online</p>
           </div>
           <ThemeToggle />
         </div>
