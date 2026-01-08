@@ -167,14 +167,21 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
               <AvatarImage src={message.sender?.avatar_url} />
               <AvatarFallback>{message.sender?.full_name?.[0] || message.sender?.username?.[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm hover:underline cursor-pointer">
-                  {message.sender?.full_name || message.sender?.username}
-                </span>
-                <span className="text-[10px] text-zinc-500 font-medium">
-                  {format(new Date(message.created_at), "h:mm a")}
-                </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-sm hover:underline cursor-pointer">
+                      {message.sender?.full_name || message.sender?.username}
+                    </span>
+                    {message.sender?.badge && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider">
+                        {message.sender.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-zinc-500 font-medium">
+                    {format(new Date(message.created_at), "h:mm a")}
+                  </span>
                 {message.is_edited && (
                   <span className="text-[10px] text-zinc-400">(edited)</span>
                 )}
