@@ -332,16 +332,43 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                             <Lock className="h-4 w-4 text-zinc-400" />
                             <span>{channelDetails.is_private ? "Private Channel" : "Public Channel"}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-sm">
-                            <Calendar className="h-4 w-4 text-zinc-400" />
-                            <span>Created August 2024</span>
+                            <div className="flex items-center gap-3 text-sm">
+                              <Calendar className="h-4 w-4 text-zinc-400" />
+                              <span>Created August 2024</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <Separator />
+                        <Separator />
 
-                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Pinned Messages</h4>
+                            <Badge variant="secondary" className="text-[10px] h-4 px-1">{pinnedMessages.length}</Badge>
+                          </div>
+                          <div className="space-y-3">
+                            {pinnedMessages.length === 0 ? (
+                              <p className="text-xs text-zinc-500 italic">No pinned messages yet.</p>
+                            ) : (
+                              pinnedMessages.map((msg) => (
+                                <div key={msg.id} className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-100 dark:border-zinc-800 space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <Avatar className="h-5 w-5">
+                                      <AvatarFallback className="text-[8px]">{msg.sender?.full_name?.[0] || msg.sender?.username?.[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-[11px] font-bold">{msg.sender?.full_name || msg.sender?.username}</span>
+                                    <span className="text-[9px] text-zinc-500 ml-auto">{new Date(msg.created_at).toLocaleDateString()}</span>
+                                  </div>
+                                  <p className="text-xs text-zinc-700 dark:text-zinc-300 line-clamp-3">{msg.content}</p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        <div className="grid grid-cols-2 gap-2">
                         <Button variant="outline" className="w-full text-xs h-9">Edit Channel</Button>
                         <Button variant="outline" className="w-full text-xs h-9 text-red-500 hover:text-red-600">Archive</Button>
                       </div>
