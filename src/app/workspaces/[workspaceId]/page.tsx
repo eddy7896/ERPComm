@@ -6,7 +6,7 @@ import { MessageList } from "@/components/MessageList";
 import { MessageInput } from "@/components/MessageInput";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
-import { Hash, Lock, Info, Search, Bell, Star, AtSign, Menu, Users, X, Calendar, MapPin, Link2, Pencil } from "lucide-react";
+import { Hash, Lock, Info, Search, Star, Menu, Users, Calendar, MapPin, Link2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,7 @@ import { SearchDialog } from "@/components/SearchDialog";
 import { NotificationsPopover } from "@/components/NotificationsPopover";
 import { MentionsPopover } from "@/components/MentionsPopover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface ChannelDetails {
   id: string;
