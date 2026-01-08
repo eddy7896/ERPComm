@@ -27,12 +27,23 @@ export async function GET(
           .eq("id", workspaceId)
           .single();
 
-        // Fetch channels
-        const { data: channels } = await supabaseServer
+        // Fetch all channels in workspace
+        const { data: allChannels } = await supabaseServer
           .from("channels")
           .select("*")
           .eq("workspace_id", workspaceId)
           .order("name");
+
+        // Fetch user's channel memberships
+        const { data: memberships } = await supabaseServer
+          .from("channel_members")
+          .select("channel_id")
+          .eq("user_id", userId);
+
+        const memberChannelIds = new Set(memberships?.map(m => m.channel_id) || []);
+        
+        // Filter channels: public OR user is a member
+        const channels = allChannels?.filter(c => !c.is_private || memberChannelIds.has(c.id)) || [];
 
         // Fetch members
         const { data: members } = await supabaseServer
