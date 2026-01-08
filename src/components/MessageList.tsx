@@ -535,14 +535,16 @@ function MessageItem({
                               className="max-h-[400px] w-auto object-contain cursor-pointer"
                               onClick={() => window.open(file.url, '_blank')}
                             />
-                            <a 
-                              href={file.url} 
-                              download={file.name}
-                              className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-900/50 text-white opacity-0 group-hover/image:opacity-100 transition-opacity hover:bg-zinc-900"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Download className="h-4 w-4" />
-                            </a>
+                              <button 
+                                className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-900/50 text-white opacity-0 group-hover/image:opacity-100 transition-opacity hover:bg-zinc-900"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  downloadFile(file.url, file.name);
+                                }}
+                              >
+                                <Download className="h-4 w-4" />
+                              </button>
+
                           </div>
                         ) : (
                           <div className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 group/file">
