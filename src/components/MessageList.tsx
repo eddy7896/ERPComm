@@ -574,10 +574,21 @@ function MessageItem({
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => { setEditingId(message.id); setEditContent(message.content); }}>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit
-                </DropdownMenuItem>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleTogglePin(message.id, !!message.is_pinned)}>
+                    {message.is_pinned ? (
+                      <>
+                        <PinOff className="mr-2 h-4 w-4" /> Unpin
+                      </>
+                    ) : (
+                      <>
+                        <Pin className="mr-2 h-4 w-4" /> Pin
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setEditingId(message.id); setEditContent(message.content); }}>
+                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                  </DropdownMenuItem>
                 <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(message.id)}>
                   <Trash2 className="mr-2 h-4 w-4" /> Delete
                 </DropdownMenuItem>
