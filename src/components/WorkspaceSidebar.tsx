@@ -270,11 +270,17 @@ export function WorkspaceSidebar({
                 <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-none">
                   {profile?.full_name || "User"}
                 </p>
-                {profile?.badge && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider">
-                    {profile.badge}
-                  </span>
-                )}
+                {profile?.badge && (() => {
+                  const badgeOption = BADGE_OPTIONS.find(b => b.label === profile.badge);
+                  return (
+                    <span className={cn(
+                      "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
+                      badgeOption?.color || "bg-primary/10 text-primary border-primary/20"
+                    )}>
+                      {profile.badge}
+                    </span>
+                  );
+                })()}
               </div>
               <StatusPicker 
                 currentStatus={profile?.status_text} 
