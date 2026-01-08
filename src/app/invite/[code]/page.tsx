@@ -62,7 +62,7 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
       .single();
 
     if (existingMember) {
-      toast.info("You&apos;re already a member of this workspace!");
+      toast.info("You are already a member of this workspace!");
       router.push(`/workspaces/${workspace.id}`);
       return;
     }
