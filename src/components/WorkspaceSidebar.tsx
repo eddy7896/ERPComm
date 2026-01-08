@@ -230,20 +230,10 @@ export function WorkspaceSidebar({
               <DropdownMenuItem className="px-3 py-2 text-red-600 focus:bg-red-50 dark:focus:bg-red-950/30" onClick={handleLogout}>
                 <LogOut className="mr-3 h-4 w-4" /> Logout
               </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+              </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        <NotificationsPopover 
-          workspaceId={workspaceId} 
-          onNotificationClick={(n) => {
-            if (n.channel_id) {
-              onSelectChannel(n.channel_id);
-            } else if (n.actor_id) {
-              onSelectDM(n.actor_id);
-            }
-          }}
-        />
-      </div>
 
 
       <ScrollArea className="flex-1 px-3">
