@@ -353,12 +353,19 @@ export function WorkspaceSidebar({
               </Avatar>
               <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-100 dark:border-zinc-900 bg-emerald-500" />
             </div>
-            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowProfileSettings(true)}>
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-none">
-                  {profile?.full_name || "User"}
-                </p>
-                {profile?.badge && (() => {
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowProfileSettings(true)}>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-tight">
+                      {profile?.full_name || "User"}
+                    </p>
+                    {profile?.username && (
+                      <p className="text-[10px] text-zinc-500 font-medium truncate">
+                        @{profile.username}
+                      </p>
+                    )}
+                  </div>
+                  {profile?.badge && (() => {
                   const badgeOption = BADGE_OPTIONS.find(b => b.label === profile.badge);
                   return (
                     <span className={cn(
