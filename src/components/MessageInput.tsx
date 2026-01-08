@@ -174,16 +174,28 @@ export function MessageInput({
                     </PopoverContent>
                   </Popover>
 
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                        <StickerIcon className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                      <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} />
-                    </PopoverContent>
-                  </Popover>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add GIF">
+                          <ImageIcon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                        <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} defaultTab="gifs" />
+                      </PopoverContent>
+                    </Popover>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add Sticker">
+                          <StickerIcon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                        <GiphyPicker onSelect={(url) => handleSendMessage(url, "sticker")} defaultTab="stickers" />
+                      </PopoverContent>
+                    </Popover>
+
 
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
                     <Paperclip className="h-4 w-4" />
