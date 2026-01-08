@@ -91,106 +91,63 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
 
     useEffect(() => {
       const fetchMessages = async () => {
-      if (!user) return;
-      setLoading(true);
+        if (!user) return;
+        setLoading(true);
 
-      let query = supabase
-        .from("messages")
-        .select("*, sender:profiles!sender_id(*)")
-        .eq("workspace_id", workspaceId)
-        .order("created_at", { ascending: true });
+        let query = supabase
+          .from("messages")
+          .select("*, sender:profiles!sender_id(*)")
+          .eq("workspace_id", workspaceId)
+          .order("created_at", { ascending: true });
 
-      if (channelId) {
-        query = query.eq("channel_id", channelId);
-      } else if (recipientId) {
-        query = query.or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`);
-      }
+        if (channelId) {
+          query = query.eq("channel_id", channelId);
+        } else if (recipientId) {
+          query = query.or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`);
+        }
 
-      const { data, error } = await query;
-      if (error) {
-        console.error("Error fetching messages:", error);
-      } else {
-        const fetchedMessages = data || [];
-        
-        // Decrypt messages if needed
-        const decryptedMessages = await Promise.all(fetchedMessages.map(async (msg) => {
-          if (msg.is_encrypted && msg.payload?.iv && channelId) {
-            try {
-              let channelKey = keyCache[channelId];
-              if (!channelKey) {
-                const { data: member } = await supabase
-                  .from("channel_members")
-                  .select("encrypted_key")
-                  .eq("channel_id", channelId)
-                  .eq("user_id", user.id)
-                  .single();
-                
-                if (member?.encrypted_key) {
-                  const privateKey = await getPrivateKey();
-                  if (privateKey) {
-                    channelKey = await unwrapChannelKey(member.encrypted_key, privateKey);
-                    keyCache[channelId] = channelKey;
-                  }
-                }
-              }
+        const { data, error } = await query;
+        if (error) {
+          console.error("Error fetching messages:", error);
+        } else {
+          setMessages(data || []);
+        }
+        setLoading(false);
+      };
 
-              if (channelKey) {
-                const decrypted = await decryptMessage(msg.content, msg.payload.iv, channelKey);
-                return { ...msg, decryptedContent: decrypted };
-              }
-            } catch (err) {
-              console.error("Decryption failed for message", msg.id, err);
-            }
-          }
-          return msg;
-        }));
-        
-        setMessages(decryptedMessages);
-      }
-      setLoading(false);
-    };
+      fetchMessages();
 
-    fetchMessages();
-
-    const channel = supabase
-      .channel(`room:${channelId || recipientId || 'global'}`)
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'messages',
-        filter: channelId ? `channel_id=eq.${channelId}` : undefined
-      }, async (payload) => {
+      const channel = supabase
+        .channel(`room:${channelId || recipientId || 'global'}`)
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'messages',
+          filter: channelId ? `channel_id=eq.${channelId}` : undefined
+        }, async (payload) => {
           if (payload.eventType === 'INSERT') {
             const msg = payload.new;
             
-            // Filter for DMs if needed
             if (recipientId) {
               const isRelated = (msg.sender_id === user?.id && msg.recipient_id === recipientId) || 
                                (msg.sender_id === recipientId && msg.recipient_id === user?.id);
               if (!isRelated) return;
             }
 
-            // If it's a channel message and we are in a different channel, the filter should handle it
             if (channelId && msg.channel_id !== channelId) return;
 
-            // Decrypt new message if encrypted
-            let decryptedMsg = msg;
-            if (msg.is_encrypted && msg.payload?.iv && channelId) {
-              try {
-                const channelKey = keyCache[channelId];
-                if (channelKey) {
-                  const decrypted = await decryptMessage(msg.content, msg.payload.iv, channelKey);
-                  decryptedMsg = { ...msg, decryptedContent: decrypted };
-                }
-              } catch (err) {
-                console.error("Real-time decryption failed", err);
-              }
-            }
+            // Use the cache for the sender profile
+            const sender = await getProfile(msg.sender_id);
+            const newMessage = { ...msg, sender };
 
-            const { data: sender } = await supabase.from("profiles").select("*").eq("id", msg.sender_id).single();
-            const newMessage = { ...decryptedMsg, sender };
             setMessages(prev => {
-              if (prev.find(m => m.id === newMessage.id)) return prev;
+              // Replace optimistic message if it exists, or append if not
+              const existingIndex = prev.findIndex(m => m.id === msg.id || (m.id.startsWith('opt-') && m.content === msg.content && m.sender_id === msg.sender_id));
+              if (existingIndex !== -1) {
+                const newMessages = [...prev];
+                newMessages[existingIndex] = newMessage;
+                return newMessages;
+              }
               return [...prev, newMessage];
             });
           } else if (payload.eventType === 'UPDATE') {
@@ -199,12 +156,34 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             setMessages(prev => prev.filter(m => m.id !== payload.old.id));
           }
         })
-      .subscribe();
+        .on('broadcast', { event: 'optimistic_message' }, async ({ payload }) => {
+          // Listen for optimistic messages sent by the current user in other tabs or for immediate local feedback
+          if (payload.sender_id === user?.id) return; // We handle local optimistic update in MessageInput
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [workspaceId, channelId, recipientId, user?.id]);
+          const sender = await getProfile(payload.sender_id);
+          const optMessage = { ...payload, sender, id: `opt-${Date.now()}` };
+
+          setMessages(prev => {
+            if (prev.find(m => m.content === payload.content && m.sender_id === payload.sender_id)) return prev;
+            return [...prev, optMessage];
+          });
+        })
+        .subscribe();
+
+      // Listen for local optimistic messages from MessageInput
+      const handleLocalOptimistic = async (e: any) => {
+        const { message } = e.detail;
+        const sender = await getProfile(message.sender_id);
+        setMessages(prev => [...prev, { ...message, sender }]);
+      };
+
+      window.addEventListener('optimistic_message', handleLocalOptimistic);
+
+      return () => {
+        supabase.removeChannel(channel);
+        window.removeEventListener('optimistic_message', handleLocalOptimistic);
+      };
+    }, [workspaceId, channelId, recipientId, user?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
