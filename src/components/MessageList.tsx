@@ -276,33 +276,48 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
                 )}
               </div>
               
-              {editingId === message.id ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <Input
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    className="flex-1 h-8 text-sm"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleEdit(message.id);
-                      if (e.key === "Escape") {
-                        setEditingId(null);
-                        setEditContent("");
-                      }
-                    }}
-                  />
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(message.id)}>
-                    <Check className="h-4 w-4 text-green-500" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(null); setEditContent(""); }}>
-                    <X className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
-              )}
+                {editingId === message.id ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="flex-1 h-8 text-sm"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleEdit(message.id);
+                        if (e.key === "Escape") {
+                          setEditingId(null);
+                          setEditContent("");
+                        }
+                      }}
+                    />
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(message.id)}>
+                      <Check className="h-4 w-4 text-green-500" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(null); setEditContent(""); }}>
+                      <X className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 group/msg">
+                    <p className={cn(
+                      "text-sm leading-relaxed whitespace-pre-wrap break-words",
+                      message.is_encrypted && !message.decryptedContent 
+                        ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
+                        : "text-zinc-800 dark:text-zinc-200"
+                    )}>
+                      {message.is_encrypted 
+                        ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
+                        : message.content}
+                    </p>
+                    {message.is_encrypted && (
+                      <div className="mt-1 flex items-center gap-1 opacity-40 group-hover/msg:opacity-100 transition-opacity" title="End-to-End Encrypted">
+                        <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                    )}
+                  </div>
+                )}
+
             </div>
             
             {currentUserId === message.sender_id && editingId !== message.id && (
