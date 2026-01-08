@@ -33,17 +33,34 @@ interface RecipientDetails {
   status?: string;
 }
 
-export default function WorkspacePage({ params }: { params: Promise<{ workspaceId: string }> }) {
-  const { workspaceId } = use(params);
-  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
-  const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
-  const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
-  const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
-  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const { user, loading: authLoading } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  export default function WorkspacePage({ params }: { params: Promise<{ workspaceId: string }> }) {
+    const { workspaceId } = use(params);
+    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+    const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
+    const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
+    const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
+    const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+    const { user, loading: authLoading } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+  
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          setSearchOpen(prev => !prev);
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+          e.preventDefault();
+          setIsSidebarVisible(prev => !prev);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
 
   const { typingUsers, handleTyping, stopTyping } = useTypingIndicator(
     workspaceId,
