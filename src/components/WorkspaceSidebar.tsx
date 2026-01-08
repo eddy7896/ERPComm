@@ -46,6 +46,12 @@ interface Member {
   badge?: string;
 }
 
+interface UnreadCount {
+  channel_id: string | null;
+  recipient_id: string | null;
+  unread_count: number;
+}
+
 interface Profile {
   id: string;
   full_name?: string;
