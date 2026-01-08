@@ -228,7 +228,10 @@ export function WorkspaceSidebar({
                     </Avatar>
                     <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-50 dark:border-zinc-950 ${getStatusColor(member.id)}`} />
                   </div>
-                  <span className="truncate">{member.full_name || member.username}</span>
+                  <span className="truncate flex-1">{member.full_name || member.username}</span>
+                  {member.status_emoji && (
+                    <span className="text-xs ml-1 opacity-70">{member.status_emoji}</span>
+                  )}
                 </Button>
               ))}
               {members.length === 0 && (
