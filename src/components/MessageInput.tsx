@@ -298,7 +298,15 @@ export function MessageInput({
 
   return (
     <div className="px-2 md:px-4 pb-4 relative">
-      {showMentions && filteredMembers.length > 0 && (
+      {!isMember ? (
+        <div className="flex flex-col items-center justify-center p-6 bg-zinc-50 dark:bg-zinc-900 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg text-center">
+          <Lock className="h-8 w-8 text-zinc-400 mb-2" />
+          <h4 className="text-sm font-bold">This is a private channel</h4>
+          <p className="text-xs text-zinc-500">Only members of this channel can view or send messages.</p>
+        </div>
+      ) : (
+        <>
+          {showMentions && filteredMembers.length > 0 && (
         <div className="absolute bottom-full left-4 mb-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl overflow-hidden z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
           <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Channel Members</span>
