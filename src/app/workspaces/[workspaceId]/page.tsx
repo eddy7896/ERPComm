@@ -108,6 +108,15 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
         setChannelDetails(data);
         setEditedDescription(data?.description || "");
         setRecipientDetails(null);
+
+        // Fetch pinned messages
+        const { data: pinned } = await supabase
+          .from("messages")
+          .select("*, sender:profiles!sender_id(*)")
+          .eq("channel_id", selectedChannelId)
+          .eq("is_pinned", true)
+          .order("created_at", { ascending: false });
+        setPinnedMessages(pinned || []);
       } else if (selectedRecipientId) {
         const { data } = await supabase.from("profiles").select("*").eq("id", selectedRecipientId).single();
         setRecipientDetails(data);
