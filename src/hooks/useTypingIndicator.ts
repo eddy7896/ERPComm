@@ -31,30 +31,27 @@ export function useTypingIndicator(
 
       const typingChannel = supabase.channel(`typing:${workspaceId}:${roomId}`);
       
-      typingChannel
-        .on("broadcast", { event: "typing" }, async ({ payload }) => {
-          if (payload.userId === user.id) return;
-          
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("id, username, full_name")
-            .eq("id", payload.userId)
-            .single();
+        typingChannel
+          .on("broadcast", { event: "typing" }, async ({ payload }) => {
+            if (payload.userId === user.id) return;
+            
+            const profile = await getProfile(payload.userId);
 
-          if (profile) {
-            setTypingUsers((prev) => {
-              const exists = prev.some((u) => u.id === profile.id);
-              if (!exists) {
-                return [...prev, profile];
-              }
-              return prev;
-            });
+            if (profile) {
+              setTypingUsers((prev) => {
+                const exists = prev.some((u) => u.id === profile.id);
+                if (!exists) {
+                  return [...prev, profile];
+                }
+                return prev;
+              });
 
-            setTimeout(() => {
-              setTypingUsers((prev) => prev.filter((u) => u.id !== payload.userId));
-            }, 3000);
-          }
-        })
+              setTimeout(() => {
+                setTypingUsers((prev) => prev.filter((u) => u.id !== payload.userId));
+              }, 3000);
+            }
+          })
+
         .on("broadcast", { event: "stop_typing" }, ({ payload }) => {
           setTypingUsers((prev) => prev.filter((u) => u.id !== payload.userId));
         })
