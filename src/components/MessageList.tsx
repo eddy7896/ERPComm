@@ -16,19 +16,21 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { getProfile } from "@/lib/profile-cache";
 import { 
-  Loader2, 
-  Hash, 
-  MoreHorizontal, 
-  Pencil, 
-  Trash2, 
-    Check, 
-    X, 
-    ShieldCheck, 
-    Reply, 
-    SmilePlus,
-    Pin,
-    PinOff
-  } from "lucide-react";
+    Loader2, 
+    Hash, 
+    MoreHorizontal, 
+    Pencil, 
+    Trash2, 
+      Check, 
+      X, 
+      ShieldCheck, 
+      Reply, 
+      SmilePlus,
+      Pin,
+      PinOff,
+      FileIcon,
+      Download
+    } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
