@@ -298,25 +298,35 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
                       <X className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
-                ) : (
-                  <div className="flex items-start gap-2 group/msg">
-                    <p className={cn(
-                      "text-sm leading-relaxed whitespace-pre-wrap break-words",
-                      message.is_encrypted && !message.decryptedContent 
-                        ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
-                        : "text-zinc-800 dark:text-zinc-200"
-                    )}>
-                      {message.is_encrypted 
-                        ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
-                        : message.content}
-                    </p>
-                    {message.is_encrypted && (
-                      <div className="mt-1 flex items-center gap-1 opacity-40 group-hover/msg:opacity-100 transition-opacity" title="End-to-End Encrypted">
-                        <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                    )}
-                  </div>
-                )}
+                  ) : (
+                    <div className="flex flex-col items-start gap-2 group/msg">
+                      {message.payload?.type === "gif" || message.payload?.type === "sticker" ? (
+                        <div className="relative mt-1 max-w-[300px] rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                          <img 
+                            src={message.is_encrypted ? message.decryptedContent : message.content} 
+                            alt="GIF" 
+                            className="w-full h-auto object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <p className={cn(
+                          "text-sm leading-relaxed whitespace-pre-wrap break-words",
+                          message.is_encrypted && !message.decryptedContent 
+                            ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
+                            : "text-zinc-800 dark:text-zinc-200"
+                        )}>
+                          {message.is_encrypted 
+                            ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
+                            : message.content}
+                        </p>
+                      )}
+                      {message.is_encrypted && (
+                        <div className="mt-1 flex items-center gap-1 opacity-40 group-hover/msg:opacity-100 transition-opacity" title="End-to-End Encrypted">
+                          <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
             </div>
             
