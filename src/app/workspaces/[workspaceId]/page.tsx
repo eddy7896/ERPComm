@@ -125,6 +125,24 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
     };
 
     fetchDetails();
+
+    const channel = supabase
+      .channel(`pinned:${selectedChannelId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'messages',
+        filter: `channel_id=eq.${selectedChannelId}`
+      }, (payload) => {
+        if (payload.new.is_pinned !== payload.old.is_pinned) {
+          fetchDetails();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [selectedChannelId, selectedRecipientId]);
 
   const handleUpdateDescription = async () => {
