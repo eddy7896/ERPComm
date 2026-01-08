@@ -269,10 +269,15 @@ export function WorkspaceSidebar({
                       <AvatarImage src={member.avatar_url} />
                       <AvatarFallback className="text-[10px] bg-zinc-200 dark:bg-zinc-800">{member.full_name?.[0] || member.username?.[0]}</AvatarFallback>
                     </Avatar>
-                    <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-50 dark:border-zinc-950 ${getStatusColor(member.id)}`} />
-                  </div>
-                    <span className="truncate flex-1">{member.full_name || member.username}</span>
-                    {member.badge && (() => {
+                      <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-50 dark:border-zinc-950 ${getStatusColor(member.id)}`} />
+                    </div>
+                      <span className="truncate flex-1">{member.full_name || member.username}</span>
+                      {getUnreadCount(member.id, false) > 0 && (
+                        <Badge className="mr-1.5 h-5 w-5 p-0 flex items-center justify-center bg-primary text-[10px]">
+                          {getUnreadCount(member.id, false)}
+                        </Badge>
+                      )}
+                      {member.badge && (() => {
                       const badgeOption = BADGE_OPTIONS.find(b => b.label === member.badge);
                       return (
                         <span className={cn(
