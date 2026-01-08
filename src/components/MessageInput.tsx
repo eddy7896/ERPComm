@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/AuthProvider";
 import { Send, Smile, Paperclip, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,19 +28,18 @@ export function MessageInput({
 }: MessageInputProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleSendMessage = async () => {
-    if (!content.trim() || loading) return;
+    if (!content.trim() || loading || !user) return;
     setLoading(true);
     onStopTyping?.();
-
-    const { data: { user } } = await supabase.auth.getUser();
 
     const { error } = await supabase.from("messages").insert({
       workspace_id: workspaceId,
       channel_id: channelId,
       recipient_id: recipientId,
-      sender_id: user?.id,
+      sender_id: user.id,
       content: content.trim(),
     });
 
