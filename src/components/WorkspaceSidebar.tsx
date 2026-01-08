@@ -96,9 +96,9 @@ export function WorkspaceSidebar({
       .channel('public:channels')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'channels', filter: `workspace_id=eq.${workspaceId}` }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          setChannels(prev => [...prev, payload.new].sort((a, b) => a.name.localeCompare(b.name)));
+          setChannels(prev => [...prev, payload.new as Channel].sort((a, b) => a.name.localeCompare(b.name)));
         } else if (payload.eventType === 'DELETE') {
-          setChannels(prev => prev.filter(c => c.id !== payload.old.id));
+          setChannels(prev => prev.filter(c => c.id !== (payload.old as Channel).id));
         }
       })
       .subscribe();
