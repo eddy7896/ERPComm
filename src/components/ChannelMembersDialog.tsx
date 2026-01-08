@@ -60,21 +60,21 @@ export function ChannelMembersDialog({
 
       if (cmError) throw cmError;
 
-      const currentMembers = (channelMembersData as any[]).map((m) => m.profiles as Profile);
-      setMembers(currentMembers);
-
-      // Fetch all workspace members
-      const { data: workspaceMembersData, error: wmError } = await supabase
-        .from("workspace_members")
-        .select("user_id, profiles!inner(*)")
-        .eq("workspace_id", workspaceId);
-
-      if (wmError) throw wmError;
-
-      const memberIds = new Set(currentMembers.map((m) => m.id));
-      const others = (workspaceMembersData as any[])
-        .map((m) => m.profiles as Profile)
-        .filter((p) => !memberIds.has(p.id));
+        const currentMembers = (channelMembersData as unknown as ChannelMemberResponse[]).map((m) => m.profiles);
+        setMembers(currentMembers);
+  
+        // Fetch all workspace members
+        const { data: workspaceMembersData, error: wmError } = await supabase
+          .from("workspace_members")
+          .select("user_id, profiles!inner(*)")
+          .eq("workspace_id", workspaceId);
+  
+        if (wmError) throw wmError;
+  
+        const memberIds = new Set(currentMembers.map((m) => m.id));
+        const others = (workspaceMembersData as unknown as ChannelMemberResponse[])
+          .map((m) => m.profiles)
+          .filter((p) => !memberIds.has(p.id));
 
       setNonMembers(others);
       } catch (error: any) {
