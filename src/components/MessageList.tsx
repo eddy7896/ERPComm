@@ -485,7 +485,7 @@ function MessageItem({
             )}
           </div>
 
-          {message.parent_message && (
+          {message.parent_id && message.parent_message && (
             <div className="mt-1 mb-1 pl-2 border-l-2 border-zinc-200 dark:border-zinc-700">
               <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium">
                 <Reply className="h-3 w-3" />
