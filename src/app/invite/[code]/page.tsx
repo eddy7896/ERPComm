@@ -46,8 +46,8 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
     fetchInvitation();
   }, [code]);
 
-  const handleJoin = async () => {
-    if (!user) {
+    const handleJoin = async () => {
+    if (!user || !workspace || !invitation) {
       router.push(`/login?redirect=/invite/${code}`);
       return;
     }
@@ -62,7 +62,7 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
       .single();
 
     if (existingMember) {
-      toast.info("You're already a member of this workspace!");
+      toast.info("You&apos;re already a member of this workspace!");
       router.push(`/workspaces/${workspace.id}`);
       return;
     }
