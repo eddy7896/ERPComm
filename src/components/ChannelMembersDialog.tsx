@@ -31,6 +31,11 @@ interface ChannelMembersDialogProps {
   channelName: string;
 }
 
+interface ChannelMemberResponse {
+  user_id: string;
+  profiles: Profile;
+}
+
 export function ChannelMembersDialog({
   channelId,
   workspaceId,
