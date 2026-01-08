@@ -610,12 +610,12 @@ export function MessageInput({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button 
-                    size="icon" 
-                    className={`h-9 w-9 rounded-full transition-all duration-300 shadow-sm ${(content.trim() || pendingFiles.length > 0) ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
-                    onClick={() => handleSendMessage()}
-                    disabled={(!content.trim() && pendingFiles.length === 0) || loading || uploading}
-                  >
+                    <Button 
+                      size="icon" 
+                      className={`h-9 w-9 rounded-full transition-all duration-300 shadow-sm ${(content.trim() || pendingFiles.length > 0) ? 'bg-blue-600 hover:bg-blue-700 text-white opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
+                      onClick={() => handleSendMessage()}
+                      disabled={(!content.trim() && pendingFiles.length === 0) || loading || uploading}
+                    >
                     {loading || uploading ? (
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />
                     ) : (
