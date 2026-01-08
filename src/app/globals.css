@@ -121,6 +121,38 @@
   }
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-zinc-200 dark:bg-zinc-800 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-300 dark:bg-zinc-700;
+}
+
+/* Emoji Picker Customization */
+.EmojiPickerReact {
+  --epr-bg-color: transparent !important;
+  --epr-category-label-bg-color: transparent !important;
+  --epr-border-color: transparent !important;
+  border: none !important;
+}
+
+.dark .EmojiPickerReact {
+  --epr-bg-color: #09090b !important;
+  --epr-category-label-bg-color: #09090b !important;
+  --epr-text-color: #fafafa !important;
+  --epr-search-input-bg-color: #18181b !important;
+  --epr-picker-border-color: #27272a !important;
+}
+
 /* Hide Next.js error overlay portal */
 nextjs-portal {
   display: none !important;
