@@ -84,32 +84,48 @@ export function WorkspaceSidebar({
   const router = useRouter();
   const { getPresence } = usePresence(workspaceId);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    useEffect(() => {
+      const fetchData = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const { data: ws } = await supabase.from("workspaces").select("*").eq("id", workspaceId).single();
-      setWorkspace(ws);
+        try {
+          // Use cached API route for faster initial load
+          const response = await fetch(`/api/workspaces/${workspaceId}/details?userId=${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setWorkspace(data.workspace);
+            setChannels(data.channels);
+            setMembers(data.members);
+            setUnreadCounts(data.unreadCounts);
+          } else {
+            // Fallback to direct supabase if API fails
+            const { data: ws } = await supabase.from("workspaces").select("*").eq("id", workspaceId).single();
+            setWorkspace(ws);
 
-      const { data: chans } = await supabase.from("channels").select("*").eq("workspace_id", workspaceId).order("name");
-      setChannels(chans || []);
+            const { data: chans } = await supabase.from("channels").select("*").eq("workspace_id", workspaceId).order("name");
+            setChannels(chans || []);
 
-      const { data: mems } = await supabase
-        .from("workspace_members")
-        .select("profiles(*)")
-        .eq("workspace_id", workspaceId);
-      
-        setMembers(mems?.map((m: { profiles: Member }) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
+            const { data: mems } = await supabase
+              .from("workspace_members")
+              .select("profiles(*)")
+              .eq("workspace_id", workspaceId);
+            
+            setMembers(mems?.map((m: any) => m.profiles).filter((p: any) => p && p.id !== user?.id) || []);
 
-      const { data: unreads } = await supabase.rpc("get_unread_counts", {
-        p_workspace_id: workspaceId,
-        p_user_id: user.id
-      });
-      setUnreadCounts(unreads || []);
-    };
+            const { data: unreads } = await supabase.rpc("get_unread_counts", {
+              p_workspace_id: workspaceId,
+              p_user_id: user.id
+            });
+            setUnreadCounts(unreads || []);
+          }
+        } catch (error) {
+          console.error("Error fetching workspace details:", error);
+        }
+      };
 
-    fetchData();
+      fetchData();
+
 
     const channelSub = supabase
       .channel('public:channels')
