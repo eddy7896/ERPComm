@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import { encryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
-import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon } from "lucide-react";
+import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import EmojiPicker, { Theme } from "emoji-picker-react";
