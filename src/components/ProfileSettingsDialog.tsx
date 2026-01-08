@@ -129,18 +129,29 @@ export function ProfileSettingsDialog({ open, onOpenChange }: ProfileSettingsDia
 
               <div className="grid gap-2 pt-2">
                 <Label htmlFor="name" className="flex items-center gap-2">
+                  <User className="h-4 w-4 opacity-70" /> Full Name
+                </Label>
+                <Input
+                  id="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your full name"
+                />
+              </div>
 
-              <Label htmlFor="badge" className="flex items-center gap-2">
-                <Award className="h-4 w-4 opacity-70" /> Badge
-              </Label>
-              <Input
-                id="badge"
-                value={badge}
-                onChange={(e) => setBadge(e.target.value)}
-                placeholder="e.g. Pro, Admin, Founder"
-              />
-              <p className="text-[10px] text-zinc-500">This badge will appear next to your name</p>
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="badge" className="flex items-center gap-2">
+                  <Award className="h-4 w-4 opacity-70" /> Badge
+                </Label>
+                <Input
+                  id="badge"
+                  value={badge}
+                  onChange={(e) => setBadge(e.target.value)}
+                  placeholder="e.g. Pro, Admin, Founder"
+                />
+                <p className="text-[10px] text-zinc-500">This badge will appear next to your name</p>
+              </div>
+
           </div>
         </div>
         <DialogFooter>
