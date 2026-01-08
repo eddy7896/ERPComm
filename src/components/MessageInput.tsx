@@ -219,8 +219,29 @@ export function MessageInput({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-    if (e.target.value.trim()) {
+    const value = e.target.value;
+    const selectionStart = e.target.selectionStart;
+    setContent(value);
+    setCursorPos(selectionStart);
+
+    // Detect @mention trigger
+    const textBeforeCursor = value.slice(0, selectionStart);
+    const lastAt = textBeforeCursor.lastIndexOf("@");
+    
+    if (lastAt !== -1 && (lastAt === 0 || textBeforeCursor[lastAt - 1] === " ")) {
+      const search = textBeforeCursor.slice(lastAt + 1);
+      if (!search.includes(" ")) {
+        setMentionSearch(search);
+        setShowMentions(true);
+        setMentionIndex(0);
+      } else {
+        setShowMentions(false);
+      }
+    } else {
+      setShowMentions(false);
+    }
+
+    if (value.trim()) {
       onTyping?.();
     } else {
       onStopTyping?.();
@@ -232,7 +253,40 @@ export function MessageInput({
     : `Message ${recipientName || 'user'}`;
 
   return (
-    <div className="px-2 md:px-4 pb-4">
+    <div className="px-2 md:px-4 pb-4 relative">
+      {showMentions && filteredMembers.length > 0 && (
+        <div className="absolute bottom-full left-4 mb-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl overflow-hidden z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Channel Members</span>
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {filteredMembers.map((member, i) => (
+              <button
+                key={member.id}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors",
+                  i === mentionIndex ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                )}
+                onClick={() => insertMention(member)}
+                onMouseEnter={() => setMentionIndex(i)}
+              >
+                <div className="h-6 w-6 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                  {member.avatar_url ? (
+                    <img src={member.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    member.full_name?.[0] || member.username?.[0]
+                  )}
+                </div>
+                <div className="flex flex-col items-start min-w-0">
+                  <span className="font-medium truncate w-full">{member.full_name || member.username}</span>
+                  <span className="text-[10px] text-zinc-500 truncate w-full">@{member.username}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {replyingTo && (
         <div className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border-x border-t border-zinc-200 dark:border-zinc-800 rounded-t-lg animate-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center gap-2 min-w-0">
