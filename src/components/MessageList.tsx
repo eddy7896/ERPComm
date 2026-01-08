@@ -200,10 +200,10 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             </div>
             
             {currentUserId === message.sender_id && editingId !== message.id && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="opacity-0 group-hover:opacity-100 md:opacity-0 transition-opacity lg:group-hover:opacity-100 flex items-start">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
