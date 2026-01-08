@@ -25,13 +25,15 @@ import {
 import { Loader2, User, ImageIcon, Award, Check } from "lucide-react";
 
 const BADGE_OPTIONS = [
-  "Founder",
-  "Admin",
-  "Product",
-  "Engineering",
-  "Design",
-  "Marketing",
-  "Intern"
+  { label: "Founder", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800" },
+  { label: "Co-Founder", color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800" },
+  { label: "CEO", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
+  { label: "CTO", color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800" },
+  { label: "Product", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" },
+  { label: "Engineering", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800" },
+  { label: "Design", color: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-800" },
+  { label: "Marketing", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800" },
+  { label: "Intern", color: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800" }
 ];
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
