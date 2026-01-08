@@ -43,6 +43,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [replyingTo, setReplyingTo] = useState<any>(null);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
