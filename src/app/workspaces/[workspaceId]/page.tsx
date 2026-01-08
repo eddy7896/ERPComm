@@ -11,12 +11,26 @@ import { Separator } from "@/components/ui/separator";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useRouter } from "next/navigation";
 
+interface ChannelDetails {
+  id: string;
+  name: string;
+  description?: string;
+  is_private?: boolean;
+}
+
+interface RecipientDetails {
+  id: string;
+  full_name?: string;
+  username?: string;
+  status?: string;
+}
+
 export default function WorkspacePage({ params }: { params: Promise<{ workspaceId: string }> }) {
   const { workspaceId } = use(params);
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string | null>(null);
-  const [channelDetails, setChannelDetails] = useState<any>(null);
-  const [recipientDetails, setRecipientDetails] = useState<any>(null);
+  const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
+  const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
