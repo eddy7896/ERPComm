@@ -44,16 +44,21 @@ export default function WorkspacesPage() {
         .select("workspaces(*)")
         .eq("user_id", user.id);
 
-      if (error) {
-        toast.error("Failed to load workspaces");
-      } else {
-        setWorkspaces(data.map((item: { workspaces: Workspace }) => item.workspaces));
+        const userWorkspaces = data.map((item: { workspaces: Workspace }) => item.workspaces);
+        setWorkspaces(userWorkspaces);
+        
+        // Auto-redirect if user is only in one workspace
+        if (userWorkspaces.length === 1) {
+          router.push(`/workspaces/${userWorkspaces[0].id}`);
+          return;
+        }
       }
       setLoading(false);
     };
 
     fetchWorkspaces();
   }, [router]);
+
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
