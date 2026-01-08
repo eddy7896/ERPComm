@@ -31,7 +31,7 @@ import {
       FileIcon,
       Download
     } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, downloadFile } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, useMotionValue, useTransform } from "framer-motion";
