@@ -176,7 +176,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             let decryptedMsg = msg;
             if (msg.is_encrypted && msg.payload?.iv && channelId) {
               try {
-                let channelKey = keyCache[channelId];
+                const channelKey = keyCache[channelId];
                 if (channelKey) {
                   const decrypted = await decryptMessage(msg.content, msg.payload.iv, channelKey);
                   decryptedMsg = { ...msg, decryptedContent: decrypted };
