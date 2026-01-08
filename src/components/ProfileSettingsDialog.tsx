@@ -160,14 +160,21 @@ export function ProfileSettingsDialog({ open, onOpenChange }: ProfileSettingsDia
                 <Label htmlFor="badge" className="flex items-center gap-2">
                   <Award className="h-4 w-4 opacity-70" /> Badge
                 </Label>
-                <Input
-                  id="badge"
-                  value={badge}
-                  onChange={(e) => setBadge(e.target.value)}
-                  placeholder="e.g. Pro, Admin, Founder"
-                />
+                <Select value={badge} onValueChange={setBadge}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a badge" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BADGE_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-[10px] text-zinc-500">This badge will appear next to your name</p>
               </div>
+
 
           </div>
         </div>
