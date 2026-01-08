@@ -69,6 +69,7 @@ export function WorkspaceSidebar({
   const [user, setUser] = useState<User | null>(null);
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { getPresence } = usePresence(workspaceId);
 
