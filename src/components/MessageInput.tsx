@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
-import { Send, Smile, Paperclip, Plus } from "lucide-react";
+import { encryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
+import { Send, Smile, Paperclip, Plus, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -17,6 +18,9 @@ interface MessageInputProps {
   onStopTyping?: () => void;
 }
 
+// Simple cache for unwrapped keys
+const keyCache: Record<string, CryptoKey> = {};
+
 export function MessageInput({ 
   workspaceId, 
   channelId, 
@@ -28,27 +32,85 @@ export function MessageInput({
 }: MessageInputProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isEncryptionActive, setIsEncryptionActive] = useState(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    async function checkEncryption() {
+      if (!channelId) {
+        setIsEncryptionActive(false);
+        return;
+      }
+
+      const { data: channel } = await supabase
+        .from("channels")
+        .select("encryption_enabled")
+        .eq("id", channelId)
+        .single();
+
+      setIsEncryptionActive(!!channel?.encryption_enabled);
+    }
+    checkEncryption();
+  }, [channelId]);
 
   const handleSendMessage = async () => {
     if (!content.trim() || loading || !user) return;
     setLoading(true);
     onStopTyping?.();
 
-    const { error } = await supabase.from("messages").insert({
-      workspace_id: workspaceId,
-      channel_id: channelId,
-      recipient_id: recipientId,
-      sender_id: user.id,
-      content: content.trim(),
-    });
+    try {
+      let finalContent = content.trim();
+      let payload = null;
+      let isEncrypted = false;
 
-    if (error) {
-      console.error("Error sending message:", error);
-    } else {
-      setContent("");
+      if (isEncryptionActive && channelId) {
+        let channelKey = keyCache[channelId];
+        
+        if (!channelKey) {
+          const { data: member } = await supabase
+            .from("channel_members")
+            .select("encrypted_key")
+            .eq("channel_id", channelId)
+            .eq("user_id", user.id)
+            .single();
+
+          if (member?.encrypted_key) {
+            const privateKey = await getPrivateKey();
+            if (privateKey) {
+              channelKey = await unwrapChannelKey(member.encrypted_key, privateKey);
+              keyCache[channelId] = channelKey;
+            }
+          }
+        }
+
+        if (channelKey) {
+          const encrypted = await encryptMessage(finalContent, channelKey);
+          finalContent = encrypted.content;
+          payload = { iv: encrypted.iv };
+          isEncrypted = true;
+        }
+      }
+
+      const { error } = await supabase.from("messages").insert({
+        workspace_id: workspaceId,
+        channel_id: channelId,
+        recipient_id: recipientId,
+        sender_id: user.id,
+        content: finalContent,
+        is_encrypted: isEncrypted,
+        payload,
+      });
+
+      if (error) {
+        console.error("Error sending message:", error);
+      } else {
+        setContent("");
+      }
+    } catch (err) {
+      console.error("Encryption failed:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
