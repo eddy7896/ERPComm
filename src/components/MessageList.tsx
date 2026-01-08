@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Loader2, Hash, MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const getBadgeColor = (badge: string) => {
   switch (badge) {
