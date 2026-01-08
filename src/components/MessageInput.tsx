@@ -304,20 +304,45 @@ export function MessageInput({
         }
       }
 
-      const { error } = await supabase.from("messages").insert({
-        workspace_id: workspaceId,
-        channel_id: channelId,
-        recipient_id: recipientId,
-        sender_id: user.id,
-        content: messageContent || (uploadedFiles.length > 0 ? uploadedFiles[0].name : ""),
-        is_encrypted: isEncrypted,
-        parent_id: currentReply?.id,
-        payload,
-      });
+        const { data: msgData, error } = await supabase.from("messages").insert({
+          workspace_id: workspaceId,
+          channel_id: channelId,
+          recipient_id: recipientId,
+          sender_id: user.id,
+          content: messageContent || (uploadedFiles.length > 0 ? uploadedFiles[0].name : ""),
+          is_encrypted: isEncrypted,
+          parent_id: currentReply?.id,
+          payload,
+        }).select().single();
 
-      if (error) {
-        console.error("Error sending message:", error);
-      }
+        if (error) {
+          console.error("Error sending message:", error);
+        } else if (msgData && mentions.length > 0) {
+          // Handle mentions
+          const { data: mentionedUsers } = await supabase
+            .from('profiles')
+            .select('id')
+            .in('username', mentions);
+
+          if (mentionedUsers && mentionedUsers.length > 0) {
+            const notifications = mentionedUsers
+              .filter(u => u.id !== user.id) // Don't notify self
+              .map(u => ({
+                user_id: u.id,
+                actor_id: user.id,
+                workspace_id: workspaceId,
+                channel_id: channelId,
+                message_id: msgData.id,
+                type: 'mention' as const,
+                content: finalMsgContent.substring(0, 100)
+              }));
+
+            if (notifications.length > 0) {
+              await supabase.from('notifications').insert(notifications);
+            }
+          }
+        }
+
     } catch (err) {
       console.error("Upload/Send failed:", err);
     } finally {
