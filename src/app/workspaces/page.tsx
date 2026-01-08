@@ -186,5 +186,3 @@ export default function WorkspacesPage() {
     </div>
   );
 }
-
-import { motion } from "framer-motion";
