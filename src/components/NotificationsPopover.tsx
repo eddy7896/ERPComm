@@ -161,39 +161,39 @@ export function NotificationsPopover({ workspaceId, onNotificationClick }: Notif
                 <Bell className="h-6 w-6 text-zinc-400" />
               </div>
               <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">No notifications yet</p>
-              <p className="text-xs text-zinc-500 mt-1">When someone mentions you, you'll see it here.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {notifications.map((n) => (
-                <div 
-                  key={n.id} 
-                  className={cn(
-                    "relative group flex gap-3 p-4 transition-colors",
-                    n.is_read ? "bg-transparent" : "bg-primary/5 dark:bg-primary/10"
-                  )}
-                >
-                  <div className="relative">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={n.actor.avatar_url} />
-                      <AvatarFallback>{n.actor.username[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
-                      {getIcon(n.type)}
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100 leading-tight">
-                      <span className="font-bold">@{n.actor.username}</span>
-                      {n.type === 'mention' && " mentioned you"}
-                      {n.type === 'reply' && " replied to you"}
-                      {n.type === 'reaction' && " reacted to your message"}
-                    </p>
-                    {n.content && (
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2 italic">
-                        "{n.content}"
-                      </p>
+                <p className="text-xs text-zinc-500 mt-1">When someone mentions you, you&apos;ll see it here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {notifications.map((n) => (
+                  <div 
+                    key={n.id} 
+                    className={cn(
+                      "relative group flex gap-3 p-4 transition-colors",
+                      n.is_read ? "bg-transparent" : "bg-primary/5 dark:bg-primary/10"
                     )}
+                  >
+                    <div className="relative">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={n.actor.avatar_url} />
+                        <AvatarFallback>{n.actor.username[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
+                        {getIcon(n.type)}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100 leading-tight">
+                        <span className="font-bold">@{n.actor.username}</span>
+                        {n.type === 'mention' && " mentioned you"}
+                        {n.type === 'reply' && " replied to you"}
+                        {n.type === 'reaction' && " reacted to your message"}
+                      </p>
+                      {n.content && (
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2 italic">
+                          &quot;{n.content}&quot;
+                        </p>
+                      )}
                     <p className="text-[10px] text-zinc-400 mt-2">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                     </p>
