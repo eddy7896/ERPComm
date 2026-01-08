@@ -132,20 +132,38 @@ export function CreateChannelDialog({
                 rows={2}
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="private">Make private</Label>
-                <p className="text-xs text-zinc-500">
-                  Only invited members can see this channel
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="private">Make private</Label>
+                  <p className="text-xs text-zinc-500">
+                    Only invited members can see this channel
+                  </p>
+                </div>
+                <Switch
+                  id="private"
+                  checked={isPrivate}
+                  onCheckedChange={setIsPrivate}
+                />
               </div>
-              <Switch
-                id="private"
-                checked={isPrivate}
-                onCheckedChange={setIsPrivate}
-              />
+              <div className="flex items-center justify-between p-3 rounded-lg border border-emerald-100 bg-emerald-50/50 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <Label htmlFor="encryption" className="text-emerald-900 dark:text-emerald-100">End-to-End Encryption</Label>
+                  </div>
+                  <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80">
+                    Messages are encrypted locally. Only members can decrypt.
+                  </p>
+                </div>
+                <Switch
+                  id="encryption"
+                  checked={encryptionEnabled}
+                  onCheckedChange={setEncryptionEnabled}
+                  className="data-[state=checked]:bg-emerald-600"
+                />
+              </div>
             </div>
-          </div>
+
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
