@@ -14,10 +14,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { decryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
+import { decryptMessage } from "@/lib/crypto";
 import { getProfile } from "@/lib/profile-cache";
-import { Loader2, Hash, MoreHorizontal, Pencil, Trash2, Check, X, ShieldCheck } from "lucide-react";
+import { 
+  Loader2, 
+  Hash, 
+  MoreHorizontal, 
+  Pencil, 
+  Trash2, 
+  Check, 
+  X, 
+  ShieldCheck, 
+  Reply, 
+  SmilePlus,
+  ArrowRight
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import EmojiPicker, { Theme } from "emoji-picker-react";
+import { useTheme } from "next-themes";
 
 const getBadgeColor = (badge: string) => {
   switch (badge) {
@@ -31,14 +49,10 @@ const getBadgeColor = (badge: string) => {
     default: return "bg-primary/10 text-primary border-primary/20";
   }
 };
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 
-interface MessageListProps {
-  workspaceId: string;
-  channelId?: string;
-  recipientId?: string;
-  typingUsers?: Array<{ id: string; full_name?: string; username?: string }>;
+interface Reaction {
+  emoji: string;
+  user_id: string;
 }
 
 interface Message {
@@ -49,6 +63,14 @@ interface Message {
   sender_id: string;
   is_encrypted?: boolean;
   payload?: Record<string, any> | null;
+  parent_id?: string;
+  parent_message?: {
+    content: string;
+    sender: {
+      full_name?: string;
+      username?: string;
+    };
+  };
   sender?: {
     id: string;
     avatar_url?: string;
@@ -56,134 +78,175 @@ interface Message {
     username?: string;
     badge?: string;
   };
+  reactions?: Reaction[];
   decryptedContent?: string;
 }
 
-const keyCache: Record<string, CryptoKey> = {};
+interface MessageListProps {
+  workspaceId: string;
+  channelId?: string;
+  recipientId?: string;
+  typingUsers?: Array<{ id: string; full_name?: string; username?: string }>;
+  onReply?: (message: Message) => void;
+}
 
-export function MessageList({ workspaceId, channelId, recipientId, typingUsers = [] }: MessageListProps) {
+export function MessageList({ workspaceId, channelId, recipientId, typingUsers = [], onReply }: MessageListProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const currentUserId = user?.id;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
-    const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
   
-    useEffect(() => {
-      const updateLastRead = async () => {
-        if (!user || !workspaceId) return;
-        const { error } = await supabase.from("member_last_read").upsert({
-          user_id: user.id,
-          workspace_id: workspaceId,
-          channel_id: channelId || null,
-          recipient_id: recipientId || null,
-          last_read_at: new Date().toISOString()
-        }, {
-          onConflict: channelId ? 'user_id,workspace_id,channel_id' : 'user_id,workspace_id,recipient_id'
-        });
-      };
-  
-      if (messages.length > 0) {
-        updateLastRead();
+  useEffect(() => {
+    const updateLastRead = async () => {
+      if (!user || !workspaceId) return;
+      await supabase.from("member_last_read").upsert({
+        user_id: user.id,
+        workspace_id: workspaceId,
+        channel_id: channelId || null,
+        recipient_id: recipientId || null,
+        last_read_at: new Date().toISOString()
+      }, {
+        onConflict: channelId ? 'user_id,workspace_id,channel_id' : 'user_id,workspace_id,recipient_id'
+      });
+    };
+
+    if (messages.length > 0) {
+      updateLastRead();
+    }
+  }, [messages, user, workspaceId, channelId, recipientId]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!user) return;
+      setLoading(true);
+
+      let query = supabase
+        .from("messages")
+        .select(`
+          *,
+          sender:profiles!sender_id(*),
+          parent_message:messages!parent_id(
+            content,
+            sender:profiles!sender_id(full_name, username)
+          ),
+          message_reactions(emoji, user_id)
+        `)
+        .eq("workspace_id", workspaceId)
+        .order("created_at", { ascending: true });
+
+      if (channelId) {
+        query = query.eq("channel_id", channelId);
+      } else if (recipientId) {
+        query = query.or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`);
       }
-    }, [messages, user, workspaceId, channelId, recipientId]);
 
-    useEffect(() => {
-      const fetchMessages = async () => {
-        if (!user) return;
-        setLoading(true);
+      const { data, error } = await query;
+      if (error) {
+        console.error("Error fetching messages:", error);
+      } else {
+        const formattedData = data?.map(m => ({
+          ...m,
+          reactions: m.message_reactions || []
+        })) || [];
+        setMessages(formattedData);
+      }
+      setLoading(false);
+    };
 
-        let query = supabase
-          .from("messages")
-          .select("*, sender:profiles!sender_id(*)")
-          .eq("workspace_id", workspaceId)
-          .order("created_at", { ascending: true });
+    fetchMessages();
 
-        if (channelId) {
-          query = query.eq("channel_id", channelId);
-        } else if (recipientId) {
-          query = query.or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`);
-        }
-
-        const { data, error } = await query;
-        if (error) {
-          console.error("Error fetching messages:", error);
-        } else {
-          setMessages(data || []);
-        }
-        setLoading(false);
-      };
-
-      fetchMessages();
-
-      const channel = supabase
-        .channel(`room:${channelId || recipientId || 'global'}`)
-        .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'messages',
-          filter: channelId ? `channel_id=eq.${channelId}` : undefined
-        }, async (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const msg = payload.new;
-            
-            if (recipientId) {
-              const isRelated = (msg.sender_id === user?.id && msg.recipient_id === recipientId) || 
-                               (msg.sender_id === recipientId && msg.recipient_id === user?.id);
-              if (!isRelated) return;
-            }
-
-            if (channelId && msg.channel_id !== channelId) return;
-
-            // Use the cache for the sender profile
-            const sender = await getProfile(msg.sender_id);
-            const newMessage = { ...msg, sender };
-
-            setMessages(prev => {
-              // Replace optimistic message if it exists, or append if not
-              const existingIndex = prev.findIndex(m => m.id === msg.id || (m.id.startsWith('opt-') && m.content === msg.content && m.sender_id === msg.sender_id));
-              if (existingIndex !== -1) {
-                const newMessages = [...prev];
-                newMessages[existingIndex] = newMessage;
-                return newMessages;
-              }
-              return [...prev, newMessage];
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
-          } else if (payload.eventType === 'DELETE') {
-            setMessages(prev => prev.filter(m => m.id !== payload.old.id));
+    const channel = supabase
+      .channel(`room:${channelId || recipientId || 'global'}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'messages',
+        filter: channelId ? `channel_id=eq.${channelId}` : undefined
+      }, async (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const msg = payload.new;
+          if (recipientId) {
+            const isRelated = (msg.sender_id === user?.id && msg.recipient_id === recipientId) || 
+                             (msg.sender_id === recipientId && msg.recipient_id === user?.id);
+            if (!isRelated) return;
           }
-        })
-        .on('broadcast', { event: 'optimistic_message' }, async ({ payload }) => {
-          // Listen for optimistic messages sent by the current user in other tabs or for immediate local feedback
-          if (payload.sender_id === user?.id) return; // We handle local optimistic update in MessageInput
+          if (channelId && msg.channel_id !== channelId) return;
 
-          const sender = await getProfile(payload.sender_id);
-          const optMessage = { ...payload, sender, id: `opt-${Date.now()}` };
+          const sender = await getProfile(msg.sender_id);
+          let parent_message = null;
+          if (msg.parent_id) {
+            const { data: parent } = await supabase
+              .from("messages")
+              .select("content, sender:profiles!sender_id(full_name, username)")
+              .eq("id", msg.parent_id)
+              .single();
+            parent_message = parent;
+          }
+
+          const newMessage = { ...msg, sender, parent_message, reactions: [] };
 
           setMessages(prev => {
-            if (prev.find(m => m.content === payload.content && m.sender_id === payload.sender_id)) return prev;
-            return [...prev, optMessage];
+            const existingIndex = prev.findIndex(m => m.id === msg.id || (m.id.startsWith('opt-') && m.content === msg.content && m.sender_id === msg.sender_id));
+            if (existingIndex !== -1) {
+              const newMessages = [...prev];
+              newMessages[existingIndex] = newMessage;
+              return newMessages;
+            }
+            return [...prev, newMessage];
           });
-        })
-        .subscribe();
+        } else if (payload.eventType === 'UPDATE') {
+          setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
+        } else if (payload.eventType === 'DELETE') {
+          setMessages(prev => prev.filter(m => m.id !== payload.old.id));
+        }
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'message_reactions'
+      }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setMessages(prev => prev.map(m => 
+            m.id === payload.new.message_id 
+              ? { ...m, reactions: [...(m.reactions || []), payload.new] } 
+              : m
+          ));
+        } else if (payload.eventType === 'DELETE') {
+          setMessages(prev => prev.map(m => 
+            m.id === payload.old.message_id 
+              ? { ...m, reactions: m.reactions?.filter(r => !(r.user_id === payload.old.user_id && r.emoji === payload.old.emoji)) } 
+              : m
+          ));
+        }
+      })
+      .subscribe();
 
-      // Listen for local optimistic messages from MessageInput
-      const handleLocalOptimistic = async (e: any) => {
-        const { message } = e.detail;
-        const sender = await getProfile(message.sender_id);
-        setMessages(prev => [...prev, { ...message, sender }]);
-      };
+    const handleLocalOptimistic = async (e: any) => {
+      const { message } = e.detail;
+      const sender = await getProfile(message.sender_id);
+      let parent_message = null;
+      if (message.parent_id) {
+        const { data: parent } = await supabase
+          .from("messages")
+          .select("content, sender:profiles!sender_id(full_name, username)")
+          .eq("id", message.parent_id)
+          .single();
+        parent_message = parent;
+      }
+      setMessages(prev => [...prev, { ...message, sender, parent_message, reactions: [] }]);
+    };
 
-      window.addEventListener('optimistic_message', handleLocalOptimistic);
+    window.addEventListener('optimistic_message', handleLocalOptimistic);
 
-      return () => {
-        supabase.removeChannel(channel);
-        window.removeEventListener('optimistic_message', handleLocalOptimistic);
-      };
-    }, [workspaceId, channelId, recipientId, user?.id]);
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener('optimistic_message', handleLocalOptimistic);
+    };
+  }, [workspaceId, channelId, recipientId, user?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -193,28 +256,31 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
 
   const handleEdit = async (messageId: string) => {
     if (!editContent.trim()) return;
-    
     const { error } = await supabase
       .from("messages")
       .update({ content: editContent.trim(), is_edited: true, updated_at: new Date().toISOString() })
       .eq("id", messageId);
 
-    if (error) {
-      toast.error("Failed to edit message");
-    } else {
+    if (error) toast.error("Failed to edit message");
+    else {
       setEditingId(null);
       setEditContent("");
     }
   };
 
   const handleDelete = async (messageId: string) => {
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("id", messageId);
+    const { error } = await supabase.from("messages").delete().eq("id", messageId);
+    if (error) toast.error("Failed to delete message");
+  };
 
-    if (error) {
-      toast.error("Failed to delete message");
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    if (!user) return;
+    const existing = messages.find(m => m.id === messageId)?.reactions?.find(r => r.user_id === user.id && r.emoji === emoji);
+
+    if (existing) {
+      await supabase.from("message_reactions").delete().match({ message_id: messageId, user_id: user.id, emoji });
+    } else {
+      await supabase.from("message_reactions").insert({ message_id: messageId, user_id: user.id, emoji });
     }
   };
 
@@ -230,106 +296,20 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
     <ScrollArea ref={scrollRef} className="flex-1 p-4">
       <div className="flex flex-col gap-4">
         {messages.map((message) => (
-          <div key={message.id} className="flex gap-3 group hover:bg-zinc-50 dark:hover:bg-zinc-900/50 -mx-2 px-2 py-1 rounded-lg transition-colors">
-            <Avatar className="h-9 w-9 mt-0.5">
-              <AvatarImage src={message.sender?.avatar_url} />
-              <AvatarFallback>{message.sender?.full_name?.[0] || message.sender?.username?.[0]}</AvatarFallback>
-            </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-sm hover:underline cursor-pointer">
-                      {message.sender?.full_name || message.sender?.username}
-                    </span>
-                      {message.sender?.badge && (
-                        <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 uppercase tracking-wider font-bold h-4 border", getBadgeColor(message.sender.badge))}>
-                          {message.sender.badge}
-                        </Badge>
-                      )}
-
-                  </div>
-                  <span className="text-[10px] text-zinc-500 font-medium">
-                    {format(new Date(message.created_at), "h:mm a")}
-                  </span>
-                {message.is_edited && (
-                  <span className="text-[10px] text-zinc-400">(edited)</span>
-                )}
-              </div>
-              
-                {editingId === message.id ? (
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      className="flex-1 h-8 text-sm"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleEdit(message.id);
-                        if (e.key === "Escape") {
-                          setEditingId(null);
-                          setEditContent("");
-                        }
-                      }}
-                    />
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(message.id)}>
-                      <Check className="h-4 w-4 text-green-500" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(null); setEditContent(""); }}>
-                      <X className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                  ) : (
-                    <div className="flex flex-col items-start gap-2 group/msg">
-                      {message.payload?.type === "gif" || message.payload?.type === "sticker" ? (
-                        <div className="relative mt-1 max-w-[300px] rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
-                          <img 
-                            src={message.is_encrypted ? message.decryptedContent : message.content} 
-                            alt="GIF" 
-                            className="w-full h-auto object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <p className={cn(
-                          "text-sm leading-relaxed whitespace-pre-wrap break-words",
-                          message.is_encrypted && !message.decryptedContent 
-                            ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
-                            : "text-zinc-800 dark:text-zinc-200"
-                        )}>
-                          {message.is_encrypted 
-                            ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
-                            : message.content}
-                        </p>
-                      )}
-                      {message.is_encrypted && (
-                        <div className="mt-1 flex items-center gap-1 opacity-40 group-hover/msg:opacity-100 transition-opacity" title="End-to-End Encrypted">
-                          <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-            </div>
-            
-            {currentUserId === message.sender_id && editingId !== message.id && (
-              <div className="opacity-0 group-hover:opacity-100 md:opacity-0 transition-opacity lg:group-hover:opacity-100 flex items-start">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => { setEditingId(message.id); setEditContent(message.content); }}>
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(message.id)}>
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
+          <MessageItem 
+            key={message.id} 
+            message={message} 
+            currentUserId={currentUserId}
+            editingId={editingId}
+            editContent={editContent}
+            setEditingId={setEditingId}
+            setEditContent={setEditContent}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            handleToggleReaction={handleToggleReaction}
+            onReply={onReply}
+            theme={theme}
+          />
         ))}
         
         {messages.length === 0 && (
@@ -356,5 +336,217 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         </div>
       )}
     </ScrollArea>
+  );
+}
+
+function MessageItem({ 
+  message, 
+  currentUserId, 
+  editingId, 
+  editContent, 
+  setEditingId, 
+  setEditContent, 
+  handleEdit, 
+  handleDelete,
+  handleToggleReaction,
+  onReply,
+  theme
+}: any) {
+  const x = useMotionValue(0);
+  const opacity = useTransform(x, [0, 100], [0, 1]);
+  const color = useTransform(x, [0, 100], ["#71717a", "#10b981"]);
+
+  const onDragEnd = (event: any, info: any) => {
+    if (info.offset.x > 80) {
+      onReply?.(message);
+    }
+  };
+
+  const groupedReactions = message.reactions?.reduce((acc: any, curr: any) => {
+    acc[curr.emoji] = (acc[curr.emoji] || 0) + 1;
+    return acc;
+  }, {});
+
+  const userReactions = message.reactions?.filter((r: any) => r.user_id === currentUserId).map((r: any) => r.emoji) || [];
+
+  return (
+    <motion.div 
+      drag="x"
+      dragConstraints={{ left: 0, right: 100 }}
+      dragElastic={0.2}
+      onDragEnd={onDragEnd}
+      style={{ x }}
+      className="relative group"
+    >
+      {/* Swipe background indicator */}
+      <motion.div 
+        style={{ opacity }}
+        className="absolute left-0 inset-y-0 -translate-x-full flex items-center pr-4"
+      >
+        <motion.div style={{ color }}>
+          <Reply className="h-6 w-6" />
+        </motion.div>
+      </motion.div>
+
+      <div className="flex gap-3 group hover:bg-zinc-50 dark:hover:bg-zinc-900/50 -mx-2 px-2 py-1 rounded-lg transition-colors relative">
+        <Avatar className="h-9 w-9 mt-0.5">
+          <AvatarImage src={message.sender?.avatar_url} />
+          <AvatarFallback>{message.sender?.full_name?.[0] || message.sender?.username?.[0]}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-sm hover:underline cursor-pointer">
+                {message.sender?.full_name || message.sender?.username}
+              </span>
+              {message.sender?.badge && (
+                <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 uppercase tracking-wider font-bold h-4 border", getBadgeColor(message.sender.badge))}>
+                  {message.sender.badge}
+                </Badge>
+              )}
+            </div>
+            <span className="text-[10px] text-zinc-500 font-medium">
+              {format(new Date(message.created_at), "h:mm a")}
+            </span>
+            {message.is_edited && (
+              <span className="text-[10px] text-zinc-400">(edited)</span>
+            )}
+          </div>
+
+          {message.parent_message && (
+            <div className="mt-1 mb-1 pl-2 border-l-2 border-zinc-200 dark:border-zinc-700">
+              <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium">
+                <Reply className="h-3 w-3" />
+                <span>Replying to {message.parent_message.sender?.full_name || message.parent_message.sender?.username}</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 truncate max-w-md italic">
+                {message.parent_message.content}
+              </p>
+            </div>
+          )}
+          
+          {editingId === message.id ? (
+            <div className="flex items-center gap-2 mt-1">
+              <Input
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="flex-1 h-8 text-sm"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleEdit(message.id);
+                  if (e.key === "Escape") {
+                    setEditingId(null);
+                    setEditContent("");
+                  }
+                }}
+              />
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(message.id)}>
+                <Check className="h-4 w-4 text-green-500" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(null); setEditContent(""); }}>
+                <X className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-start gap-1 group/msg">
+              {message.payload?.type === "gif" || message.payload?.type === "sticker" ? (
+                <div className="relative mt-1 max-w-[300px] rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                  <img 
+                    src={message.is_encrypted ? message.decryptedContent : message.content} 
+                    alt="GIF" 
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+              ) : (
+                <p className={cn(
+                  "text-sm leading-relaxed whitespace-pre-wrap break-words",
+                  message.is_encrypted && !message.decryptedContent 
+                    ? "text-zinc-400 italic font-mono bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded border border-dashed border-zinc-200 dark:border-zinc-700" 
+                    : "text-zinc-800 dark:text-zinc-200"
+                )}>
+                  {message.is_encrypted 
+                    ? (message.decryptedContent || `[Encrypted: ${message.content.substring(0, 16)}...]`) 
+                    : message.content}
+                </p>
+              )}
+              
+              {/* Reactions display */}
+              {groupedReactions && Object.keys(groupedReactions).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {Object.entries(groupedReactions).map(([emoji, count]: any) => (
+                    <button
+                      key={emoji}
+                      onClick={() => handleToggleReaction(message.id, emoji)}
+                      className={cn(
+                        "flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium transition-all border",
+                        userReactions.includes(emoji)
+                          ? "bg-primary/10 border-primary/20 text-primary"
+                          : "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      )}
+                    >
+                      <span>{emoji}</span>
+                      {count > 1 && <span>{count}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {message.is_encrypted && (
+                <div className="mt-1 flex items-center gap-1 opacity-40 group-hover/msg:opacity-100 transition-opacity" title="End-to-End Encrypted">
+                  <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        
+        {/* Floating Actions */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 absolute right-2 top-1 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm p-0.5 z-10">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <SmilePlus className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0 border-none shadow-xl" side="top" align="end">
+              <EmojiPicker 
+                theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                onEmojiClick={(emojiData) => handleToggleReaction(message.id, emojiData.emoji)}
+                autoFocusSearch={false}
+                skinTonesDisabled
+                previewConfig={{ showPreview: false }}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+            onClick={() => onReply?.(message)}
+          >
+            <Reply className="h-4 w-4" />
+          </Button>
+
+          {currentUserId === message.sender_id && editingId !== message.id && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { setEditingId(message.id); setEditContent(message.content); }}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(message.id)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      </div>
+    </motion.div>
   );
 }
