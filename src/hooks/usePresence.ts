@@ -36,7 +36,7 @@ export function usePresence(workspaceId: string) {
           
           Object.entries(state).forEach(([key, presences]) => {
             if (Array.isArray(presences) && presences.length > 0) {
-              const presence = presences[0] as any;
+              const presence = presences[0] as { status?: PresenceState; lastSeen?: string };
               newMap.set(key, {
                 id: key,
                 status: presence.status || "online",
