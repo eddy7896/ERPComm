@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Hash, Lock, Plus, Settings, LogOut, ChevronDown, UserPlus, Layout } from "lucide-react";
+import { Hash, Lock, Plus, Settings, LogOut, ChevronDown, UserPlus, Layout, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
