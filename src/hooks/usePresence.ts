@@ -19,7 +19,7 @@ export function usePresence(workspaceId: string) {
   useEffect(() => {
     let presenceChannel: RealtimeChannel | null = null;
     let idleTimeout: NodeJS.Timeout;
-    let activityListeners: (() => void)[] = [];
+    const activityListeners: (() => void)[] = [];
 
     const setupPresence = async () => {
       const { data: { user } } = await supabase.auth.getUser();
