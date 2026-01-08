@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { decryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
-import { Loader2, Hash, MoreHorizontal, Pencil, Trash2, Check, X, ShieldCheck, Lock } from "lucide-react";
+import { Loader2, Hash, MoreHorizontal, Pencil, Trash2, Check, X, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const getBadgeColor = (badge: string) => {
