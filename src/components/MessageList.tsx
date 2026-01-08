@@ -127,6 +127,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         .from("messages")
         .select(`
           *,
+          is_pinned,
           sender:profiles!sender_id(*),
           parent_message:messages!parent_id(
             content,
