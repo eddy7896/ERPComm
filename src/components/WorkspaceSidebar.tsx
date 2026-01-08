@@ -87,7 +87,7 @@ export function WorkspaceSidebar({
         .select("profiles(*)")
         .eq("workspace_id", workspaceId);
       
-      setMembers(mems?.map((m: any) => m.profiles).filter((p: any) => p && p.id !== user?.id) || []);
+      setMembers(mems?.map((m: { profiles: Member }) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
     };
 
     fetchData();
