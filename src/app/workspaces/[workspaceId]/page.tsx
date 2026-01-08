@@ -5,6 +5,7 @@ import { WorkspaceSidebar } from "@/components/WorkspaceSidebar";
 import { MessageList } from "@/components/MessageList";
 import { MessageInput } from "@/components/MessageInput";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/AuthProvider";
 import { Hash, Lock, Info, Search, Bell, Star, AtSign, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
