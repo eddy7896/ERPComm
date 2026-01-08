@@ -48,7 +48,7 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
 
     const handleJoin = async () => {
     if (!user || !workspace || !invitation) {
-      router.push(`/login?redirect=/invite/${code}`);
+      router.push(`/?redirect=/invite/${code}`);
       return;
     }
 
