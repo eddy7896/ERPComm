@@ -28,18 +28,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Script
-          id="orchids-browser-logs"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts/orchids-browser-logs.js"
-          strategy="afterInteractive"
-          data-orchids-project-id="4a7b227e-f0df-487a-ba4f-390b566a7139"
-        />
-        {children}
-        <VisualEditsMessenger />
-      </body>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <ThemeProvider>
+            <Script
+              id="orchids-browser-logs"
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts/orchids-browser-logs.js"
+              strategy="afterInteractive"
+              data-orchids-project-id="4a7b227e-f0df-487a-ba4f-390b566a7139"
+            />
+            {children}
+            <Toaster richColors position="top-right" />
+            <VisualEditsMessenger />
+          </ThemeProvider>
+        </body>
     </html>
   );
 }
