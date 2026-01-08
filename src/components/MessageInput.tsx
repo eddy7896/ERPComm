@@ -72,46 +72,47 @@ export function MessageInput({
     : `Message ${recipientName || 'user'}`;
 
   return (
-    <div className="px-4 pb-4">
-      <div className="relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 transition-shadow">
-        <Textarea
-          placeholder={placeholder}
-          className="min-h-[44px] h-auto max-h-[200px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-4 pt-3 pb-2 text-sm"
-          value={content}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          onBlur={() => onStopTyping?.()}
-        />
-        
-        <div className="flex items-center justify-between px-2 pb-2">
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-              <Plus className="h-4 w-4" />
-            </Button>
-            <div className="h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-1" />
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-              <Smile className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-              <Paperclip className="h-4 w-4" />
-            </Button>
-          </div>
+      <div className="px-2 md:px-4 pb-4">
+        <div className="relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 transition-shadow">
+          <Textarea
+            placeholder={placeholder}
+            className="min-h-[44px] h-auto max-h-[150px] md:max-h-[200px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-4 pt-3 pb-2 text-sm"
+            value={content}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onBlur={() => onStopTyping?.()}
+          />
           
-          <div className="flex items-center gap-2">
-            <Button 
-              size="icon" 
-              className={`h-8 w-8 transition-all ${content.trim() ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
-              onClick={handleSendMessage}
-              disabled={!content.trim() || loading}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center justify-between px-2 pb-2">
+            <div className="flex items-center gap-0.5 md:gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <Plus className="h-4 w-4" />
+              </Button>
+              <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800 mx-1" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hidden xs:flex">
+                <Smile className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <Paperclip className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button 
+                size="icon" 
+                className={`h-8 w-8 transition-all ${content.trim() ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
+                onClick={handleSendMessage}
+                disabled={!content.trim() || loading}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
+        <p className="hidden md:block text-[10px] text-zinc-400 mt-2 ml-1">
+          <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line
+        </p>
       </div>
-      <p className="text-[10px] text-zinc-400 mt-2 ml-1">
-        <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line
-      </p>
-    </div>
+
   );
 }
