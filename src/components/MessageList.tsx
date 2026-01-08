@@ -47,7 +47,7 @@ interface Message {
   is_edited?: boolean;
   sender_id: string;
   is_encrypted?: boolean;
-  payload?: any;
+  payload?: Record<string, any> | null;
   sender?: {
     id: string;
     avatar_url?: string;
