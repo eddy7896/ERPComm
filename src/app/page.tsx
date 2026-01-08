@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Shield, LayoutDashboard, Globe, Lock, ArrowRight, Loader2, Code, Palette, Zap, Users } from "lucide-react";
 
@@ -25,12 +25,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/workspaces");
+      router.push(redirect || "/workspaces");
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, redirect]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +47,7 @@ export default function Home() {
       toast.error(error.message);
     } else {
       toast.success("Logged in successfully!");
-      router.push("/workspaces");
+      router.push(redirect || "/workspaces");
     }
     setLoading(false);
   };
