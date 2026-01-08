@@ -153,6 +153,14 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
                     <Hash className="h-5 w-5 text-zinc-500 shrink-0" />
                   )}
                   <h2 className="font-bold text-lg truncate">{channelDetails.name}</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 ml-1"
+                    onClick={() => setMembersDialogOpen(true)}
+                  >
+                    <Users className="h-4 w-4 text-zinc-400" />
+                  </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
                     <Star className="h-4 w-4 text-zinc-400" />
                   </Button>
