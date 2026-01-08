@@ -4,9 +4,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import { encryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
-import { Send, Smile, Paperclip, Plus, ShieldCheck } from "lucide-react";
+import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import EmojiPicker, { Theme } from "emoji-picker-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { GiphyPicker } from "./GiphyPicker";
+import { useTheme } from "next-themes";
 
 interface MessageInputProps {
   workspaceId: string;
@@ -34,6 +38,7 @@ export function MessageInput({
   const [loading, setLoading] = useState(false);
   const [isEncryptionActive, setIsEncryptionActive] = useState(false);
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     async function checkEncryption() {
@@ -53,14 +58,16 @@ export function MessageInput({
     checkEncryption();
   }, [channelId]);
 
-  const handleSendMessage = async () => {
-    if (!content.trim() || loading || !user) return;
+  const handleSendMessage = async (overrideContent?: string, type: "text" | "image" | "gif" | "sticker" = "text") => {
+    const finalMsgContent = overrideContent || content.trim();
+    if (!finalMsgContent && type === "text") return;
+    if (loading || !user) return;
     setLoading(true);
     onStopTyping?.();
 
     try {
-      let finalContent = content.trim();
-      let payload = null;
+      let messageContent = finalMsgContent;
+      let payload: any = { type };
       let isEncrypted = false;
 
       if (isEncryptionActive && channelId) {
@@ -84,9 +91,9 @@ export function MessageInput({
         }
 
         if (channelKey) {
-          const encrypted = await encryptMessage(finalContent, channelKey);
-          finalContent = encrypted.content;
-          payload = { iv: encrypted.iv };
+          const encrypted = await encryptMessage(messageContent, channelKey);
+          messageContent = encrypted.content;
+          payload = { ...payload, iv: encrypted.iv };
           isEncrypted = true;
         }
       }
@@ -96,7 +103,7 @@ export function MessageInput({
         channel_id: channelId,
         recipient_id: recipientId,
         sender_id: user.id,
-        content: finalContent,
+        content: messageContent,
         is_encrypted: isEncrypted,
         payload,
       });
@@ -104,7 +111,7 @@ export function MessageInput({
       if (error) {
         console.error("Error sending message:", error);
       } else {
-        setContent("");
+        if (!overrideContent) setContent("");
       }
     } catch (err) {
       console.error("Encryption failed:", err);
