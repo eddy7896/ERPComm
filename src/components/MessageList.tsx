@@ -268,12 +268,26 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
     }
   };
 
-  const handleDelete = async (messageId: string) => {
-    const { error } = await supabase.from("messages").delete().eq("id", messageId);
-    if (error) toast.error("Failed to delete message");
-  };
+    const handleDelete = async (messageId: string) => {
+      const { error } = await supabase.from("messages").delete().eq("id", messageId);
+      if (error) toast.error("Failed to delete message");
+    };
 
-  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    const handleTogglePin = async (messageId: string, currentPinStatus: boolean) => {
+      const { error } = await supabase
+        .from("messages")
+        .update({ is_pinned: !currentPinStatus })
+        .eq("id", messageId);
+
+      if (error) {
+        toast.error(`Failed to ${currentPinStatus ? 'unpin' : 'pin'} message`);
+      } else {
+        toast.success(`Message ${currentPinStatus ? 'unpinned' : 'pinned'}`);
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_pinned: !currentPinStatus } : m));
+      }
+    };
+
+    const handleToggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
     const existing = messages.find(m => m.id === messageId)?.reactions?.find(r => r.user_id === user.id && r.emoji === emoji);
 
