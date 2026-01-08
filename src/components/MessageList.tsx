@@ -35,6 +35,7 @@ interface Message {
     avatar_url?: string;
     full_name?: string;
     username?: string;
+    badge?: string;
   };
 }
 
@@ -42,6 +43,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const currentUserId = user?.id;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
