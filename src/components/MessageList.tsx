@@ -159,15 +159,41 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         table: 'messages',
         filter: channelId ? `channel_id=eq.${channelId}` : undefined
       }, async (payload) => {
-        if (payload.eventType === 'INSERT') {
-          const msg = payload.new;
-          
-          // Filter for DMs if needed
-          if (recipientId) {
-            const isRelated = (msg.sender_id === user?.id && msg.recipient_id === recipientId) || 
-                             (msg.sender_id === recipientId && msg.recipient_id === user?.id);
-            if (!isRelated) return;
+          if (payload.eventType === 'INSERT') {
+            const msg = payload.new;
+            
+            // Filter for DMs if needed
+            if (recipientId) {
+              const isRelated = (msg.sender_id === user?.id && msg.recipient_id === recipientId) || 
+                               (msg.sender_id === recipientId && msg.recipient_id === user?.id);
+              if (!isRelated) return;
+            }
+
+            // If it's a channel message and we are in a different channel, the filter should handle it
+            if (channelId && msg.channel_id !== channelId) return;
+
+            // Decrypt new message if encrypted
+            let decryptedMsg = msg;
+            if (msg.is_encrypted && msg.payload?.iv && channelId) {
+              try {
+                let channelKey = keyCache[channelId];
+                if (channelKey) {
+                  const decrypted = await decryptMessage(msg.content, msg.payload.iv, channelKey);
+                  decryptedMsg = { ...msg, decryptedContent: decrypted };
+                }
+              } catch (err) {
+                console.error("Real-time decryption failed", err);
+              }
+            }
+
+            const { data: sender } = await supabase.from("profiles").select("*").eq("id", msg.sender_id).single();
+            const newMessage = { ...decryptedMsg, sender };
+            setMessages(prev => {
+              if (prev.find(m => m.id === newMessage.id)) return prev;
+              return [...prev, newMessage];
+            });
           }
+
 
           // If it's a channel message and we are in a different channel, the filter should handle it
           // but we check anyway if channelId is present
