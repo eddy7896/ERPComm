@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import { encryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
-import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon, Image as ImageIcon } from "lucide-react";
+import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon, Image as ImageIcon, X, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { GiphyPicker } from "./GiphyPicker";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 interface MessageInputProps {
   workspaceId: string;
@@ -20,9 +21,10 @@ interface MessageInputProps {
   recipientName?: string;
   onTyping?: () => void;
   onStopTyping?: () => void;
+  replyingTo?: any;
+  onCancelReply?: () => void;
 }
 
-// Simple cache for unwrapped keys
 const keyCache: Record<string, CryptoKey> = {};
 
 export function MessageInput({ 
@@ -32,7 +34,9 @@ export function MessageInput({
   channelName,
   recipientName,
   onTyping,
-  onStopTyping 
+  onStopTyping,
+  replyingTo,
+  onCancelReply
 }: MessageInputProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,47 +62,41 @@ export function MessageInput({
     checkEncryption();
   }, [channelId]);
 
-    const handleSendMessage = async (overrideContent?: string, type: "text" | "image" | "gif" | "sticker" = "text") => {
-      const finalMsgContent = overrideContent || content.trim();
-      if (!finalMsgContent && type === "text") return;
-      if (loading || !user) return;
-      
-      const optimisticId = `opt-${Date.now()}`;
-      const tempContent = finalMsgContent;
-      
-      // Dispatch local optimistic update
-      const optimisticMessage = {
-        id: optimisticId,
-        content: tempContent,
-        created_at: new Date().toISOString(),
-        sender_id: user.id,
-        workspace_id: workspaceId,
-        channel_id: channelId,
-        recipient_id: recipientId,
-        payload: { type },
-        is_optimistic: true
-      };
+  const handleSendMessage = async (overrideContent?: string, type: "text" | "image" | "gif" | "sticker" = "text") => {
+    const finalMsgContent = overrideContent || content.trim();
+    if (!finalMsgContent && type === "text") return;
+    if (loading || !user) return;
+    
+    const optimisticId = `opt-${Date.now()}`;
+    const tempContent = finalMsgContent;
+    
+    const optimisticMessage = {
+      id: optimisticId,
+      content: tempContent,
+      created_at: new Date().toISOString(),
+      sender_id: user.id,
+      workspace_id: workspaceId,
+      channel_id: channelId,
+      recipient_id: recipientId,
+      parent_id: replyingTo?.id,
+      payload: { type },
+      is_optimistic: true
+    };
 
-      window.dispatchEvent(new CustomEvent('optimistic_message', { 
-        detail: { message: optimisticMessage } 
-      }));
+    window.dispatchEvent(new CustomEvent('optimistic_message', { 
+      detail: { message: optimisticMessage } 
+    }));
 
-      // Broadcast optimistic update to other clients/tabs
-      supabase.channel(`room:${channelId || recipientId || 'global'}`).send({
-        type: 'broadcast',
-        event: 'optimistic_message',
-        payload: optimisticMessage
-      });
+    if (!overrideContent) setContent("");
+    const currentReply = replyingTo;
+    onCancelReply?.();
+    setLoading(true);
+    onStopTyping?.();
 
-      if (!overrideContent) setContent("");
-      setLoading(true);
-      onStopTyping?.();
-
-      try {
-        let messageContent = finalMsgContent;
-        let payload: any = { type, optimistic_id: optimisticId };
-        let isEncrypted = false;
-
+    try {
+      let messageContent = finalMsgContent;
+      let payload: any = { type, optimistic_id: optimisticId };
+      let isEncrypted = false;
 
       if (isEncryptionActive && channelId) {
         let channelKey = keyCache[channelId];
@@ -135,13 +133,12 @@ export function MessageInput({
         sender_id: user.id,
         content: messageContent,
         is_encrypted: isEncrypted,
+        parent_id: currentReply?.id,
         payload,
       });
 
       if (error) {
         console.error("Error sending message:", error);
-      } else {
-        if (!overrideContent) setContent("");
       }
     } catch (err) {
       console.error("Encryption failed:", err);
@@ -154,6 +151,9 @@ export function MessageInput({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+    if (e.key === "Escape" && replyingTo) {
+      onCancelReply?.();
     }
   };
 
@@ -171,90 +171,114 @@ export function MessageInput({
     : `Message ${recipientName || 'user'}`;
 
   return (
-      <div className="px-2 md:px-4 pb-4">
-        <div className="relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 transition-shadow">
-          <Textarea
-            placeholder={placeholder}
-            className="min-h-[44px] h-auto max-h-[150px] md:max-h-[200px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-4 pt-3 pb-2 text-sm"
-            value={content}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onBlur={() => onStopTyping?.()}
-          />
-          
-            <div className="flex items-center justify-between px-2 pb-2">
-                <div className="flex items-center gap-0.5 md:gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800 mx-1" />
-                  
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                        <Smile className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                      <EmojiPicker 
-                        theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
-                        onEmojiClick={(emojiData) => setContent(prev => prev + emojiData.emoji)}
-                        autoFocusSearch={false}
-                      />
-                    </PopoverContent>
-                  </Popover>
-
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add GIF">
-                          <ImageIcon className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                        <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} defaultTab="gifs" />
-                      </PopoverContent>
-                    </Popover>
-
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add Sticker">
-                          <StickerIcon className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                        <GiphyPicker onSelect={(url) => handleSendMessage(url, "sticker")} defaultTab="stickers" />
-                      </PopoverContent>
-                    </Popover>
-
-
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                {isEncryptionActive && (
-                  <div className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
-                    <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">Encrypted</span>
-                  </div>
-                )}
-              </div>
-
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                size="icon" 
-                className={`h-8 w-8 transition-all ${content.trim() ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
-                onClick={handleSendMessage}
-                disabled={!content.trim() || loading}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+    <div className="px-2 md:px-4 pb-4">
+      {replyingTo && (
+        <div className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border-x border-t border-zinc-200 dark:border-zinc-800 rounded-t-lg animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2 min-w-0">
+            <Reply className="h-4 w-4 text-zinc-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
+                Replying to {replyingTo.sender?.full_name || replyingTo.sender?.username}
+              </p>
+              <p className="text-xs text-zinc-500 truncate italic">
+                {replyingTo.content}
+              </p>
             </div>
           </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+            onClick={onCancelReply}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <p className="hidden md:block text-[10px] text-zinc-400 mt-2 ml-1">
-          <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line
-        </p>
-      </div>
+      )}
+      
+      <div className={cn(
+        "relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus-within:ring-1 focus-within:ring-primary/20 transition-shadow",
+        replyingTo ? "rounded-b-lg border-t-0" : "rounded-lg"
+      )}>
+        <Textarea
+          placeholder={placeholder}
+          className="min-h-[44px] h-auto max-h-[150px] md:max-h-[200px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-4 pt-3 pb-2 text-sm"
+          value={content}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onBlur={() => onStopTyping?.()}
+        />
+        
+        <div className="flex items-center justify-between px-2 pb-2">
+          <div className="flex items-center gap-0.5 md:gap-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+              <Plus className="h-4 w-4" />
+            </Button>
+            <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800 mx-1" />
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                <EmojiPicker 
+                  theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                  onEmojiClick={(emojiData) => setContent(prev => prev + emojiData.emoji)}
+                  autoFocusSearch={false}
+                />
+              </PopoverContent>
+            </Popover>
 
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add GIF">
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} defaultTab="gifs" />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add Sticker">
+                  <StickerIcon className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                <GiphyPicker onSelect={(url) => handleSendMessage(url, "sticker")} defaultTab="stickers" />
+              </PopoverContent>
+            </Popover>
+
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+              <Paperclip className="h-4 w-4" />
+            </Button>
+            {isEncryptionActive && (
+              <div className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
+                <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">Encrypted</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button 
+              size="icon" 
+              className={`h-8 w-8 transition-all ${content.trim() ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
+              onClick={() => handleSendMessage()}
+              disabled={!content.trim() || loading}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      <p className="hidden md:block text-[10px] text-zinc-400 mt-2 ml-1">
+        <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line{replyingTo && <>, <strong>Esc</strong> to cancel reply</>}
+      </p>
+    </div>
   );
 }
