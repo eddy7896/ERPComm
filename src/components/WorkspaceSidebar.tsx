@@ -100,6 +100,12 @@ export function WorkspaceSidebar({
         .eq("workspace_id", workspaceId);
       
       setMembers(mems?.map((m: any) => m.profiles).filter((p: Member | null) => p && p.id !== user?.id) || []);
+
+      const { data: unreads } = await supabase.rpc("get_unread_counts", {
+        p_workspace_id: workspaceId,
+        p_user_id: user.id
+      });
+      setUnreadCounts(unreads || []);
     };
 
     fetchData();
@@ -115,8 +121,24 @@ export function WorkspaceSidebar({
       })
       .subscribe();
 
+    const messageSub = supabase
+      .channel('public:messages_unread')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `workspace_id=eq.${workspaceId}` }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    const readSub = supabase
+      .channel('public:member_last_read')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'member_last_read', filter: `workspace_id=eq.${workspaceId}` }, () => {
+        fetchData();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channelSub);
+      supabase.removeChannel(messageSub);
+      supabase.removeChannel(readSub);
     };
   }, [workspaceId]);
 
