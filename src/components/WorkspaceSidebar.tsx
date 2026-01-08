@@ -61,6 +61,12 @@ interface Profile {
   status_emoji?: string;
 }
 
+interface Workspace {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 import { ProfileSettingsDialog, BADGE_OPTIONS } from "./ProfileSettingsDialog";
 import { useAuth } from "@/components/AuthProvider";
 import { cn } from "@/lib/utils";
