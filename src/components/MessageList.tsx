@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { decryptMessage } from "@/lib/crypto";
 import { getProfile } from "@/lib/profile-cache";
 import { 
   Loader2, 
@@ -26,13 +25,12 @@ import {
   X, 
   ShieldCheck, 
   Reply, 
-  SmilePlus,
-  ArrowRight
+  SmilePlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -55,7 +53,7 @@ interface Reaction {
   user_id: string;
 }
 
-interface Message {
+export interface Message {
   id: string;
   content: string;
   created_at: string;
@@ -148,7 +146,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       if (error) {
         console.error("Error fetching messages:", error);
       } else {
-        const formattedData = data?.map(m => ({
+        const formattedData = data?.map((m: any) => ({
           ...m,
           reactions: m.message_reactions || []
         })) || [];
@@ -187,7 +185,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             parent_message = parent;
           }
 
-          const newMessage = { ...msg, sender, parent_message, reactions: [] };
+          const newMessage: Message = { ...msg, sender, parent_message, reactions: [] };
 
           setMessages(prev => {
             const existingIndex = prev.findIndex(m => m.id === msg.id || (m.id.startsWith('opt-') && m.content === msg.content && m.sender_id === msg.sender_id));
@@ -246,7 +244,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       supabase.removeChannel(channel);
       window.removeEventListener('optimistic_message', handleLocalOptimistic);
     };
-  }, [workspaceId, channelId, recipientId, user?.id]);
+  }, [workspaceId, channelId, recipientId, user]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -339,6 +337,20 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   );
 }
 
+interface MessageItemProps {
+  message: Message;
+  currentUserId?: string;
+  editingId: string | null;
+  editContent: string;
+  setEditingId: (id: string | null) => void;
+  setEditContent: (content: string) => void;
+  handleEdit: (id: string) => void;
+  handleDelete: (id: string) => void;
+  handleToggleReaction: (id: string, emoji: string) => void;
+  onReply?: (message: Message) => void;
+  theme?: string;
+}
+
 function MessageItem({ 
   message, 
   currentUserId, 
@@ -351,23 +363,23 @@ function MessageItem({
   handleToggleReaction,
   onReply,
   theme
-}: any) {
+}: MessageItemProps) {
   const x = useMotionValue(0);
   const opacity = useTransform(x, [0, 100], [0, 1]);
   const color = useTransform(x, [0, 100], ["#71717a", "#10b981"]);
 
-  const onDragEnd = (event: any, info: any) => {
+  const onDragEnd = (_: any, info: any) => {
     if (info.offset.x > 80) {
       onReply?.(message);
     }
   };
 
-  const groupedReactions = message.reactions?.reduce((acc: any, curr: any) => {
+  const groupedReactions = message.reactions?.reduce((acc: Record<string, number>, curr: Reaction) => {
     acc[curr.emoji] = (acc[curr.emoji] || 0) + 1;
     return acc;
   }, {});
 
-  const userReactions = message.reactions?.filter((r: any) => r.user_id === currentUserId).map((r: any) => r.emoji) || [];
+  const userReactions = message.reactions?.filter((r: Reaction) => r.user_id === currentUserId).map((r: Reaction) => r.emoji) || [];
 
   return (
     <motion.div 
@@ -378,7 +390,6 @@ function MessageItem({
       style={{ x }}
       className="relative group"
     >
-      {/* Swipe background indicator */}
       <motion.div 
         style={{ opacity }}
         className="absolute left-0 inset-y-0 -translate-x-full flex items-center pr-4"
@@ -440,12 +451,14 @@ function MessageItem({
                   }
                 }}
               />
-              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(message.id)}>
-                <Check className="h-4 w-4 text-green-500" />
-              </Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(null); setEditContent(""); }}>
-                <X className="h-4 w-4 text-red-500" />
-              </Button>
+              <div className="flex items-center">
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(message.id)}>
+                  <Check className="h-4 w-4 text-green-500" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(null); setEditContent(""); }}>
+                  <X className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-start gap-1 group/msg">
@@ -470,10 +483,9 @@ function MessageItem({
                 </p>
               )}
               
-              {/* Reactions display */}
               {groupedReactions && Object.keys(groupedReactions).length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1.5">
-                  {Object.entries(groupedReactions).map(([emoji, count]: any) => (
+                  {Object.entries(groupedReactions).map(([emoji, count]) => (
                     <button
                       key={emoji}
                       onClick={() => handleToggleReaction(message.id, emoji)}
@@ -500,7 +512,6 @@ function MessageItem({
           )}
         </div>
         
-        {/* Floating Actions */}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 absolute right-2 top-1 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm p-0.5 z-10">
           <Popover>
             <PopoverTrigger asChild>
