@@ -68,11 +68,11 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       if (!user) return;
       setLoading(true);
 
-      let query = supabase
-        .from("messages")
-        .select("*, sender:profiles(*)")
-        .eq("workspace_id", workspaceId)
-        .order("created_at", { ascending: true });
+        let query = supabase
+          .from("messages")
+          .select("*, sender:profiles!sender_id(*)")
+          .eq("workspace_id", workspaceId)
+          .order("created_at", { ascending: true });
 
       if (channelId) {
         query = query.eq("channel_id", channelId);
