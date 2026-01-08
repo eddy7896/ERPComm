@@ -13,10 +13,10 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
   const { code } = use(params);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
-  const [invitation, setInvitation] = useState<any>(null);
-  const [workspace, setWorkspace] = useState<any>(null);
+  const [invitation, setInvitation] = useState<{ id: string; role?: string; workspaces?: { id: string; name: string; slug: string } } | null>(null);
+  const [workspace, setWorkspace] = useState<{ id: string; name: string; slug: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
