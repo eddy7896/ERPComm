@@ -204,7 +204,7 @@ export function WorkspaceSidebar({
     };
 
     return (
-      <div className="flex h-full w-[280px] flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800">
+      <div className="flex h-full w-full flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800">
       <div className="p-3 flex items-center justify-between gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
