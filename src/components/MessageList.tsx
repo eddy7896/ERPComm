@@ -189,7 +189,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             parent_message = parent;
           }
 
-          const newMessage: Message = { ...msg, sender, parent_message, reactions: [] };
+          const newMessage: Message = { ...msg as Message, sender, parent_message, reactions: [] };
 
           setMessages(prev => {
             const existingIndex = prev.findIndex(m => m.id === msg.id || (m.id.startsWith('opt-') && m.content === msg.content && m.sender_id === msg.sender_id));
@@ -215,7 +215,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         if (payload.eventType === 'INSERT') {
           setMessages(prev => prev.map(m => 
             m.id === payload.new.message_id 
-              ? { ...m, reactions: [...(m.reactions || []), payload.new] } 
+              ? { ...m, reactions: [...(m.reactions || []), payload.new as Reaction] } 
               : m
           ));
         } else if (payload.eventType === 'DELETE') {
