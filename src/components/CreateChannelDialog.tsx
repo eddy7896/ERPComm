@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/AuthProvider";
+import { generateChannelKey, wrapChannelKey, importPublicKey } from "@/lib/crypto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Hash, Lock } from "lucide-react";
+import { Hash, Lock, ShieldCheck } from "lucide-react";
 
 interface CreateChannelDialogProps {
   workspaceId: string;
@@ -31,9 +33,11 @@ export function CreateChannelDialog({
   onOpenChange,
   onChannelCreated,
 }: CreateChannelDialogProps) {
+  const { profile } = useAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [encryptionEnabled, setEncryptionEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +57,7 @@ export function CreateChannelDialog({
         description: description.trim() || null,
         is_private: isPrivate,
         created_by: user?.id,
+        encryption_enabled: encryptionEnabled,
       })
       .select()
       .single();
@@ -60,9 +65,22 @@ export function CreateChannelDialog({
     if (error) {
       toast.error(error.message);
     } else {
+      let encryptedKey = null;
+      if (encryptionEnabled && profile?.public_key) {
+        try {
+          const channelKey = await generateChannelKey();
+          const publicKey = await importPublicKey(profile.public_key);
+          encryptedKey = await wrapChannelKey(channelKey, publicKey);
+        } catch (err) {
+          console.error("Failed to generate/wrap channel key:", err);
+          toast.error("Failed to setup encryption for this channel.");
+        }
+      }
+
       await supabase.from("channel_members").insert({
         channel_id: data.id,
         user_id: user?.id,
+        encrypted_key: encryptedKey,
       });
       
       toast.success(`Channel #${channelName} created!`);
@@ -71,6 +89,7 @@ export function CreateChannelDialog({
       setName("");
       setDescription("");
       setIsPrivate(false);
+      setEncryptionEnabled(true);
     }
     setLoading(false);
   };
