@@ -207,6 +207,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         schema: 'public',
         table: 'message_reactions'
       }, (payload) => {
+        console.log('Reaction change received:', payload);
         if (payload.eventType === 'INSERT') {
           setMessages(prev => prev.map(m => 
             m.id === payload.new.message_id 
