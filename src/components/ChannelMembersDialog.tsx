@@ -55,7 +55,7 @@ export function ChannelMembersDialog({
 
       if (cmError) throw cmError;
 
-      const currentMembers = channelMembersData.map((m: any) => m.profiles);
+      const currentMembers = (channelMembersData as any[]).map((m) => m.profiles as Profile);
       setMembers(currentMembers);
 
       // Fetch all workspace members
@@ -67,13 +67,14 @@ export function ChannelMembersDialog({
       if (wmError) throw wmError;
 
       const memberIds = new Set(currentMembers.map((m) => m.id));
-      const others = workspaceMembersData
-        .map((m: any) => m.profiles)
+      const others = (workspaceMembersData as any[])
+        .map((m) => m.profiles as Profile)
         .filter((p) => !memberIds.has(p.id));
 
       setNonMembers(others);
-    } catch (error: any) {
-      toast.error("Failed to load members: " + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Failed to load members: " + errorMessage);
     } finally {
       setLoading(false);
     }
@@ -83,6 +84,7 @@ export function ChannelMembersDialog({
     if (open) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, channelId, workspaceId]);
 
   const addMember = async (userId: string) => {
@@ -97,8 +99,9 @@ export function ChannelMembersDialog({
 
       toast.success("Member added to channel");
       fetchData();
-    } catch (error: any) {
-      toast.error("Failed to add member: " + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Failed to add member: " + errorMessage);
     } finally {
       setAddingMember(null);
     }
