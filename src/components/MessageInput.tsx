@@ -428,10 +428,10 @@ export function MessageInput({
     : `Message ${recipientName || 'user'}`;
 
   return (
-    <div className="px-2 md:px-4 pb-4 relative" {...getRootProps()}>
+    <div className="px-3 md:px-4 pb-4 md:pb-6 relative" {...getRootProps()}>
       <input {...getInputProps()} id="file-input" />
       {isDragActive && (
-        <div className="absolute inset-x-2 md:inset-x-4 inset-y-0 -top-2 bg-primary/10 border-2 border-dashed border-primary rounded-lg z-50 flex items-center justify-center backdrop-blur-[2px] animate-in fade-in duration-200">
+        <div className="absolute inset-x-3 md:inset-x-4 inset-y-0 -top-2 bg-primary/10 border-2 border-dashed border-primary rounded-2xl z-50 flex items-center justify-center backdrop-blur-[2px] animate-in fade-in duration-200">
           <div className="flex flex-col items-center gap-2 text-primary">
             <Paperclip className="h-10 w-10 animate-bounce" />
             <p className="font-bold">Drop files to upload</p>
@@ -440,30 +440,30 @@ export function MessageInput({
       )}
 
       {!isMember ? (
-        <div className="flex flex-col items-center justify-center p-6 bg-zinc-50 dark:bg-zinc-900 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg text-center">
-          <Lock className="h-8 w-8 text-zinc-400 mb-2" />
+        <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl text-center backdrop-blur-sm">
+          <Lock className="h-8 w-8 text-zinc-400 mb-3" />
           <h4 className="text-sm font-bold">This is a private channel</h4>
-          <p className="text-xs text-zinc-500">Only members of this channel can view or send messages.</p>
+          <p className="text-xs text-zinc-500 max-w-[200px] mx-auto">Only members of this channel can view or send messages.</p>
         </div>
       ) : (
         <>
           {showMentions && filteredMembers.length > 0 && (
-            <div className="absolute bottom-full left-4 mb-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl overflow-hidden z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Channel Members</span>
+            <div className="absolute bottom-full left-3 md:left-4 mb-3 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 backdrop-blur-xl">
+              <div className="p-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Channel Members</span>
               </div>
-              <div className="max-h-48 overflow-y-auto">
+              <div className="max-h-60 overflow-y-auto custom-scrollbar">
                 {filteredMembers.map((member, i) => (
                   <button
                     key={member.id}
                     className={cn(
-                      "w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors",
-                      i === mentionIndex ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      "w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all",
+                      i === mentionIndex ? "bg-primary/5 dark:bg-primary/10 text-primary" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                     )}
                     onClick={() => insertMention(member)}
                     onMouseEnter={() => setMentionIndex(i)}
                   >
-                    <div className="h-6 w-6 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                    <div className="h-8 w-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] font-bold overflow-hidden ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
                       {member.avatar_url ? (
                         <img src={member.avatar_url} alt="" className="h-full w-full object-cover" />
                       ) : (
@@ -471,7 +471,7 @@ export function MessageInput({
                       )}
                     </div>
                     <div className="flex flex-col items-start min-w-0">
-                      <span className="font-medium truncate w-full">{member.full_name || member.username}</span>
+                      <span className="font-semibold truncate w-full">{member.full_name || member.username}</span>
                       <span className="text-[10px] text-zinc-500 truncate w-full">@{member.username}</span>
                     </div>
                   </button>
@@ -481,14 +481,16 @@ export function MessageInput({
           )}
 
           {replyingTo && (
-            <div className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border-x border-t border-zinc-200 dark:border-zinc-800 rounded-t-lg animate-in slide-in-from-bottom-2 duration-200">
-              <div className="flex items-center gap-2 min-w-0">
-                <Reply className="h-4 w-4 text-zinc-500 shrink-0" />
+            <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-x border-t border-zinc-200 dark:border-zinc-800 rounded-t-2xl animate-in slide-in-from-bottom-2 duration-200">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Reply className="h-3 w-3 text-primary shrink-0" />
+                </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
+                  <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-tight">
                     Replying to {replyingTo.sender?.full_name || replyingTo.sender?.username}
                   </p>
-                  <p className="text-xs text-zinc-500 truncate italic">
+                  <p className="text-xs text-zinc-500 truncate italic mt-0.5">
                     {replyingTo.content}
                   </p>
                 </div>
@@ -496,7 +498,7 @@ export function MessageInput({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-6 w-6 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                className="h-7 w-7 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
                 onClick={onCancelReply}
               >
                 <X className="h-4 w-4" />
@@ -505,123 +507,126 @@ export function MessageInput({
           )}
           
           <div className={cn(
-            "relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus-within:ring-1 focus-within:ring-primary/20 transition-shadow",
-            replyingTo ? "rounded-b-lg border-t-0" : "rounded-lg"
+            "relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm focus-within:shadow-md focus-within:border-zinc-300 dark:focus-within:border-zinc-700 transition-all duration-200",
+            replyingTo ? "rounded-b-2xl border-t-0" : "rounded-2xl"
           )}>
             {pendingFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-2 bg-zinc-50/50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="flex flex-wrap gap-3 p-3 bg-zinc-50/30 dark:bg-zinc-800/20 border-b border-zinc-100 dark:border-zinc-800/50">
                 {pendingFiles.map((file, i) => (
-                  <div key={i} className="relative group/file h-20 w-20 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex items-center justify-center">
+                  <div key={i} className="relative group/file h-24 w-24 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 flex items-center justify-center shadow-sm">
                     {file.type === 'image' ? (
-                      <img src={file.preview} alt="" className="h-full w-full object-cover" />
+                      <img src={file.preview} alt="" className="h-full w-full object-cover transition-transform group-hover/file:scale-105" />
                     ) : (
-                      <div className="flex flex-col items-center gap-1 p-2">
-                        <FileIcon className="h-6 w-6 text-zinc-400" />
-                        <span className="text-[8px] text-zinc-500 text-center truncate w-full px-1">{file.file.name}</span>
+                      <div className="flex flex-col items-center gap-2 p-3">
+                        <div className="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <FileIcon className="h-5 w-5 text-zinc-400" />
+                        </div>
+                        <span className="text-[10px] font-medium text-zinc-500 text-center truncate w-full px-1">{file.file.name}</span>
                       </div>
                     )}
                     <button 
                       onClick={() => removePendingFile(i)}
-                      className="absolute top-1 right-1 h-5 w-5 rounded-full bg-zinc-900/50 text-white flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-opacity hover:bg-red-500"
+                      className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-900/80 text-white flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-all hover:bg-red-500 shadow-lg"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            <Textarea
-              placeholder={placeholder}
-              className="min-h-[44px] h-auto max-h-[150px] md:max-h-[200px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-4 pt-3 pb-2 text-sm"
-              value={content}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={() => onStopTyping?.()}
-            />
-            
-            <div className="flex items-center justify-between px-2 pb-2">
-              <div className="flex items-center gap-0.5 md:gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-                  onClick={() => document.getElementById('file-input')?.click()}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800 mx-1" />
-                
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                      <Smile className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                    <EmojiPicker 
-                      theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
-                      onEmojiClick={(emojiData) => setContent(prev => prev + emojiData.emoji)}
-                      autoFocusSearch={false}
-                    />
-                  </PopoverContent>
-                </Popover>
+            <div className="flex flex-col md:flex-row md:items-end">
+              <Textarea
+                placeholder={placeholder}
+                className="min-h-[52px] h-auto max-h-[180px] md:max-h-[220px] resize-none border-none bg-transparent shadow-none focus-visible:ring-0 px-5 pt-4 pb-3 text-[15px] leading-relaxed"
+                value={content}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                onBlur={() => onStopTyping?.()}
+              />
+              
+              <div className="flex items-center justify-between px-3 pb-3 md:pb-3 md:pr-4">
+                <div className="flex items-center gap-1">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                        <Plus className="h-[18px] w-[18px]" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-2 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-2xl" side="top" align="start">
+                      <div className="grid grid-cols-1 gap-1">
+                        <button 
+                          className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                          onClick={() => document.getElementById('file-input')?.click()}
+                        >
+                          <ImageIcon className="h-4 w-4 text-blue-500" />
+                          <span>Upload Image</span>
+                        </button>
+                        <button 
+                          className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                          onClick={() => document.getElementById('file-input')?.click()}
+                        >
+                          <Paperclip className="h-4 w-4 text-emerald-500" />
+                          <span>Attach File</span>
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
 
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add GIF">
-                      <ImageIcon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                    <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} defaultTab="gifs" />
-                  </PopoverContent>
-                </Popover>
+                  <div className="h-5 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-1 hidden md:block" />
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                        <Smile className="h-[18px] w-[18px]" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                      <EmojiPicker 
+                        theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                        onEmojiClick={(emojiData) => setContent(prev => prev + emojiData.emoji)}
+                        autoFocusSearch={false}
+                      />
+                    </PopoverContent>
+                  </Popover>
 
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" title="Add Sticker">
-                      <StickerIcon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
-                    <GiphyPicker onSelect={(url) => handleSendMessage(url, "sticker")} defaultTab="stickers" />
-                  </PopoverContent>
-                </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors hidden md:flex" title="Add GIF">
+                        <ImageIcon className="h-[18px] w-[18px]" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 border-none shadow-none bg-transparent" side="top" align="start">
+                      <GiphyPicker onSelect={(url) => handleSendMessage(url, "gif")} defaultTab="gifs" />
+                    </PopoverContent>
+                  </Popover>
 
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-                  onClick={() => document.getElementById('file-input')?.click()}
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                {isEncryptionActive && (
-                  <div className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
-                    <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">Encrypted</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button 
-                  size="icon" 
-                  className={`h-8 w-8 transition-all ${(content.trim() || pendingFiles.length > 0) ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
-                  onClick={() => handleSendMessage()}
-                  disabled={(!content.trim() && pendingFiles.length === 0) || loading || uploading}
-                >
-                  {loading || uploading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
+                  {isEncryptionActive && (
+                    <div className="flex items-center gap-1.5 ml-2 px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 shadow-sm">
+                      <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Secured</span>
+                    </div>
                   )}
-                </Button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="icon" 
+                    className={`h-9 w-9 rounded-full transition-all duration-300 shadow-sm ${(content.trim() || pendingFiles.length > 0) ? 'bg-primary text-primary-foreground opacity-100 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-50 scale-95 pointer-events-none'}`}
+                    onClick={() => handleSendMessage()}
+                    disabled={(!content.trim() && pendingFiles.length === 0) || loading || uploading}
+                  >
+                    {loading || uploading ? (
+                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                    ) : (
+                      <Send className="h-[18px] w-[18px]" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-          <p className="hidden md:block text-[10px] text-zinc-400 mt-2 ml-1">
+          <p className="hidden md:block text-[10px] text-zinc-400 mt-2.5 ml-2">
             <strong>Return</strong> to send, <strong>Shift + Return</strong> for new line{replyingTo && <>, <strong>Esc</strong> to cancel reply</>}
           </p>
         </>
