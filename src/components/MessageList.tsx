@@ -201,6 +201,10 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
 
           const newMessage: Message = { ...msg as Message, sender, parent_message, reactions: [] };
 
+          if (recipientId && msg.sender_id !== user?.id) {
+            new Audio('/pop.mp3').play().catch(e => console.error("Error playing sound:", e));
+          }
+
           setMessages(prev => {
             const existingIndex = prev.findIndex(m => m.id === msg.id || (m.id.startsWith('opt-') && m.content === msg.content && m.sender_id === msg.sender_id));
             if (existingIndex !== -1) {
