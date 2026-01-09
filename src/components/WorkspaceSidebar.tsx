@@ -77,7 +77,8 @@ export function WorkspaceSidebar({
   selectedChannelId, 
   selectedRecipientId,
   onSelectChannel, 
-  onSelectDM 
+  onSelectDM,
+  isCollapsed = false
 }: WorkspaceSidebarProps) {
   const { profile, refreshProfile } = useAuth();
     const [channels, setChannels] = useState<Channel[]>([]);
@@ -204,18 +205,21 @@ export function WorkspaceSidebar({
     };
 
     return (
-      <div className="flex h-full w-full flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800">
-      <div className="p-3 flex items-center justify-between gap-1">
+      <div className="flex h-full w-full flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-300">
+      <div className={cn("p-3 flex items-center justify-between gap-1", isCollapsed && "px-2")}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex h-12 flex-1 items-center justify-between px-3 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-lg transition-all active:scale-[0.98]">
-              <div className="flex items-center gap-2 truncate">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm shrink-0">
+            <Button variant="ghost" className={cn(
+              "flex h-12 flex-1 items-center justify-between px-3 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-lg transition-all active:scale-[0.98]",
+              isCollapsed && "px-0 justify-center"
+            )}>
+              <div className={cn("flex items-center gap-2 truncate", isCollapsed && "gap-0")}>
+                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm shrink-0 shadow-sm">
                   {workspace?.name?.[0].toUpperCase() || "W"}
                 </div>
-                <span className="font-bold text-base truncate">{workspace?.name || "Workspace"}</span>
+                {!isCollapsed && <span className="font-bold text-base truncate">{workspace?.name || "Workspace"}</span>}
               </div>
-              <ChevronDown className="h-4 w-4 opacity-40 shrink-0" />
+              {!isCollapsed && <ChevronDown className="h-4 w-4 opacity-40 shrink-0" />}
             </Button>
           </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64" align="start" sideOffset={8}>
