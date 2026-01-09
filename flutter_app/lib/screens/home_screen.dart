@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/models/workspace.dart';
-import 'package:flutter_app/screens/workspace_screen.dart';
+import 'package:flutter_app/screens/workspace_layout.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,12 +46,76 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _joinWorkspace(String code) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      // Find workspace by code/slug (In this system, we use slug as invite code for simplicity if code is not present)
+      final response = await _supabase
+          .from('workspaces')
+          .select()
+          .eq('slug', code)
+          .single();
+
+      final workspace = Workspace.fromJson(response);
+
+      await _supabase.from('workspace_members').insert({
+        'workspace_id': workspace.id,
+        'user_id': userId,
+        'role': 'member',
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Joined ${workspace.name}')),
+        );
+        _fetchWorkspaces();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error joining workspace: $e')),
+        );
+      }
+    }
+  }
+
+  void _showJoinDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Join Workspace'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Enter workspace slug/code'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              _joinWorkspace(controller.text.trim());
+              Navigator.pop(context);
+            },
+            child: const Text('Join'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workspaces'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _showJoinDialog,
+            tooltip: 'Join Workspace',
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -81,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => WorkspaceScreen(workspace: workspace),
+                            builder: (context) => WorkspaceLayout(workspace: workspace),
                           ),
                         );
                       },

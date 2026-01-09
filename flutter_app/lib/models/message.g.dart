@@ -15,6 +15,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       content: json['content'] as String,
       isEdited: json['is_edited'] as bool? ?? false,
       isEncrypted: json['is_encrypted'] as bool? ?? false,
+      parentId: json['parent_id'] as String?,
+      isPinned: json['is_pinned'] as bool? ?? false,
       payload: json['payload'] as Map<String, dynamic>?,
       topic: json['topic'] as String?,
       extension: json['extension'] as String?,
@@ -22,6 +24,13 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       private: json['private'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      sender: json['sender'] == null
+          ? null
+          : Profile.fromJson(json['sender'] as Map<String, dynamic>),
+      reactions: (json['message_reactions'] as List<dynamic>?)
+          ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      parentMessage: json['parent_message'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -33,6 +42,8 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'content': instance.content,
       'is_edited': instance.isEdited,
       'is_encrypted': instance.isEncrypted,
+      'parent_id': instance.parentId,
+      'is_pinned': instance.isPinned,
       'payload': instance.payload,
       'topic': instance.topic,
       'extension': instance.extension,
@@ -40,4 +51,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'private': instance.private,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'sender': instance.sender,
+      'message_reactions': instance.reactions,
+      'parent_message': instance.parentMessage,
     };

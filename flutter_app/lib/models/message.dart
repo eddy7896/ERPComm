@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'profile.dart';
+import 'reaction.dart';
 
 part 'message.g.dart';
 
@@ -18,6 +20,10 @@ class Message {
   final bool isEdited;
   @JsonKey(name: 'is_encrypted')
   final bool isEncrypted;
+  @JsonKey(name: 'parent_id')
+  final String? parentId;
+  @JsonKey(name: 'is_pinned')
+  final bool isPinned;
   final Map<String, dynamic>? payload;
   final String? topic;
   final String? extension;
@@ -28,6 +34,13 @@ class Message {
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
 
+  // Joined fields
+  final Profile? sender;
+  @JsonKey(name: 'message_reactions')
+  final List<Reaction>? reactions;
+  @JsonKey(name: 'parent_message')
+  final Map<String, dynamic>? parentMessage;
+
   Message({
     required this.id,
     required this.workspaceId,
@@ -37,6 +50,8 @@ class Message {
     required this.content,
     this.isEdited = false,
     this.isEncrypted = false,
+    this.parentId,
+    this.isPinned = false,
     this.payload,
     this.topic,
     this.extension,
@@ -44,6 +59,9 @@ class Message {
     this.private = false,
     required this.createdAt,
     required this.updatedAt,
+    this.sender,
+    this.reactions,
+    this.parentMessage,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
