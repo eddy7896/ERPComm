@@ -220,8 +220,8 @@ export default function WorkspacePage({ params }: {params: Promise<{workspaceId:
 
   }
 
-    return (
-      <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100">
+      return (
+        <div className="flex h-[100dvh] bg-white dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100">
         <div className={cn("hidden md:flex w-[280px] transition-all duration-300 ease-in-out", !isSidebarVisible && "md:w-0 overflow-hidden opacity-0")}>
           <WorkspaceSidebar 
             workspaceId={workspaceId}
@@ -238,7 +238,7 @@ export default function WorkspacePage({ params }: {params: Promise<{workspaceId:
           />
         </div>
 
-      <main className="flex flex-1 flex-col min-w-0 h-full relative">
+        <main className="flex flex-1 flex-col min-w-0 min-h-0 h-full relative overflow-hidden">
         <header className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
           <div className="flex items-center gap-2 overflow-hidden">
             <Button

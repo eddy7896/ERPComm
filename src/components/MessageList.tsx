@@ -320,7 +320,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   }
 
   return (
-    <ScrollArea ref={scrollRef} className="flex-1 p-4">
+    <ScrollArea ref={scrollRef} className="flex-1 min-h-0 p-4">
       <div className="flex flex-col gap-4">
         {messages.map((message) => (
           <MessageItem 
