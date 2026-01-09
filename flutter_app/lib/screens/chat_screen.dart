@@ -9,6 +9,7 @@ import 'package:flutter_app/models/reaction.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
+import 'package:audioplayers/audioplayers.dart';
 
 import 'package:flutter_app/screens/search_screen.dart';
 
@@ -37,6 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Map<String, dynamic>> _attachedFiles = [];
   bool _isUploading = false;
   List<Profile> _typingUsers = [];
+  final _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _realtimeChannel?.unsubscribe();
     _messageController.dispose();
     _scrollController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -161,12 +164,18 @@ class _ChatScreenState extends State<ChatScreen> {
           final newMessageData = payload.newRecord;
           
           if (channelId != null && newMessageData['channel_id'] != channelId) return;
-          if (recipientId != null) {
-            final senderId = newMessageData['sender_id'];
-            final recId = newMessageData['recipient_id'];
-            final isRelevant = (senderId == myId && recId == recipientId) || (senderId == recipientId && recId == myId);
-            if (!isRelevant) return;
-          }
+            if (recipientId != null) {
+              final senderId = newMessageData['sender_id'];
+              final recId = newMessageData['recipient_id'];
+              final isRelevant = (senderId == myId && recId == recipientId) || (senderId == recipientId && recId == myId);
+              if (!isRelevant) return;
+
+              // Play sound for incoming direct message
+              if (recId == myId) {
+                _audioPlayer.play(AssetSource('sounds/pop.mp3'));
+              }
+            }
+
 
           final senderResponse = await _supabase.from('profiles').select().eq('id', newMessageData['sender_id']).single();
           Map<String, dynamic>? parentMessage;
