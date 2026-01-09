@@ -10,6 +10,9 @@ import 'package:ERPComm/screens/create_channel_dialog.dart';
 import 'package:ERPComm/screens/profile_settings_screen.dart';
 import 'package:ERPComm/screens/status_picker.dart';
 import 'package:ERPComm/screens/invite_user_dialog.dart';
+import 'package:ERPComm/theme/shad_theme.dart';
+import 'package:ERPComm/widgets/shad_avatar.dart';
+import 'package:ERPComm/widgets/shad_badge.dart';
 
 class WorkspaceLayout extends ConsumerStatefulWidget {
   final Workspace workspace;
@@ -59,7 +62,6 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
             .toList();
         _currentUserProfile = Profile.fromJson(profileResponse);
         
-        // Select first channel by default if nothing selected
         if (_channels.isNotEmpty && ref.read(navigationProvider).channel == null && ref.read(navigationProvider).recipient == null) {
           ref.read(navigationProvider.notifier).selectChannel(_channels.first);
         }
@@ -80,7 +82,7 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
         'status_emoji': emoji,
       }).eq('id', myId!);
       
-      _fetchData(); // Refresh profile
+      _fetchData(); 
     } catch (e) {
       debugPrint('Error updating status: $e');
     }
@@ -94,10 +96,16 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     Widget sidebar = _buildSidebar();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ShadColors.background,
       appBar: isMobile
           ? AppBar(
               title: Text(nav.channel?.name ?? nav.recipient?.fullName ?? nav.recipient?.username ?? widget.workspace.name),
+              leading: Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
             )
           : null,
       drawer: isMobile ? Drawer(child: sidebar) : null,
@@ -108,7 +116,7 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
               width: 260,
               child: sidebar,
             ),
-          const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFe4e4e7)),
+          const VerticalDivider(width: 1, thickness: 1, color: ShadColors.border),
           Expanded(
             child: _buildMainContent(nav),
           ),
@@ -119,14 +127,14 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
 
   Widget _buildSidebar() {
     return Container(
-      color: const Color(0xFFf8f8f8),
+      color: const Color(0xFFf4f4f5).withOpacity(0.5), // zinc-100 equivalent
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSidebarHeader(),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: Colors.black54))
+                ? const Center(child: CircularProgressIndicator(color: ShadColors.mutedForeground))
                 : ListView(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     children: [
@@ -143,7 +151,10 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
                             label: c.name,
                             icon: Icons.tag,
                             isSelected: ref.watch(navigationProvider).channel?.id == c.id,
-                            onTap: () => ref.read(navigationProvider.notifier).selectChannel(c),
+                            onTap: () {
+                              ref.read(navigationProvider.notifier).selectChannel(c);
+                              if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+                            },
                           )),
                       const SizedBox(height: 20),
                       _buildSectionHeader('Direct Messages'),
@@ -151,7 +162,11 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
                             label: m.fullName ?? m.username ?? 'User',
                             icon: Icons.person_outline,
                             isSelected: ref.watch(navigationProvider).recipient?.id == m.id,
-                            onTap: () => ref.read(navigationProvider.notifier).selectDM(m),
+                            profile: m,
+                            onTap: () {
+                              ref.read(navigationProvider.notifier).selectDM(m);
+                              if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+                            },
                           )),
                     ],
                   ),
@@ -164,40 +179,42 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
 
   Widget _buildSidebarHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFe4e4e7))),
+        border: Border(bottom: BorderSide(color: ShadColors.border)),
       ),
       child: Row(
         children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: ShadColors.primary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Center(
+              child: Text(
+                widget.workspace.name[0].toUpperCase(),
+                style: const TextStyle(color: ShadColors.primaryForeground, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               widget.workspace.name,
               style: const TextStyle(
-                color: Color(0xFF09090b),
-                fontSize: 18,
+                color: ShadColors.foreground,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.person_add_outlined, size: 18, color: Colors.black54),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => InviteUserDialog(
-                  workspaceId: widget.workspace.id,
-                  workspaceSlug: widget.workspace.slug,
-                ),
-              );
-            },
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.keyboard_arrow_down, size: 18, color: ShadColors.mutedForeground),
+            onPressed: () {},
           ),
-          const SizedBox(width: 8),
-          const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
         ],
       ),
     );
@@ -212,19 +229,20 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
           Text(
             title.toUpperCase(),
             style: const TextStyle(
-              color: Colors.black54,
-              fontSize: 12,
+              color: ShadColors.mutedForeground,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+              letterSpacing: 0.1 * 12,
             ),
           ),
           if (onAdd != null)
-            IconButton(
-              icon: const Icon(Icons.add, size: 16, color: Colors.black54),
-              onPressed: onAdd,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              visualDensity: VisualDensity.compact,
+            InkWell(
+              onTap: onAdd,
+              borderRadius: BorderRadius.circular(4),
+              child: const Padding(
+                padding: EdgeInsets.all(2),
+                child: Icon(Icons.add, size: 16, color: ShadColors.mutedForeground),
+              ),
             ),
         ],
       ),
@@ -236,20 +254,45 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
+    Profile? profile,
   }) {
-    return ListTile(
-      onTap: onTap,
-      dense: true,
-      visualDensity: VisualDensity.compact,
-      selected: isSelected,
-      selectedTileColor: const Color(0xFFe4e4e7),
-      leading: Icon(icon, color: isSelected ? const Color(0xFF09090b) : Colors.black54, size: 18),
-      title: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? const Color(0xFF09090b) : Colors.black87,
-          fontSize: 15,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? ShadColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              if (profile != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: ShadAvatar(url: profile.avatarUrl, name: profile.fullName ?? profile.username ?? '?', size: 24),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Icon(icon, color: isSelected ? ShadColors.primaryForeground : ShadColors.mutedForeground, size: 18),
+                ),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? ShadColors.primaryForeground : ShadColors.foreground.withOpacity(0.8),
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (profile?.badge != null)
+                ShadBadge(label: profile!.badge!, variant: profile.badge),
+            ],
+          ),
         ),
       ),
     );
@@ -259,86 +302,67 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     if (_currentUserProfile == null) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFe4e4e7))),
+        color: Colors.white,
+        border: Border(top: BorderSide(color: ShadColors.border)),
       ),
-      child: InkWell(
-        onTap: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => StatusPicker(
-              currentText: _currentUserProfile?.statusText,
-              currentEmoji: _currentUserProfile?.statusEmoji,
-              onSave: _updateStatus,
+      child: Row(
+        children: [
+          InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) => StatusPicker(
+                  currentText: _currentUserProfile?.statusText,
+                  currentEmoji: _currentUserProfile?.statusEmoji,
+                  onSave: _updateStatus,
+                ),
+              );
+            },
+            child: ShadAvatar(
+              url: _currentUserProfile?.avatarUrl,
+              name: _currentUserProfile?.fullName ?? _currentUserProfile?.username ?? '?',
+              size: 36,
+              isOnline: true,
             ),
-          );
-        },
-        child: Row(
-          children: [
-            Stack(
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: _currentUserProfile?.avatarUrl != null 
-                    ? NetworkImage(_currentUserProfile!.avatarUrl!) 
-                    : null,
-                  child: _currentUserProfile?.avatarUrl == null 
-                    ? Text(_currentUserProfile?.fullName?[0] ?? _currentUserProfile?.username?[0] ?? 'U') 
-                    : null,
+                Text(
+                  _currentUserProfile?.fullName ?? _currentUserProfile?.username ?? 'User',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: ShadColors.foreground),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+                if (_currentUserProfile?.statusText != null && _currentUserProfile!.statusText!.isNotEmpty)
                   Text(
-                    _currentUserProfile?.fullName ?? _currentUserProfile?.username ?? 'User',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    '${_currentUserProfile?.statusEmoji ?? ''} ${_currentUserProfile!.statusText}',
+                    style: const TextStyle(fontSize: 11, color: ShadColors.mutedForeground),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (_currentUserProfile?.statusText != null && _currentUserProfile!.statusText!.isNotEmpty)
-                    Text(
-                      '${_currentUserProfile?.statusEmoji ?? ''} ${_currentUserProfile!.statusText}',
-                      style: const TextStyle(fontSize: 11, color: Colors.black54),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
-              ),
+              ],
             ),
-            IconButton(
-              icon: const Icon(Icons.settings_outlined, size: 20, color: Colors.black54),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfileSettingsScreen(
-                      profile: _currentUserProfile!,
-                      onUpdate: _fetchData,
-                    ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, size: 18, color: ShadColors.mutedForeground),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileSettingsScreen(
+                    profile: _currentUserProfile!,
+                    onUpdate: _fetchData,
                   ),
-                );
-              },
-            ),
-          ],
-        ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

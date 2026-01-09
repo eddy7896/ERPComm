@@ -14,6 +14,9 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:ERPComm/screens/search_screen.dart';
 import 'package:ERPComm/screens/mentions_list.dart';
 import 'package:ERPComm/screens/giphy_picker.dart';
+import 'package:ERPComm/theme/shad_theme.dart';
+import 'package:ERPComm/widgets/shad_avatar.dart';
+import 'package:ERPComm/widgets/shad_badge.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel? channel;
@@ -163,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
         await presenceChannel.track({
           'user_id': _supabase.auth.currentUser?.id,
           'is_typing': false,
-          'full_name': 'User', // Should fetch actual profile info
+          'full_name': 'User', 
         });
       }
     });
@@ -233,12 +236,10 @@ class _ChatScreenState extends State<ChatScreen> {
               final isRelevant = (senderId == myId && recId == recipientId) || (senderId == recipientId && recId == myId);
               if (!isRelevant) return;
 
-              // Play sound for incoming direct message
               if (recId == myId) {
                 _audioPlayer.play(AssetSource('sounds/pop.mp3'));
               }
             }
-
 
           final senderResponse = await _supabase.from('profiles').select().eq('id', newMessageData['sender_id']).single();
           Map<String, dynamic>? parentMessage;
@@ -473,7 +474,7 @@ class _ChatScreenState extends State<ChatScreen> {
         : (widget.recipient!.fullName ?? widget.recipient!.username ?? 'Chat');
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ShadColors.background,
       appBar: !isMobile ? null : AppBar(
         title: Text(title),
       ),
@@ -507,12 +508,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   const SizedBox(
                     width: 12,
                     height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: ShadColors.mutedForeground),
                   ),
                   const SizedBox(width: 8),
                     Text(
                       '${_typingUsers.map((u) => u.fullName ?? u.username).join(", ")} is typing...',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                      style: const TextStyle(fontSize: 12, color: ShadColors.mutedForeground, fontStyle: FontStyle.italic),
                     ),
                 ],
               ),
@@ -542,13 +543,13 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      decoration: const BoxDecoration(
+        color: ShadColors.background,
+        border: Border(bottom: BorderSide(color: ShadColors.border)),
       ),
       child: Row(
         children: [
-          Icon(widget.channel != null ? Icons.tag : Icons.person_outline, color: Colors.grey[600]),
+          Icon(widget.channel != null ? Icons.tag : Icons.person_outline, color: ShadColors.mutedForeground),
           const SizedBox(width: 8),
           Text(
             title,
@@ -591,61 +592,71 @@ class _MessageBubble extends StatelessWidget {
     final parent = message.parentMessage;
     final files = message.payload?['files'] as List<dynamic>?;
     
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: sender?.avatarUrl != null ? NetworkImage(sender!.avatarUrl!) : null,
-              child: sender?.avatarUrl == null 
-                  ? Text(sender?.fullName?[0] ?? sender?.username?[0] ?? '?', style: const TextStyle(fontSize: 12, color: Colors.black87)) 
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        sender?.fullName ?? sender?.username ?? 'Unknown',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        DateFormat('h:mm a').format(message.createdAt),
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                      ),
-                      const Spacer(),
-                      _buildActions(context),
-                    ],
-                  ),
-                  if (parent != null)
-                    _buildParentMessage(parent),
-                  const SizedBox(height: 4),
-                  if (message.content.isNotEmpty)
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ShadAvatar(
+            url: sender?.avatarUrl,
+            name: sender?.fullName ?? sender?.username ?? '?',
+            size: 36,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
                     Text(
-                      message.content,
-                      style: const TextStyle(fontSize: 15, height: 1.4, color: Colors.black87),
+                      sender?.fullName ?? sender?.username ?? 'Unknown',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
-                  if (files != null)
-                    _buildFiles(files),
-                  if (message.reactions != null && message.reactions!.isNotEmpty)
-                    _buildReactions(),
-                ],
-              ),
+                    if (sender?.username != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Text(
+                          '@${sender!.username}',
+                          style: const TextStyle(fontSize: 11, color: ShadColors.mutedForeground),
+                        ),
+                      ),
+                    if (sender?.badge != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: ShadBadge(label: sender!.badge!, variant: sender!.badge),
+                      ),
+                    const SizedBox(width: 8),
+                    Text(
+                      DateFormat('h:mm a').format(message.createdAt),
+                      style: const TextStyle(fontSize: 10, color: ShadColors.mutedForeground),
+                    ),
+                    const Spacer(),
+                    _buildActions(context),
+                  ],
+                ),
+                if (parent != null)
+                  _buildParentMessage(parent),
+                const SizedBox(height: 2),
+                if (message.content.isNotEmpty)
+                  Text(
+                    message.content,
+                    style: const TextStyle(fontSize: 15, height: 1.4, color: ShadColors.foreground),
+                  ),
+                if (files != null)
+                  _buildFiles(files),
+                if (message.reactions != null && message.reactions!.isNotEmpty)
+                  const SizedBox(height: 4),
+                if (message.reactions != null && message.reactions!.isNotEmpty)
+                  _buildReactions(),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -672,14 +683,14 @@ class _MessageBubble extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: ShadColors.secondary,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: ShadColors.border),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.insert_drive_file, size: 20, color: Colors.grey),
+                const Icon(Icons.insert_drive_file, size: 20, color: ShadColors.mutedForeground),
                 const SizedBox(width: 8),
                 Text(
                   file['name'],
@@ -709,16 +720,16 @@ class _MessageBubble extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: hasReacted ? const Color(0xFFE8F5E9) : Colors.grey[100],
+              color: hasReacted ? ShadColors.primary.withOpacity(0.1) : ShadColors.secondary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: hasReacted ? Colors.green : Colors.transparent),
+              border: Border.all(color: hasReacted ? ShadColors.primary.withOpacity(0.2) : Colors.transparent),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(entry.key, style: const TextStyle(fontSize: 12)),
                 const SizedBox(width: 4),
-                Text('${entry.value.length}', style: TextStyle(fontSize: 10, color: hasReacted ? Colors.green[700] : Colors.grey[700])),
+                Text('${entry.value.length}', style: TextStyle(fontSize: 10, color: hasReacted ? ShadColors.primary : ShadColors.mutedForeground, fontWeight: hasReacted ? FontWeight.bold : FontWeight.normal)),
               ],
             ),
           ),
@@ -733,18 +744,18 @@ class _MessageBubble extends StatelessWidget {
       margin: const EdgeInsets.only(top: 4, bottom: 4),
       padding: const EdgeInsets.only(left: 8),
       decoration: const BoxDecoration(
-        border: Border(left: BorderSide(color: Colors.grey, width: 2)),
+        border: Border(left: BorderSide(color: ShadColors.border, width: 2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.reply, size: 12, color: Colors.grey),
+              const Icon(Icons.reply, size: 12, color: ShadColors.mutedForeground),
               const SizedBox(width: 4),
               Text(
                 parentSender?.fullName ?? parentSender?.username ?? 'User',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: ShadColors.mutedForeground),
               ),
             ],
           ),
@@ -752,7 +763,7 @@ class _MessageBubble extends StatelessWidget {
             parent['content'] ?? '',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+            style: const TextStyle(fontSize: 12, color: ShadColors.mutedForeground, fontStyle: FontStyle.italic),
           ),
         ],
       ),
@@ -764,7 +775,7 @@ class _MessageBubble extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.reply, size: 16, color: Colors.grey),
+          icon: const Icon(Icons.reply, size: 16, color: ShadColors.mutedForeground),
           onPressed: () => onReply(message),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
@@ -773,7 +784,7 @@ class _MessageBubble extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         IconButton(
-          icon: const Icon(Icons.emoji_emotions_outlined, size: 16, color: Colors.grey),
+          icon: const Icon(Icons.emoji_emotions_outlined, size: 16, color: ShadColors.mutedForeground),
           onPressed: () => _showEmojiPicker(context),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
@@ -789,6 +800,7 @@ class _MessageBubble extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: ShadColors.background,
         contentPadding: const EdgeInsets.all(16),
         content: Wrap(
           spacing: 12,
@@ -843,9 +855,9 @@ class _ChatInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+      decoration: const BoxDecoration(
+        color: ShadColors.background,
+        border: Border(top: BorderSide(color: ShadColors.border)),
       ),
       child: SafeArea(
         child: Column(
@@ -861,12 +873,12 @@ class _ChatInput extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: ShadColors.secondary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.reply, size: 16, color: Colors.grey),
+                    const Icon(Icons.reply, size: 16, color: ShadColors.mutedForeground),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
@@ -880,7 +892,7 @@ class _ChatInput extends StatelessWidget {
                             replyingTo!.content,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            style: const TextStyle(fontSize: 11, color: ShadColors.mutedForeground),
                           ),
                         ],
                       ),
@@ -907,13 +919,13 @@ class _ChatInput extends StatelessWidget {
                       margin: const EdgeInsets.only(right: 8, bottom: 8),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
+                        color: ShadColors.background,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey[300]!),
+                        border: Border.all(color: ShadColors.border),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.insert_drive_file, size: 16),
+                          const Icon(Icons.insert_drive_file, size: 16, color: ShadColors.mutedForeground),
                           const SizedBox(width: 4),
                           Expanded(child: Text(file['name'], maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10))),
                           IconButton(
@@ -930,7 +942,7 @@ class _ChatInput extends StatelessWidget {
               ),
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: ShadColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -941,6 +953,8 @@ class _ChatInput extends StatelessWidget {
                     decoration: const InputDecoration(
                       hintText: 'Message...',
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     ),
                     onChanged: (val) => onTyping(val.isNotEmpty),
@@ -948,36 +962,37 @@ class _ChatInput extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: const BorderRadius.only(
+                    decoration: const BoxDecoration(
+                      color: ShadColors.secondary,
+                      borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(7),
                         bottomRight: Radius.circular(7),
                       ),
                     ),
                     child: Row(
                       children: [
-                        IconButton(icon: const Icon(Icons.alternate_email, size: 20), onPressed: () {}),
-                        IconButton(icon: const Icon(Icons.sentiment_satisfied_alt, size: 20), onPressed: () {}),
+                        IconButton(icon: const Icon(Icons.alternate_email, size: 20, color: ShadColors.mutedForeground), onPressed: () {}),
+                        IconButton(icon: const Icon(Icons.sentiment_satisfied_alt, size: 20, color: ShadColors.mutedForeground), onPressed: () {}),
                           IconButton(
                             icon: isUploading 
                                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Icon(Icons.attach_file, size: 20), 
+                                : const Icon(Icons.attach_file, size: 20, color: ShadColors.mutedForeground), 
                             onPressed: isUploading ? null : onPickFiles,
                           ),
                           IconButton(
-                            icon: const Icon(Icons.gif_box_outlined, size: 22),
+                            icon: const Icon(Icons.gif_box_outlined, size: 22, color: ShadColors.mutedForeground),
                             onPressed: onPickGiphy,
                           ),
                           const Spacer(),
                           ElevatedButton(
                             onPressed: isUploading ? null : onSend,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF09090b),
-                              foregroundColor: Colors.white,
+                              backgroundColor: ShadColors.primary,
+                              foregroundColor: ShadColors.primaryForeground,
                               minimumSize: const Size(32, 32),
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              elevation: 0,
                             ),
                             child: const Icon(Icons.send, size: 18),
                           ),
