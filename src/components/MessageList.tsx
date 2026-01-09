@@ -267,8 +267,8 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   }, [workspaceId, channelId, recipientId, user]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
