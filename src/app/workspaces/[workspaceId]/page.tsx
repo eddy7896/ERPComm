@@ -43,7 +43,6 @@ export default function WorkspacePage({ params }: {params: Promise<{workspaceId:
   const [recipientDetails, setRecipientDetails] = useState<RecipientDetails | null>(null);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [replyingTo, setReplyingTo] = useState<any>(null);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
