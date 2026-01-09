@@ -7,6 +7,8 @@ import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/services/navigation_provider.dart';
 import 'package:flutter_app/screens/chat_screen.dart';
 
+import 'package:flutter_app/screens/invite_user_dialog.dart';
+
 class WorkspaceLayout extends ConsumerStatefulWidget {
   final Workspace workspace;
   const WorkspaceLayout({super.key, required this.workspace});
@@ -19,6 +21,7 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
   final _supabase = Supabase.instance.client;
   List<Channel> _channels = [];
   List<Profile> _members = [];
+  Profile? _currentUserProfile;
   bool _isLoading = true;
 
   @override
@@ -39,12 +42,20 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
           .select('profiles (*)')
           .eq('workspace_id', widget.workspace.id);
 
+      final myId = _supabase.auth.currentUser?.id;
+      final profileResponse = await _supabase
+          .from('profiles')
+          .select()
+          .eq('id', myId!)
+          .single();
+
       setState(() {
         _channels = (channelsResponse as List).map((c) => Channel.fromJson(c)).toList();
         _members = (membersResponse as List)
             .map((m) => Profile.fromJson(m['profiles']))
-            .where((p) => p.id != _supabase.auth.currentUser?.id)
+            .where((p) => p.id != myId)
             .toList();
+        _currentUserProfile = Profile.fromJson(profileResponse);
         
         // Select first channel by default if nothing selected
         if (_channels.isNotEmpty && ref.read(navigationProvider).channel == null && ref.read(navigationProvider).recipient == null) {
@@ -59,6 +70,20 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     }
   }
 
+  Future<void> _updateStatus(String? text, String? emoji) async {
+    try {
+      final myId = _supabase.auth.currentUser?.id;
+      await _supabase.from('profiles').update({
+        'status_text': text,
+        'status_emoji': emoji,
+      }).eq('id', myId!);
+      
+      _fetchData(); // Refresh profile
+    } catch (e) {
+      debugPrint('Error updating status: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final nav = ref.watch(navigationProvider);
@@ -67,11 +92,10 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     Widget sidebar = _buildSidebar();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: isMobile
           ? AppBar(
               title: Text(nav.channel?.name ?? nav.recipient?.fullName ?? nav.recipient?.username ?? widget.workspace.name),
-              backgroundColor: const Color(0xFF611f69),
-              foregroundColor: Colors.white,
             )
           : null,
       drawer: isMobile ? Drawer(child: sidebar) : null,
@@ -82,7 +106,7 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
               width: 260,
               child: sidebar,
             ),
-          const VerticalDivider(width: 1, thickness: 1),
+          const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFe4e4e7)),
           Expanded(
             child: _buildMainContent(nav),
           ),
@@ -93,18 +117,26 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
 
   Widget _buildSidebar() {
     return Container(
-      color: const Color(0xFF3F0E40),
+      color: const Color(0xFFf8f8f8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSidebarHeader(),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: Colors.white70))
+                ? const Center(child: CircularProgressIndicator(color: Colors.black54))
                 : ListView(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     children: [
-                      _buildSectionHeader('Channels'),
+                      _buildSectionHeader('Channels', onAdd: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => CreateChannelDialog(
+                            workspaceId: widget.workspace.id,
+                            onCreated: _fetchData,
+                          ),
+                        );
+                      }),
                       ..._channels.map((c) => _buildSidebarItem(
                             label: c.name,
                             icon: Icons.tag,
@@ -122,6 +154,7 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
                     ],
                   ),
           ),
+          _buildCurrentUserSection(),
         ],
       ),
     );
@@ -131,7 +164,7 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white12)),
+        border: Border(bottom: BorderSide(color: Color(0xFFe4e4e7))),
       ),
       child: Row(
         children: [
@@ -139,30 +172,59 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
             child: Text(
               widget.workspace.name,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF09090b),
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Icon(Icons.keyboard_arrow_down, color: Colors.white70),
+          IconButton(
+            icon: const Icon(Icons.person_add_outlined, size: 18, color: Colors.black54),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => InviteUserDialog(
+                  workspaceId: widget.workspace.id,
+                  workspaceSlug: widget.workspace.slug,
+                ),
+              );
+            },
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, {VoidCallback? onAdd}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        title.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white54,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          if (onAdd != null)
+            IconButton(
+              icon: const Icon(Icons.add, size: 16, color: Colors.black54),
+              onPressed: onAdd,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              visualDensity: VisualDensity.compact,
+            ),
+        ],
       ),
     );
   }
@@ -173,19 +235,107 @@ class _WorkspaceLayoutState extends ConsumerState<WorkspaceLayout> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: isSelected ? const Color(0xFF1164A3) : Colors.transparent,
-      child: ListTile(
-        onTap: onTap,
-        dense: true,
-        visualDensity: VisualDensity.compact,
-        leading: Icon(icon, color: isSelected ? Colors.white : Colors.white70, size: 18),
-        title: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white70,
-            fontSize: 15,
-          ),
+    return ListTile(
+      onTap: onTap,
+      dense: true,
+      visualDensity: VisualDensity.compact,
+      selected: isSelected,
+      selectedTileColor: const Color(0xFFe4e4e7),
+      leading: Icon(icon, color: isSelected ? const Color(0xFF09090b) : Colors.black54, size: 18),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? const Color(0xFF09090b) : Colors.black87,
+          fontSize: 15,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentUserSection() {
+    if (_currentUserProfile == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0xFFe4e4e7))),
+      ),
+      child: InkWell(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => StatusPicker(
+              currentText: _currentUserProfile?.statusText,
+              currentEmoji: _currentUserProfile?.statusEmoji,
+              onSave: _updateStatus,
+            ),
+          );
+        },
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: _currentUserProfile?.avatarUrl != null 
+                    ? NetworkImage(_currentUserProfile!.avatarUrl!) 
+                    : null,
+                  child: _currentUserProfile?.avatarUrl == null 
+                    ? Text(_currentUserProfile?.fullName?[0] ?? _currentUserProfile?.username?[0] ?? 'U') 
+                    : null,
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _currentUserProfile?.fullName ?? _currentUserProfile?.username ?? 'User',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (_currentUserProfile?.statusText != null && _currentUserProfile!.statusText!.isNotEmpty)
+                    Text(
+                      '${_currentUserProfile?.statusEmoji ?? ''} ${_currentUserProfile!.statusText}',
+                      style: const TextStyle(fontSize: 11, color: Colors.black54),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined, size: 20, color: Colors.black54),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileSettingsScreen(
+                      profile: _currentUserProfile!,
+                      onUpdate: _fetchData,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

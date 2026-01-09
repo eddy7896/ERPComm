@@ -13,6 +13,8 @@ import 'package:audioplayers/audioplayers.dart';
 
 import 'package:flutter_app/screens/search_screen.dart';
 
+import 'package:flutter_app/screens/mentions_list.dart';
+
 class ChatScreen extends StatefulWidget {
   final Channel? channel;
   final Profile? recipient;
@@ -38,14 +40,76 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Map<String, dynamic>> _attachedFiles = [];
   bool _isUploading = false;
   List<Profile> _typingUsers = [];
+  List<Profile> _workspaceMembers = [];
+  String _mentionQuery = '';
+  bool _showMentions = false;
   final _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     _fetchMessages();
+    _fetchWorkspaceMembers();
     _subscribeToMessages();
     _setupPresence();
+    _messageController.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    final text = _messageController.text;
+    final selection = _messageController.selection;
+    if (selection.baseOffset > 0) {
+      final beforeCursor = text.substring(0, selection.baseOffset);
+      final lastAt = beforeCursor.lastIndexOf('@');
+      if (lastAt != -1 && (lastAt == 0 || beforeCursor[lastAt - 1] == ' ')) {
+        final query = beforeCursor.substring(lastAt + 1);
+        if (!query.contains(' ')) {
+          setState(() {
+            _showMentions = true;
+            _mentionQuery = query;
+          });
+          return;
+        }
+      }
+    }
+    if (_showMentions) {
+      setState(() => _showMentions = false);
+    }
+  }
+
+  Future<void> _fetchWorkspaceMembers() async {
+    try {
+      final workspaceId = widget.channel?.workspaceId ?? widget.recipient?.id;
+      if (workspaceId == null) return;
+
+      final response = await _supabase
+          .from('workspace_members')
+          .select('profiles (*)')
+          .eq('workspace_id', workspaceId);
+
+      setState(() {
+        _workspaceMembers = (response as List)
+            .map((m) => Profile.fromJson(m['profiles']))
+            .toList();
+      });
+    } catch (e) {
+      debugPrint('Error fetching members: $e');
+    }
+  }
+
+  void _onMentionSelected(Profile profile) {
+    final text = _messageController.text;
+    final selection = _messageController.selection;
+    final beforeCursor = text.substring(0, selection.baseOffset);
+    final afterCursor = text.substring(selection.baseOffset);
+    final lastAt = beforeCursor.lastIndexOf('@');
+    
+    final newText = '${beforeCursor.substring(0, lastAt)}@${profile.username ?? profile.fullName ?? 'user'} $afterCursor';
+    _messageController.text = newText;
+    _messageController.selection = TextSelection.fromPosition(
+      TextPosition(offset: lastAt + (profile.username ?? profile.fullName ?? 'user').length + 2)
+    );
+    setState(() => _showMentions = false);
   }
 
   @override
@@ -359,6 +423,25 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _pickGiphy() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => GiphyPicker(
+        onSelected: (url) {
+          setState(() {
+            _attachedFiles.add({
+              'name': 'giphy.gif',
+              'url': url,
+              'size': 0,
+              'type': 'image/gif',
+            });
+          });
+        },
+      ),
+    );
+  }
+
   Future<void> _toggleReaction(String messageId, String emoji) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
@@ -435,17 +518,22 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
-          _ChatInput(
-            controller: _messageController, 
-            onSend: _sendMessage,
-            onPickFiles: _pickFiles,
-            onTyping: _handleTyping,
-            replyingTo: _replyingTo,
-            attachedFiles: _attachedFiles,
-            isUploading: _isUploading,
-            onCancelReply: () => setState(() => _replyingTo = null),
-            onRemoveFile: (index) => setState(() => _attachedFiles.removeAt(index)),
-          ),
+            _ChatInput(
+              controller: _messageController, 
+              onSend: _sendMessage,
+              onPickFiles: _pickFiles,
+              onTyping: _handleTyping,
+              replyingTo: _replyingTo,
+              attachedFiles: _attachedFiles,
+              isUploading: _isUploading,
+              onCancelReply: () => setState(() => _replyingTo = null),
+              onRemoveFile: (index) => setState(() => _attachedFiles.removeAt(index)),
+              onPickGiphy: _pickGiphy,
+              showMentions: _showMentions,
+              mentionQuery: _mentionQuery,
+              workspaceMembers: _workspaceMembers,
+              onMentionSelected: _onMentionSelected,
+            ),
         ],
       ),
     );
@@ -740,6 +828,11 @@ class _ChatInput extends StatelessWidget {
     required this.isUploading,
     required this.onCancelReply,
     required this.onRemoveFile,
+    required this.onPickGiphy,
+    required this.showMentions,
+    required this.mentionQuery,
+    required this.workspaceMembers,
+    required this.onMentionSelected,
   });
 
   @override
@@ -753,6 +846,12 @@ class _ChatInput extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
+            if (showMentions)
+              MentionsList(
+                members: workspaceMembers,
+                query: mentionQuery,
+                onSelected: onMentionSelected,
+              ),
             if (replyingTo != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -856,24 +955,28 @@ class _ChatInput extends StatelessWidget {
                       children: [
                         IconButton(icon: const Icon(Icons.alternate_email, size: 20), onPressed: () {}),
                         IconButton(icon: const Icon(Icons.sentiment_satisfied_alt, size: 20), onPressed: () {}),
-                        IconButton(
-                          icon: isUploading 
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.attach_file, size: 20), 
-                          onPressed: isUploading ? null : onPickFiles,
-                        ),
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: isUploading ? null : onSend,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF007a5a),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(32, 32),
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          IconButton(
+                            icon: isUploading 
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.attach_file, size: 20), 
+                            onPressed: isUploading ? null : onPickFiles,
                           ),
-                          child: const Icon(Icons.send, size: 18),
-                        ),
+                          IconButton(
+                            icon: const Icon(Icons.gif_box_outlined, size: 22),
+                            onPressed: onPickGiphy,
+                          ),
+                          const Spacer(),
+                          ElevatedButton(
+                            onPressed: isUploading ? null : onSend,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF09090b),
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(32, 32),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                            ),
+                            child: const Icon(Icons.send, size: 18),
+                          ),
                       ],
                     ),
                   ),

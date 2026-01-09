@@ -25,12 +25,55 @@ class MyApp extends StatelessWidget {
       title: 'Enterprise Chat',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF611f69),
-          primary: const Color(0xFF611f69),
-        ),
-        textTheme: GoogleFonts.latoTextTheme(),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF09090b),
+          primary: const Color(0xFF09090b),
+          surface: Colors.white,
+          onSurface: const Color(0xFF09090b),
+        ),
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF09090b),
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          border: Border(bottom: BorderSide(color: Color(0xFFe4e4e7))),
+        ),
+        textTheme: GoogleFonts.interTextTheme(),
+        dividerTheme: const DividerThemeData(
+          color: Color(0xFFe4e4e7),
+          thickness: 1,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFe4e4e7)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFe4e4e7)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF09090b)),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF09090b),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF09090b),
+          ),
+        ),
       ),
       home: const AuthWrapper(),
     );
