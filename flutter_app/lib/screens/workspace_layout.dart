@@ -6,7 +6,9 @@ import 'package:flutter_app/models/channel.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/services/navigation_provider.dart';
 import 'package:flutter_app/screens/chat_screen.dart';
-
+import 'package:flutter_app/screens/create_channel_dialog.dart';
+import 'package:flutter_app/screens/profile_settings_screen.dart';
+import 'package:flutter_app/screens/status_picker.dart';
 import 'package:flutter_app/screens/invite_user_dialog.dart';
 
 class WorkspaceLayout extends ConsumerStatefulWidget {

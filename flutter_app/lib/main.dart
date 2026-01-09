@@ -33,13 +33,13 @@ class MyApp extends StatelessWidget {
           onSurface: const Color(0xFF09090b),
         ),
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF09090b),
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          border: Border(bottom: BorderSide(color: Color(0xFFe4e4e7))),
-        ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Color(0xFF09090b),
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            shape: Border(bottom: BorderSide(color: Color(0xFFe4e4e7))),
+          ),
         textTheme: GoogleFonts.interTextTheme(),
         dividerTheme: const DividerThemeData(
           color: Color(0xFFe4e4e7),

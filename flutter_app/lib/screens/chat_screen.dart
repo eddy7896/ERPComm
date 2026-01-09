@@ -12,8 +12,8 @@ import 'package:path/path.dart' as p;
 import 'package:audioplayers/audioplayers.dart';
 
 import 'package:flutter_app/screens/search_screen.dart';
-
 import 'package:flutter_app/screens/mentions_list.dart';
+import 'package:flutter_app/screens/giphy_picker.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel? channel;
@@ -145,11 +145,10 @@ class _ChatScreenState extends State<ChatScreen> {
     presenceChannel.onPresenceSync((payload) {
       final states = presenceChannel.presenceState();
       final List<Profile> typers = [];
-      states.forEach((key, value) {
-        for (var presence in value) {
+      for (final state in states) {
+        for (var presence in state.presences) {
           final p = presence.payload;
           if (p['is_typing'] == true && p['user_id'] != _supabase.auth.currentUser?.id) {
-            // We'd ideally have full profile info here, but for now we'll just use the ID or name from payload
             typers.add(Profile(
               id: p['user_id'], 
               fullName: p['full_name'], 
@@ -157,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ));
           }
         }
-      });
+      }
       if (mounted) setState(() => _typingUsers = typers);
     }).subscribe((status, error) async {
       if (status == RealtimeSubscribeStatus.subscribed) {
@@ -511,10 +510,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '${_typingUsers.map((u) => u.fullName ?? u.username).join(", ")} is typing...',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey, italic: true),
-                  ),
+                    Text(
+                      '${_typingUsers.map((u) => u.fullName ?? u.username).join(", ")} is typing...',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                    ),
                 ],
               ),
             ),
@@ -817,6 +816,11 @@ class _ChatInput extends StatelessWidget {
   final bool isUploading;
   final VoidCallback onCancelReply;
   final Function(int) onRemoveFile;
+  final VoidCallback onPickGiphy;
+  final bool showMentions;
+  final String mentionQuery;
+  final List<Profile> workspaceMembers;
+  final Function(Profile) onMentionSelected;
 
   const _ChatInput({
     required this.controller, 
