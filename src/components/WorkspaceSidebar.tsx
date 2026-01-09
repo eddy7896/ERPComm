@@ -180,7 +180,7 @@ export function WorkspaceSidebar({
       supabase.removeChannel(readSub);
       supabase.removeChannel(notificationSub);
     };
-  }, [workspaceId]);
+  }, [workspaceId, profile?.id]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
