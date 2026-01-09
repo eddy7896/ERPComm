@@ -6,9 +6,10 @@ import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Shield, LayoutDashboard, Globe, Lock, ArrowRight, Loader2, Code, Palette, Zap } from "lucide-react";
 
 const DEMO_ACCOUNTS = [
@@ -18,6 +19,38 @@ const DEMO_ACCOUNTS = [
   { email: "design@enterprise.com", role: "Design", icon: Palette, color: "text-pink-500" },
   { email: "marketing@enterprise.com", role: "Marketing", icon: Zap, color: "text-amber-500" },
 ];
+
+function LoginFormSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-11 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-11 w-full" />
+        </div>
+      </div>
+      <div className="space-y-4 pt-2">
+        <Skeleton className="h-11 w-full" />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-px flex-1" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-px flex-1" />
+          </div>
+          <div className="grid grid-cols-5 gap-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -33,6 +66,10 @@ function LoginForm() {
       router.push(redirect || "/workspaces");
     }
   }, [user, authLoading, router, redirect]);
+
+  if (authLoading) {
+    return <LoginFormSkeleton />;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +95,12 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleLogin} className="space-y-6">
+    <motion.form 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      onSubmit={handleLogin} 
+      className="space-y-6"
+    >
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -131,7 +173,7 @@ function LoginForm() {
           </div>
         </div>
       </div>
-    </form>
+    </motion.form>
   );
 }
 
