@@ -243,77 +243,105 @@ export function WorkspaceSidebar({
 
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-6 py-2">
-          <div>
-            <div className="flex items-center justify-between px-2 mb-2">
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Channels</span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 opacity-60 hover:opacity-100 transition-opacity"
-                onClick={() => setShowCreateChannel(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-0.5">
-              {channels.map((channel) => (
-                <Button
-                  key={channel.id}
-                  variant="ghost"
-                  className={`w-full justify-start h-9 px-3 font-medium transition-all group rounded-lg ${
-                    selectedChannelId === channel.id 
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
-                  }`}
-                  onClick={() => onSelectChannel(channel.id)}
+            <div>
+              <div className={cn("flex items-center justify-between px-2 mb-2", isCollapsed && "justify-center px-0")}>
+                {!isCollapsed && <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Channels</span>}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "h-6 w-6 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 opacity-60 hover:opacity-100 transition-opacity",
+                    isCollapsed && "h-8 w-8"
+                  )}
+                  onClick={() => setShowCreateChannel(true)}
                 >
-                  {channel.is_private ? (
-                    <Lock className={`mr-2.5 h-4 w-4 ${selectedChannelId === channel.id ? "opacity-100" : "opacity-60"}`} />
-                  ) : (
-                    <Hash className={`mr-2.5 h-4 w-4 ${selectedChannelId === channel.id ? "opacity-100" : "opacity-60"}`} />
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="space-y-0.5">
+                {channels.map((channel) => (
+                  <Button
+                    key={channel.id}
+                    variant="ghost"
+                    className={cn(
+                      "w-full h-9 font-medium transition-all group rounded-lg",
+                      selectedChannelId === channel.id 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
+                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50",
+                      isCollapsed ? "justify-center px-0" : "justify-start px-3"
                     )}
-                    <span className="truncate flex-1">{channel.name}</span>
-                    {getUnreadCount(channel.id, true) > 0 && (
-                      <Badge className="ml-auto h-5 w-5 p-0 flex items-center justify-center bg-primary text-[10px]">
-                        {getUnreadCount(channel.id, true)}
-                      </Badge>
+                    onClick={() => onSelectChannel(channel.id)}
+                  >
+                    <div className="relative flex items-center justify-center">
+                      {channel.is_private ? (
+                        <Lock className={cn("h-4 w-4", !isCollapsed && "mr-2.5", selectedChannelId === channel.id ? "opacity-100" : "opacity-60")} />
+                      ) : (
+                        <Hash className={cn("h-4 w-4", !isCollapsed && "mr-2.5", selectedChannelId === channel.id ? "opacity-100" : "opacity-60")} />
+                      )}
+                      {isCollapsed && getUnreadCount(channel.id, true) > 0 && (
+                        <Badge className="absolute -top-2 -right-2 h-4 min-w-[1rem] p-0.5 flex items-center justify-center bg-red-500 text-white text-[9px] border-2 border-zinc-50 dark:border-zinc-950">
+                          {getUnreadCount(channel.id, true)}
+                        </Badge>
+                      )}
+                    </div>
+                    {!isCollapsed && (
+                      <>
+                        <span className="truncate flex-1 text-left">{channel.name}</span>
+                        {getUnreadCount(channel.id, true) > 0 && (
+                          <Badge className="ml-auto h-5 w-5 p-0 flex items-center justify-center bg-primary text-[10px]">
+                            {getUnreadCount(channel.id, true)}
+                          </Badge>
+                        )}
+                      </>
                     )}
                   </Button>
                 ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <div className="flex items-center justify-between px-2 mb-2">
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Direct Messages</span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 opacity-60 hover:opacity-100 transition-opacity"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-              <div className="space-y-0.5">
-                {filteredMembers.map((member) => (
-                  <Button
-                    key={member.id}
-                    variant="ghost"
-                  className={`w-full justify-start h-9 px-2.5 font-medium transition-all group rounded-lg ${
-                    selectedRecipientId === member.id 
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
-                  }`}
-                  onClick={() => onSelectDM(member.id)}
+            <div>
+              <div className={cn("flex items-center justify-between px-2 mb-2", isCollapsed && "justify-center px-0")}>
+                {!isCollapsed && <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Direct Messages</span>}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "h-6 w-6 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 opacity-60 hover:opacity-100 transition-opacity",
+                    isCollapsed && "h-8 w-8"
+                  )}
                 >
-                  <div className="relative mr-2.5">
-                    <Avatar className="h-6 w-6 border border-zinc-200 dark:border-zinc-800">
-                      <AvatarImage src={member.avatar_url} />
-                      <AvatarFallback className="text-[10px] bg-zinc-200 dark:bg-zinc-800">{member.full_name?.[0] || member.username?.[0]}</AvatarFallback>
-                    </Avatar>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+                <div className="space-y-0.5">
+                  {filteredMembers.map((member) => (
+                    <Button
+                      key={member.id}
+                      variant="ghost"
+                    className={cn(
+                      "w-full h-9 font-medium transition-all group rounded-lg",
+                      selectedRecipientId === member.id 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
+                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50",
+                      isCollapsed ? "justify-center px-0" : "justify-start px-2.5"
+                    )}
+                    onClick={() => onSelectDM(member.id)}
+                  >
+                    <div className={cn("relative", !isCollapsed && "mr-2.5")}>
+                      <Avatar className="h-6 w-6 border border-zinc-200 dark:border-zinc-800">
+                        <AvatarImage src={member.avatar_url} />
+                        <AvatarFallback className="text-[10px] bg-zinc-200 dark:bg-zinc-800">{member.full_name?.[0] || member.username?.[0]}</AvatarFallback>
+                      </Avatar>
                       <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-50 dark:border-zinc-950 ${getStatusColor(member.id)}`} />
+                      {isCollapsed && getUnreadCount(member.id, false) > 0 && (
+                        <Badge className="absolute -top-2 -right-2 h-4 min-w-[1rem] p-0.5 flex items-center justify-center bg-red-500 text-white text-[9px] border-2 border-zinc-50 dark:border-zinc-950">
+                          {getUnreadCount(member.id, false)}
+                        </Badge>
+                      )}
                     </div>
-                        <div className="flex flex-col truncate flex-1">
+                    {!isCollapsed && (
+                      <>
+                        <div className="flex flex-col truncate flex-1 text-left">
                           <span className="truncate">{member.full_name || member.username}</span>
                           {member.username && (
                             <span className="text-[10px] text-zinc-500 font-medium truncate">@{member.username}</span>
@@ -324,22 +352,25 @@ export function WorkspaceSidebar({
                             {getUnreadCount(member.id, false)}
                           </Badge>
                         )}
-                      {member.badge && (() => {
-                      const badgeOption = BADGE_OPTIONS.find(b => b.label === member.badge);
-                      return (
-                        <span className={cn(
-                          "inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border ml-1.5",
-                          badgeOption?.color || "bg-zinc-100 text-zinc-500 border-zinc-200"
-                        )}>
-                          {member.badge}
-                        </span>
-                      );
-                    })()}
-                    {member.status_emoji && (
-                      <span className="text-xs ml-1 opacity-70">{member.status_emoji}</span>
+                        {member.badge && (() => {
+                          const badgeOption = BADGE_OPTIONS.find(b => b.label === member.badge);
+                          return (
+                            <span className={cn(
+                              "inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border ml-1.5",
+                              badgeOption?.color || "bg-zinc-100 text-zinc-500 border-zinc-200"
+                            )}>
+                              {member.badge}
+                            </span>
+                          );
+                        })()}
+                        {member.status_emoji && (
+                          <span className="text-xs ml-1 opacity-70">{member.status_emoji}</span>
+                        )}
+                      </>
                     )}
-                </Button>
-              ))}
+                  </Button>
+                ))}
+
               {members.length === 0 && (
                 <p className="text-xs text-zinc-500 px-3 py-2 italic opacity-60">No other members</p>
               )}
