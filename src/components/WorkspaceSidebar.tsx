@@ -29,6 +29,7 @@ interface WorkspaceSidebarProps {
   selectedRecipientId: string | null;
   onSelectChannel: (id: string) => void;
   onSelectDM: (id: string) => void;
+  isCollapsed?: boolean;
 }
 
 interface Channel {
