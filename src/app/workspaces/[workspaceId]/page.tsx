@@ -63,10 +63,6 @@ export default function WorkspacePage({ params }: {params: Promise<{workspaceId:
         e.preventDefault();
         setSearchOpen((prev) => !prev);
       }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-        e.preventDefault();
-        setIsSidebarVisible((prev) => !prev);
-      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
