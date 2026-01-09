@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_app/models/workspace.dart';
-import 'package:flutter_app/screens/workspace_layout.dart';
+import 'package:ERPComm/models/workspace.dart';
+import 'package:ERPComm/screens/workspace_layout.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

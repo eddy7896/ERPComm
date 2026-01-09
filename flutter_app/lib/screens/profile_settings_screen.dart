@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_app/models/profile.dart';
+import 'package:ERPComm/models/profile.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   final Profile profile;

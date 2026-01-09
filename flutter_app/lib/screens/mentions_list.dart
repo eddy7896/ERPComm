@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/models/profile.dart';
+import 'package:ERPComm/models/profile.dart';
 
 class MentionsList extends StatelessWidget {
   final List<Profile> members;

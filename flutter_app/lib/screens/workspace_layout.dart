@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_app/models/workspace.dart';
-import 'package:flutter_app/models/channel.dart';
-import 'package:flutter_app/models/profile.dart';
-import 'package:flutter_app/services/navigation_provider.dart';
-import 'package:flutter_app/screens/chat_screen.dart';
-import 'package:flutter_app/screens/create_channel_dialog.dart';
-import 'package:flutter_app/screens/profile_settings_screen.dart';
-import 'package:flutter_app/screens/status_picker.dart';
-import 'package:flutter_app/screens/invite_user_dialog.dart';
+import 'package:ERPComm/models/workspace.dart';
+import 'package:ERPComm/models/channel.dart';
+import 'package:ERPComm/models/profile.dart';
+import 'package:ERPComm/services/navigation_provider.dart';
+import 'package:ERPComm/screens/chat_screen.dart';
+import 'package:ERPComm/screens/create_channel_dialog.dart';
+import 'package:ERPComm/screens/profile_settings_screen.dart';
+import 'package:ERPComm/screens/status_picker.dart';
+import 'package:ERPComm/screens/invite_user_dialog.dart';
 
 class WorkspaceLayout extends ConsumerStatefulWidget {
   final Workspace workspace;

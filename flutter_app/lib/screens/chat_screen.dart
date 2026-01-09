@@ -2,18 +2,18 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_app/models/channel.dart';
-import 'package:flutter_app/models/profile.dart';
-import 'package:flutter_app/models/message.dart';
-import 'package:flutter_app/models/reaction.dart';
+import 'package:ERPComm/models/channel.dart';
+import 'package:ERPComm/models/profile.dart';
+import 'package:ERPComm/models/message.dart';
+import 'package:ERPComm/models/reaction.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:audioplayers/audioplayers.dart';
 
-import 'package:flutter_app/screens/search_screen.dart';
-import 'package:flutter_app/screens/mentions_list.dart';
-import 'package:flutter_app/screens/giphy_picker.dart';
+import 'package:ERPComm/screens/search_screen.dart';
+import 'package:ERPComm/screens/mentions_list.dart';
+import 'package:ERPComm/screens/giphy_picker.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel? channel;

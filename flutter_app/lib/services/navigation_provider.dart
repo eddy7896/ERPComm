@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_app/models/channel.dart';
-import 'package:flutter_app/models/profile.dart';
+import 'package:ERPComm/models/channel.dart';
+import 'package:ERPComm/models/profile.dart';
 
 class SelectedNavigation {
   final Channel? channel;
