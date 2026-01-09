@@ -142,7 +142,13 @@ export function WorkspaceSidebar({
 
     const messageSub = supabase
       .channel('public:messages_unread')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `workspace_id=eq.${workspaceId}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `workspace_id=eq.${workspaceId}` }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const msg = payload.new;
+          if (msg.recipient_id === profile?.id && msg.sender_id !== profile?.id) {
+            new Audio('/pop.mp3').play().catch(e => console.error("Error playing sound:", e));
+          }
+        }
         fetchData();
       })
       .subscribe();
