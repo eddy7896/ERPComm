@@ -354,6 +354,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
             <p className="text-sm text-zinc-500">This is the very start of the history.</p>
           </div>
         )}
+        <div ref={bottomRef} />
       </div>
       
       {typingUsers.length > 0 && (
