@@ -379,20 +379,22 @@ export function WorkspaceSidebar({
         </div>
       </ScrollArea>
 
-      <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/30 dark:bg-zinc-900/10">
-        <div className="relative group">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
-          <Input
-            placeholder="Search members..."
-            className="pl-9 h-9 bg-transparent border-zinc-200 dark:border-zinc-800 focus-visible:ring-1 focus-visible:ring-primary/20 text-xs"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      {!isCollapsed && (
+        <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/30 dark:bg-zinc-900/10">
+          <div className="relative group">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
+            <Input
+              placeholder="Search members..."
+              className="pl-9 h-9 bg-transparent border-zinc-200 dark:border-zinc-800 focus-visible:ring-1 focus-visible:ring-primary/20 text-xs"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/30">
-          <div className="flex items-center gap-3 px-1">
+      <div className={cn("p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/30", isCollapsed && "px-2")}>
+          <div className={cn("flex items-center gap-3 px-1", isCollapsed && "flex-col gap-4 px-0")}>
             <div className="relative group cursor-pointer" onClick={() => setShowProfileSettings(true)}>
               <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800 transition-transform group-hover:scale-105">
                 <AvatarImage src={profile?.avatar_url} />
@@ -400,39 +402,42 @@ export function WorkspaceSidebar({
               </Avatar>
               <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-100 dark:border-zinc-900 bg-emerald-500" />
             </div>
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowProfileSettings(true)}>
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <div className="flex flex-col min-w-0">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-tight">
-                      {profile?.full_name || "User"}
-                    </p>
-                    {profile?.username && (
-                      <p className="text-[10px] text-zinc-500 font-medium truncate">
-                        @{profile.username}
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowProfileSettings(true)}>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <div className="flex flex-col min-w-0">
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-tight">
+                        {profile?.full_name || "User"}
                       </p>
-                    )}
-                  </div>
-                  {profile?.badge && (() => {
-                  const badgeOption = BADGE_OPTIONS.find(b => b.label === profile.badge);
-                  return (
-                    <span className={cn(
-                      "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
-                      badgeOption?.color || "bg-primary/10 text-primary border-primary/20"
-                    )}>
-                      {profile.badge}
-                    </span>
-                  );
-                })()}
+                      {profile?.username && (
+                        <p className="text-[10px] text-zinc-500 font-medium truncate">
+                          @{profile.username}
+                        </p>
+                      )}
+                    </div>
+                    {profile?.badge && (() => {
+                    const badgeOption = BADGE_OPTIONS.find(b => b.label === profile.badge);
+                    return (
+                      <span className={cn(
+                        "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
+                        badgeOption?.color || "bg-primary/10 text-primary border-primary/20"
+                      )}>
+                        {profile.badge}
+                      </span>
+                    );
+                  })()}
+                </div>
+                <StatusPicker 
+                  currentStatus={profile?.status_text} 
+                  currentEmoji={profile?.status_emoji}
+                  onStatusUpdate={(text, emoji) => refreshProfile()}
+                />
               </div>
-              <StatusPicker 
-                currentStatus={profile?.status_text} 
-                currentEmoji={profile?.status_emoji}
-                onStatusUpdate={(text, emoji) => refreshProfile()}
-              />
-            </div>
+            )}
             <ThemeToggle />
           </div>
         </div>
+
 
         <CreateChannelDialog
           workspaceId={workspaceId}
