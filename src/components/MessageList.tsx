@@ -109,6 +109,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   
   useEffect(() => {
