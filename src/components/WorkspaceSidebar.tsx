@@ -160,10 +160,25 @@ export function WorkspaceSidebar({
       })
       .subscribe();
 
+    const notificationSub = supabase
+      .channel('public:notifications_sound')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'notifications', 
+        filter: `user_id=eq.${profile?.id}` 
+      }, (payload) => {
+        if (payload.new.type === 'mention') {
+          new Audio('/pop.mp3').play().catch(e => console.error("Error playing sound:", e));
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channelSub);
       supabase.removeChannel(messageSub);
       supabase.removeChannel(readSub);
+      supabase.removeChannel(notificationSub);
     };
   }, [workspaceId]);
 
