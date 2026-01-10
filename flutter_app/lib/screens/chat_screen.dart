@@ -942,18 +942,23 @@ class _ChatInput extends StatelessWidget {
                   itemCount: attachedFiles.length,
                   itemBuilder: (context, index) {
                     final file = attachedFiles[index];
+                    final isGoogleDrive = file['source'] == 'google_drive';
                     return Container(
                       width: 150,
                       margin: const EdgeInsets.only(right: 8, bottom: 8),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: ShadColors.background,
+                        color: isGoogleDrive ? const Color(0xFF4285f4).withOpacity(0.05) : ShadColors.background,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: ShadColors.border),
+                        border: Border.all(color: isGoogleDrive ? const Color(0xFF4285f4).withOpacity(0.3) : ShadColors.border),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.insert_drive_file, size: 16, color: ShadColors.mutedForeground),
+                          Icon(
+                            isGoogleDrive ? Icons.add_to_drive : Icons.insert_drive_file, 
+                            size: 16, 
+                            color: isGoogleDrive ? const Color(0xFF4285f4) : ShadColors.mutedForeground,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(child: Text(file['name'], maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10))),
                           IconButton(
