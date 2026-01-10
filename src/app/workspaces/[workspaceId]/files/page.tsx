@@ -209,14 +209,91 @@ export default function FilesPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 relative" {...getRootProps()}>
+      <input {...getInputProps()} />
+      
+      <AnimatePresence>
+        {isDragActive && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-blue-500/10 backdrop-blur-[2px] z-[70] flex items-center justify-center border-4 border-dashed border-blue-500 rounded-xl m-4"
+          >
+            <div className="flex flex-col items-center gap-4 text-blue-600 dark:text-blue-400">
+              <UploadCloud className="h-16 w-16 animate-bounce" />
+              <p className="text-xl font-bold">Drop files to upload to workspace</p>
+            </div>
+          </motion.div>
+        )}
+
+        {uploading && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-[80] flex flex-col items-center justify-center"
+          >
+            <div className="relative mb-8">
+              <motion.div
+                animate={{ 
+                  y: [0, -30, 0],
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 15, -15, 0]
+                }}
+                transition={{ 
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="bg-blue-600 p-6 rounded-3xl shadow-2xl shadow-blue-500/40"
+              >
+                <UploadCloud className="h-12 w-12 text-white" />
+              </motion.div>
+              <motion.div 
+                animate={{ opacity: [0, 0.5, 0], scale: [1, 2, 2.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute inset-0 bg-blue-500 rounded-3xl -z-10"
+              />
+            </div>
+            <div className="text-center space-y-4 w-full max-w-sm px-6">
+              <h3 className="text-2xl font-bold tracking-tight">Syncing with Cloud</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">Please wait while we secure your files in the workspace.</p>
+              <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden shadow-inner">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${uploadProgress}%` }}
+                  className="h-full bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.6)]"
+                />
+              </div>
+              <div className="flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                <span>Uploading...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-10">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-bold">Files & Attachments</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 gap-2"
+            onClick={() => {
+              const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+              if (input) input.click();
+            }}
+          >
+            <Upload className="h-4 w-4" />
+            <span>Upload Files</span>
+          </Button>
         </div>
       </div>
 
