@@ -120,11 +120,24 @@ export function ProfileSettingsDialog({ open, onOpenChange }: ProfileSettingsDia
           </div>
 
             <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4 opacity-70" /> Quick Select Avatar
-                </Label>
-                <ScrollArea className="h-32 w-full rounded-md border border-zinc-200 dark:border-zinc-800 p-2">
+                <div className="grid gap-2">
+                  <Label className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 opacity-70" /> Quick Select Avatar
+                  </Label>
+                  <div className="flex gap-2 mb-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-2 text-xs"
+                      onClick={handleOpenPicker}
+                    >
+                      <Cloud className="h-3.5 w-3.5 text-blue-500" />
+                      Google Drive
+                    </Button>
+                  </div>
+                  <ScrollArea className="h-32 w-full rounded-md border border-zinc-200 dark:border-zinc-800 p-2">
+
                   <div className="grid grid-cols-5 gap-2">
                     {ANIMAL_AVATARS.map((url) => (
                       <button
