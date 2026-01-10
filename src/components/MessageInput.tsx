@@ -243,10 +243,11 @@ export function MessageInput({
     onCancelReply?.();
     onStopTyping?.();
 
-      try {
-        let uploadedFiles: { url: string, name: string, type: string, size: number }[] = [];
+        try {
+          const uploadedFiles: { url: string, name: string, type: string, size: number }[] = [];
 
-        // Extract mentions from content
+          // Extract mentions from content
+
         const mentions: string[] = [];
         const mentionRegex = /@(\w+)/g;
         let match;
