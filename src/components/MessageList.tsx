@@ -159,16 +159,17 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
         query = query.or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`);
       }
 
-      const { data, error } = await query;
-      if (error) {
-        console.error("Error fetching messages:", error);
-      } else {
-        const formattedData = data?.map((m: any) => ({
-          ...m,
-          reactions: m.message_reactions || []
-        })) || [];
-        setMessages(formattedData);
-      }
+        const { data, error } = await query;
+        if (error) {
+          console.error("Error fetching messages:", error);
+        } else {
+          const formattedData = data?.map((m: any) => ({
+            ...m,
+            reactions: m.message_reactions || []
+          })) || [];
+          setMessages(formattedData as Message[]);
+        }
+
       setLoading(false);
     };
 
