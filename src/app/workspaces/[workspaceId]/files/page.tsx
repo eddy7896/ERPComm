@@ -52,52 +52,142 @@ interface Attachment {
 export default function FilesPage() {
   const { workspaceId } = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
 
-  useEffect(() => {
-    async function fetchFiles() {
-      if (!workspaceId) return;
-      setLoading(true);
+  const fetchFiles = useCallback(async () => {
+    if (!workspaceId) return;
+    setLoading(true);
 
-      const { data, error } = await supabase
-        .from("messages")
-        .select(`
-          id,
-          created_at,
-          payload,
-          sender:profiles!sender_id(full_name, username)
-        `)
-        .eq("workspace_id", workspaceId)
-        .not("payload->files", "is", null)
-        .order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("messages")
+      .select(`
+        id,
+        created_at,
+        payload,
+        sender:profiles!sender_id(full_name, username)
+      `)
+      .eq("workspace_id", workspaceId)
+      .not("payload->files", "is", null)
+      .order("created_at", { ascending: false });
 
-      if (!error && data) {
-        const allFiles: Attachment[] = [];
-        data.forEach((msg: any) => {
-          if (msg.payload?.files && Array.isArray(msg.payload.files)) {
-            msg.payload.files.forEach((file: any) => {
-              allFiles.push({
-                name: file.name,
-                url: file.url,
-                type: file.type,
-                size: file.size || 0,
-                messageId: msg.id,
-                senderName: msg.sender?.full_name || msg.sender?.username || "Unknown",
-                createdAt: msg.created_at
-              });
+    if (!error && data) {
+      const allFiles: Attachment[] = [];
+      data.forEach((msg: any) => {
+        if (msg.payload?.files && Array.isArray(msg.payload.files)) {
+          msg.payload.files.forEach((file: any) => {
+            allFiles.push({
+              name: file.name,
+              url: file.url,
+              type: file.type,
+              size: file.size || 0,
+              messageId: msg.id,
+              senderName: msg.sender?.full_name || msg.sender?.username || "Unknown",
+              createdAt: msg.created_at
             });
+          });
+        }
+      });
+      setAttachments(allFiles);
+    }
+    setLoading(false);
+  }, [workspaceId]);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (!workspaceId || !user) return;
+    
+    setUploading(true);
+    setUploadProgress(0);
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 95) return prev;
+        return prev + 5;
+      });
+    }, 150);
+
+    try {
+      const uploadedFiles: { url: string, name: string, type: string, size: number }[] = [];
+
+      for (const file of acceptedFiles) {
+        const isImage = file.type.startsWith('image/');
+        let fileToUpload = file;
+
+        if (isImage && file.size > 5 * 1024 * 1024) {
+          fileToUpload = await compressImage(file);
+        } else if (file.size > 25 * 1024 * 1024) {
+          toast.error(`${file.name} is too large (max 25MB)`);
+          continue;
+        }
+
+        const fileExt = fileToUpload.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `${workspaceId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('attachments')
+          .upload(filePath, fileToUpload);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('attachments')
+          .getPublicUrl(filePath);
+
+        uploadedFiles.push({
+          url: publicUrl,
+          name: file.name,
+          type: file.type,
+          size: file.size
+        });
+      }
+
+      if (uploadedFiles.length > 0) {
+        // Find a channel to post to
+        const { data: channels } = await supabase
+          .from("channels")
+          .select("id")
+          .eq("workspace_id", workspaceId)
+          .limit(1);
+
+        const channelId = channels?.[0]?.id;
+
+        await supabase.from("messages").insert({
+          workspace_id: workspaceId,
+          channel_id: channelId,
+          sender_id: user.id,
+          content: `Uploaded ${uploadedFiles.length} file(s) from Dashboard`,
+          payload: {
+            type: 'file',
+            files: uploadedFiles,
+            from_dashboard: true
           }
         });
-        setAttachments(allFiles);
-      }
-      setLoading(false);
-    }
 
-    fetchFiles();
-  }, [workspaceId]);
+        toast.success(`Successfully uploaded ${uploadedFiles.length} file(s)`);
+        fetchFiles();
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Failed to upload files");
+    } finally {
+      clearInterval(progressInterval);
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  }, [workspaceId, user, fetchFiles]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noClick: true });
 
   const filteredFiles = attachments.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
