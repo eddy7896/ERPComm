@@ -404,12 +404,14 @@ export function MessageInput({
           }
         }
 
-    } catch (err) {
-      console.error("Upload/Send failed:", err);
-    } finally {
-      setLoading(false);
-      setUploading(false);
-    }
+      } catch (err) {
+        console.error("Upload/Send failed:", err);
+      } finally {
+        clearInterval(progressInterval);
+        setLoading(false);
+        setUploading(false);
+        setUploadProgress(0);
+      }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
