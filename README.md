@@ -7,9 +7,18 @@ Connect your team in one secure, high-performance platform. The all-in-one works
 - **Real-time Messaging**: Instant communication with support for multiple channels and direct messaging.
 - **Workspace Management**: Organize your team into workspaces with dedicated channels and roles.
 - **Enterprise Security**: Role-based access control (RBAC), SSO-ready architecture, and global compliance standards.
-- **Modern UI/UX**: Built with a focus on speed, accessibility, and a delightful user experience using Tailwind CSS and Framer Motion.
+- **Modern UI/UX**: Built with a focus on speed, accessibility, and a delightful user experience using Tailwind CSS and Framer Motion. Includes features like password visibility toggles for improved security.
 - **Optimized Caching**: High-performance data retrieval with Redis-backed caching.
 - **Robust Backend**: Powered by Supabase for real-time database capabilities and secure authentication.
+
+## 🧪 Demo Access
+
+To explore the platform without creating an account, use the following demo credentials:
+
+- **Email**: `user1@enterprise.com`
+- **Password**: `password123`
+
+*Note: There are 25 pre-configured demo users across 5 different workspaces (e.g., `user1@enterprise.com` through `user25@enterprise.com`).*
 
 ## 🛠️ Tech Stack
 
