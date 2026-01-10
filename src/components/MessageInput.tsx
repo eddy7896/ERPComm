@@ -610,13 +610,21 @@ export function MessageInput({
                     </PopoverTrigger>
                     <PopoverContent className="w-48 p-2 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-2xl" side="top" align="start">
                       <div className="grid grid-cols-1 gap-1">
-                        <button 
-                          className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                          onClick={() => document.getElementById('file-input')?.click()}
-                        >
-                          <ImageIcon className="h-4 w-4 text-blue-500" />
-                          <span>Upload Image</span>
-                        </button>
+                          <button 
+                            className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            onClick={handleOpenPicker}
+                          >
+                            <Cloud className="h-4 w-4 text-blue-500" />
+                            <span>Google Drive</span>
+                          </button>
+                          <button 
+                            className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            onClick={() => document.getElementById('file-input')?.click()}
+                          >
+                            <ImageIcon className="h-4 w-4 text-blue-500" />
+                            <span>Upload Image</span>
+                          </button>
+
                         <button 
                           className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                           onClick={() => document.getElementById('file-input')?.click()}
