@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,7 +17,11 @@ import {
   MoreVertical,
   Calendar,
   User as UserIcon,
-  ArrowLeft
+  ArrowLeft,
+  Upload,
+  UploadCloud,
+  X,
+  Paperclip
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn, downloadFile } from "@/lib/utils";
@@ -30,6 +34,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, useParams } from "next/navigation";
+import { useDropzone } from "react-dropzone";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import { compressImage } from "@/lib/image-compression";
 
 interface Attachment {
   name: string;
