@@ -71,7 +71,7 @@ export function MessageInput({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [pendingFiles, setPendingFiles] = useState<{ file: File, preview: string, type: 'image' | 'file' }[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [isEncryptionActive, setIsEncryptionActive] = useState(false);
   const [isMember, setIsMember] = useState(true);
   const [members, setMembers] = useState<Profile[]>([]);
@@ -81,6 +81,31 @@ export function MessageInput({
   const [cursorPos, setCursorPos] = useState(0);
   const { user } = useAuth();
   const { theme } = useTheme();
+  const [openPicker, authResponse] = useDrivePicker();
+
+  const handleOpenPicker = () => {
+    openPicker({
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+      developerKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "",
+      viewId: "DOCS",
+      showUploadView: true,
+      showUploadFolders: true,
+      supportDrives: true,
+      multiselect: true,
+      callbackFunction: (data) => {
+        if (data.action === "picked") {
+          const newDriveFiles: PendingFile[] = data.docs.map(doc => ({
+            name: doc.name,
+            url: doc.url,
+            type: 'drive',
+            preview: doc.iconUrl || '',
+            size: doc.sizeBytes || 0,
+          }));
+          setPendingFiles(prev => [...prev, ...newDriveFiles]);
+        }
+      },
+    });
+  };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const newFiles = await Promise.all(acceptedFiles.map(async (file) => {
