@@ -42,6 +42,23 @@ export default function Home() {
             <LoginForm />
           </Suspense>
 
+          <div className="mt-8 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">Demo Credentials</h3>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-zinc-500 dark:text-zinc-400">Email:</span>
+                <code className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-zinc-900 dark:text-zinc-300">user1@enterprise.com</code>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-zinc-500 dark:text-zinc-400">Password:</span>
+                <code className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-zinc-900 dark:text-zinc-300">password123</code>
+              </div>
+            </div>
+            <p className="mt-3 text-[10px] text-zinc-400 dark:text-zinc-500 text-center uppercase tracking-wider">
+              Note: use any user1-25@enterprise.com with same password
+            </p>
+          </div>
+
           <div className="mt-12 pt-8 border-t border-zinc-100 dark:border-zinc-900">
             <div className="flex items-center gap-4 text-xs text-zinc-400 dark:text-zinc-500">
               <div className="flex items-center gap-1">
