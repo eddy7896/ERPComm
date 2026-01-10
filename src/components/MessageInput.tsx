@@ -241,6 +241,16 @@ export function MessageInput({
     
     setLoading(true);
     setUploading(true);
+    setUploadProgress(0);
+    
+    // Simulate progress for visual effect
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 95) return prev;
+        return prev + 5;
+      });
+    }, 200);
+
     const currentReply = replyingTo;
     onCancelReply?.();
     onStopTyping?.();
