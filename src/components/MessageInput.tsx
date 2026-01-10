@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import { encryptMessage, unwrapChannelKey, getPrivateKey } from "@/lib/crypto";
-import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon, Image as ImageIcon, X, Reply, FileIcon, Loader2, Lock } from "lucide-react";
+import { Send, Smile, Paperclip, Plus, ShieldCheck, Sticker as StickerIcon, Image as ImageIcon, X, Reply, FileIcon, Loader2, Lock, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import EmojiPicker, { Theme } from "emoji-picker-react";
@@ -15,12 +15,22 @@ import { cn } from "@/lib/utils";
 import { useDropzone } from "react-dropzone";
 import { compressImage } from "@/lib/image-compression";
 import { toast } from "sonner";
+import useDrivePicker from "react-google-drive-picker";
 
 interface Profile {
   id: string;
   username: string;
   full_name?: string;
   avatar_url?: string;
+}
+
+interface PendingFile {
+  file?: File;
+  preview: string;
+  type: 'image' | 'file' | 'drive';
+  name: string;
+  url?: string;
+  size?: number;
 }
 
 interface MessageInputProps {
