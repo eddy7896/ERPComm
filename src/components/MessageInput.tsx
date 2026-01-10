@@ -561,16 +561,24 @@ export function MessageInput({
               <div className="flex flex-wrap gap-3 p-3 bg-zinc-50/30 dark:bg-zinc-800/20 border-b border-zinc-100 dark:border-zinc-800/50">
                 {pendingFiles.map((file, i) => (
                   <div key={i} className="relative group/file h-24 w-24 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 flex items-center justify-center shadow-sm">
-                    {file.type === 'image' ? (
-                      <img src={file.preview} alt="" className="h-full w-full object-cover transition-transform group-hover/file:scale-105" />
-                    ) : (
-                      <div className="flex flex-col items-center gap-2 p-3">
-                        <div className="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                          <FileIcon className="h-5 w-5 text-zinc-400" />
+                      {file.type === 'image' ? (
+                        <img src={file.preview} alt="" className="h-full w-full object-cover transition-transform group-hover/file:scale-105" />
+                      ) : file.type === 'drive' ? (
+                        <div className="flex flex-col items-center gap-2 p-3">
+                          <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                            <Cloud className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <span className="text-[10px] font-medium text-zinc-500 text-center truncate w-full px-1">{file.name}</span>
                         </div>
-                        <span className="text-[10px] font-medium text-zinc-500 text-center truncate w-full px-1">{file.file.name}</span>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 p-3">
+                          <div className="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                            <FileIcon className="h-5 w-5 text-zinc-400" />
+                          </div>
+                          <span className="text-[10px] font-medium text-zinc-500 text-center truncate w-full px-1">{file.name}</span>
+                        </div>
+                      )}
+
                     <button 
                       onClick={() => removePendingFile(i)}
                       className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-900/80 text-white flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-all hover:bg-red-500 shadow-lg"
