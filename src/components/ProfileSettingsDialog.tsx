@@ -22,7 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, User, ImageIcon, Award, Check } from "lucide-react";
+import { Loader2, User, ImageIcon, Award, Check, Cloud } from "lucide-react";
+import useDrivePicker from "react-google-drive-picker";
 
 export const BADGE_OPTIONS = [
   { label: "Founder", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800" },
