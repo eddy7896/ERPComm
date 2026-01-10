@@ -13,11 +13,11 @@ import { motion } from "framer-motion";
 import { Shield, LayoutDashboard, ArrowRight, Loader2, Code, Palette, Zap } from "lucide-react";
 
 const DEMO_ACCOUNTS = [
-  { email: "admin@enterprise.com", role: "Lead", workspace: "Nexus Solutions", icon: Shield, color: "text-blue-500" },
-  { email: "design@enterprise.com", role: "Director", workspace: "Design Studio", icon: Palette, color: "text-pink-500" },
-  { email: "engineering@enterprise.com", role: "Head of Eng", workspace: "Tech Frontier", icon: Code, color: "text-emerald-500" },
-  { email: "marketing@enterprise.com", role: "CMO", workspace: "Marketing Pulse", icon: Zap, color: "text-amber-500" },
-  { email: "product@enterprise.com", role: "PM", workspace: "Multi-Team", icon: LayoutDashboard, color: "text-purple-500" },
+  { email: "user1@enterprise.com", role: "Manager", workspace: "Enterprise", icon: LayoutDashboard, color: "text-zinc-500" },
+  { email: "user6@enterprise.com", role: "Lead", workspace: "Nexus Solutions", icon: Shield, color: "text-blue-500" },
+  { email: "user11@enterprise.com", role: "Director", workspace: "Design Studio", icon: Palette, color: "text-pink-500" },
+  { email: "user16@enterprise.com", role: "Head of Eng", workspace: "Tech Frontier", icon: Code, color: "text-emerald-500" },
+  { email: "user21@enterprise.com", role: "CMO", workspace: "Marketing Pulse", icon: Zap, color: "text-amber-500" },
 ];
 
 export function LoginFormSkeleton() {
