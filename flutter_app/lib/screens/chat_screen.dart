@@ -444,6 +444,29 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _pickGoogleDrive() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => GoogleDrivePicker(
+        onFileSelected: (GoogleDriveFile file) {
+          final driveService = GoogleDriveService();
+          setState(() {
+            _attachedFiles.add({
+              'name': file.name,
+              'url': driveService.getViewUrl(file),
+              'size': file.size ?? 0,
+              'type': file.mimeType ?? 'application/octet-stream',
+              'source': 'google_drive',
+              'drive_id': file.id,
+              'thumbnail': file.thumbnailLink,
+            });
+          });
+        },
+      ),
+    );
+  }
+
   Future<void> _toggleReaction(String messageId, String emoji) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
