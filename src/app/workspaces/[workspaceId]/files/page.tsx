@@ -11,7 +11,6 @@ import {
   ExternalLink, 
   Download, 
   Search, 
-  Filter,
   Image as ImageIcon,
   FileText,
   MoreVertical,
@@ -19,12 +18,10 @@ import {
   User as UserIcon,
   ArrowLeft,
   Upload,
-  UploadCloud,
-  X,
-  Paperclip
+  UploadCloud
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn, downloadFile } from "@/lib/utils";
+import { downloadFile } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
