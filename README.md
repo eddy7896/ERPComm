@@ -13,12 +13,20 @@ Connect your team in one secure, high-performance platform. The all-in-one works
 
 ## 🧪 Demo Access
 
-To explore the platform without creating an account, use the following demo credentials:
+To explore the platform without creating an account, use the following pre-configured demo credentials. These users are distributed across 5 different workspaces (Enterprise Workspace, Nexus Solutions, Design Studio, Tech Frontier, and Marketing Pulse).
 
+### Recommended Account
 - **Email**: `user1@enterprise.com`
 - **Password**: `password123`
 
-*Note: There are 25 pre-configured demo users across 5 different workspaces (e.g., `user1@enterprise.com` through `user25@enterprise.com`).*
+### Bulk Accounts
+You can use any of the 25 pre-configured users to test real-time collaboration:
+- **Range**: `user1@enterprise.com` through `user25@enterprise.com`
+- **Password**: `password123` (all accounts use the same password)
+
+### Workspace Roles
+- **Admins**: `user1`, `user6`, `user11`, `user16`, `user21` (Owners of their respective workspaces)
+- **Members**: All other users are members with standard permissions.
 
 ## 🛠️ Tech Stack
 
