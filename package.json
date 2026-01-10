@@ -60,6 +60,7 @@
     "react-day-picker": "^9.11.2",
     "react-dom": "19.0.0",
     "react-dropzone": "^14.3.8",
+    "react-google-drive-picker": "^1.2.2",
     "react-hook-form": "^7.66.1",
     "react-resizable-panels": "^3.0.6",
     "recharts": "^2.15.4",
