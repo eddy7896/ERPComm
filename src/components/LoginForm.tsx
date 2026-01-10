@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Shield, LayoutDashboard, ArrowRight, Loader2, Code, Palette, Zap } from "lucide-react";
+import { Shield, LayoutDashboard, ArrowRight, Loader2, Code, Palette, Zap, Eye, EyeOff } from "lucide-react";
 
 const DEMO_ACCOUNTS = [
   { email: "user1@enterprise.com", role: "Manager", workspace: "Enterprise", icon: LayoutDashboard, color: "text-zinc-500" },
