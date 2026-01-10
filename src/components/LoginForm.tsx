@@ -140,6 +140,3 @@ export default function LoginForm() {
     </motion.form>
   );
 }
-    </motion.form>
-  );
-}
