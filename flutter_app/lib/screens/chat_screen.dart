@@ -988,45 +988,50 @@ class _ChatInput extends StatelessWidget {
                     onChanged: (val) => onTyping(val.isNotEmpty),
                     onSubmitted: (_) => onSend(),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: const BoxDecoration(
-                      color: ShadColors.secondary,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(7),
-                        bottomRight: Radius.circular(7),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: const BoxDecoration(
+                        color: ShadColors.secondary,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(7),
+                          bottomRight: Radius.circular(7),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(icon: const Icon(Icons.alternate_email, size: 20, color: ShadColors.mutedForeground), onPressed: () {}),
+                          IconButton(icon: const Icon(Icons.sentiment_satisfied_alt, size: 20, color: ShadColors.mutedForeground), onPressed: () {}),
+                            IconButton(
+                              icon: isUploading 
+                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                  : const Icon(Icons.attach_file, size: 20, color: ShadColors.mutedForeground), 
+                              onPressed: isUploading ? null : onPickFiles,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add_to_drive, size: 20, color: Color(0xFF4285f4)),
+                              onPressed: onPickGoogleDrive,
+                              tooltip: 'Google Drive',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.gif_box_outlined, size: 22, color: ShadColors.mutedForeground),
+                              onPressed: onPickGiphy,
+                            ),
+                            const Spacer(),
+                            ElevatedButton(
+                              onPressed: isUploading ? null : onSend,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ShadColors.primary,
+                                foregroundColor: ShadColors.primaryForeground,
+                                minimumSize: const Size(32, 32),
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                elevation: 0,
+                              ),
+                              child: const Icon(Icons.send, size: 18),
+                            ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        IconButton(icon: const Icon(Icons.alternate_email, size: 20, color: ShadColors.mutedForeground), onPressed: () {}),
-                        IconButton(icon: const Icon(Icons.sentiment_satisfied_alt, size: 20, color: ShadColors.mutedForeground), onPressed: () {}),
-                          IconButton(
-                            icon: isUploading 
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Icon(Icons.attach_file, size: 20, color: ShadColors.mutedForeground), 
-                            onPressed: isUploading ? null : onPickFiles,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.gif_box_outlined, size: 22, color: ShadColors.mutedForeground),
-                            onPressed: onPickGiphy,
-                          ),
-                          const Spacer(),
-                          ElevatedButton(
-                            onPressed: isUploading ? null : onSend,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ShadColors.primary,
-                              foregroundColor: ShadColors.primaryForeground,
-                              minimumSize: const Size(32, 32),
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                              elevation: 0,
-                            ),
-                            child: const Icon(Icons.send, size: 18),
-                          ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
