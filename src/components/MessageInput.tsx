@@ -72,6 +72,7 @@ export function MessageInput({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [isEncryptionActive, setIsEncryptionActive] = useState(false);
   const [isMember, setIsMember] = useState(true);
