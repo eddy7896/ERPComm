@@ -9,8 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Plus, Layout, ArrowRight, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Plus, Layout, ArrowRight, Loader2, LogOut } from "lucide-react";
 
 interface Workspace {
   id: string;
