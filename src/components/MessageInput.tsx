@@ -187,14 +187,15 @@ export function MessageInput({
         setMembers([]);
         return;
       }
-      const { data, error } = await supabase
-        .from("channel_members")
-        .select("profiles!user_id(id, username, full_name, avatar_url)")
-        .eq("channel_id", channelId);
-      
-      if (!error && data) {
-        setMembers(data.map((m: any) => m.profiles).filter(Boolean));
-      }
+        const { data, error } = await supabase
+          .from("channel_members")
+          .select("profiles!user_id(id, username, full_name, avatar_url)")
+          .eq("channel_id", channelId);
+        
+        if (!error && data) {
+          setMembers(data.map((m: { profiles: Profile }) => m.profiles).filter(Boolean));
+        }
+
     }
     fetchMembers();
   }, [channelId]);
