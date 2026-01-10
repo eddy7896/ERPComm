@@ -29,7 +29,9 @@ import {
       Pin,
       PinOff,
       FileIcon,
-      Download
+      Download,
+      Cloud,
+      ExternalLink
     } from "lucide-react";
 import { cn, downloadFile } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
