@@ -130,18 +130,29 @@ export default function WorkspacesPage() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
       <div className="mx-auto max-w-4xl">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Your Workspaces</h1>
-            <p className="text-zinc-600 dark:text-zinc-400">Select a workspace to start communicating</p>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Your Workspaces</h1>
+              <p className="text-zinc-600 dark:text-zinc-400">Select a workspace to start communicating</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLogout}
+                className="text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+              {workspaces.length === 0 && (
+                <Button onClick={() => setCreating(true)} disabled={creating}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Workspace
+                </Button>
+              )}
+            </div>
           </div>
-          {workspaces.length === 0 && (
-            <Button onClick={() => setCreating(true)} disabled={creating}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Workspace
-            </Button>
-          )}
-        </div>
 
         {creating && (
           <motion.div 
