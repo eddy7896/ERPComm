@@ -242,7 +242,7 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       })
       .subscribe();
 
-    const handleLocalOptimistic = async (e: any) => {
+    const handleLocalOptimistic = async (e: CustomEvent<{ message: Message }>) => {
       const { message } = e.detail;
       const sender = await getProfile(message.sender_id);
       let parent_message = null;
@@ -257,11 +257,11 @@ export function MessageList({ workspaceId, channelId, recipientId, typingUsers =
       setMessages(prev => [...prev, { ...message, sender, parent_message, reactions: [] }]);
     };
 
-    window.addEventListener('optimistic_message', handleLocalOptimistic);
+    window.addEventListener('optimistic_message', handleLocalOptimistic as EventListener);
 
     return () => {
       supabase.removeChannel(channel);
-      window.removeEventListener('optimistic_message', handleLocalOptimistic);
+      window.removeEventListener('optimistic_message', handleLocalOptimistic as EventListener);
     };
   }, [workspaceId, channelId, recipientId, user]);
 
