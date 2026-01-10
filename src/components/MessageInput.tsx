@@ -240,16 +240,23 @@ export function MessageInput({
     if (loading || uploading || !user) return;
     
     setLoading(true);
-    setUploading(true);
-    setUploadProgress(0);
+    const hasFiles = pendingFiles.length > 0;
+    
+    if (hasFiles) {
+      setUploading(true);
+      setUploadProgress(0);
+    }
     
     // Simulate progress for visual effect
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 95) return prev;
-        return prev + 5;
-      });
-    }, 200);
+    let progressInterval: NodeJS.Timeout | null = null;
+    if (hasFiles) {
+      progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 95) return prev;
+          return prev + 5;
+        });
+      }, 200);
+    }
 
     const currentReply = replyingTo;
     onCancelReply?.();
