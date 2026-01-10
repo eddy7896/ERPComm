@@ -855,6 +855,7 @@ class _ChatInput extends StatelessWidget {
   final VoidCallback onCancelReply;
   final Function(int) onRemoveFile;
   final VoidCallback onPickGiphy;
+  final VoidCallback onPickGoogleDrive;
   final bool showMentions;
   final String mentionQuery;
   final List<Profile> workspaceMembers;
@@ -871,6 +872,7 @@ class _ChatInput extends StatelessWidget {
     required this.onCancelReply,
     required this.onRemoveFile,
     required this.onPickGiphy,
+    required this.onPickGoogleDrive,
     required this.showMentions,
     required this.mentionQuery,
     required this.workspaceMembers,
