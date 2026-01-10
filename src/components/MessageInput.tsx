@@ -81,7 +81,7 @@ export function MessageInput({
   const [cursorPos, setCursorPos] = useState(0);
   const { user } = useAuth();
   const { theme } = useTheme();
-  const [openPicker, authResponse] = useDrivePicker();
+  const [openPicker] = useDrivePicker();
 
   const handleOpenPicker = () => {
     openPicker({
