@@ -530,8 +530,25 @@ function MessageItem({
                 {message.payload?.files && message.payload.files.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2 w-full max-w-2xl">
                     {message.payload.files.map((file: any, i: number) => (
-                      <div key={i} className="flex flex-col gap-1 w-full max-w-sm">
-                        {file.type.startsWith('image/') ? (
+                        <div key={i} className="flex flex-col gap-1 w-full max-w-sm">
+                          {file.type === 'drive' ? (
+                            <div className="flex items-center gap-3 p-3 rounded-lg border border-blue-200 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-950/20 group/file">
+                              <div className="h-10 w-10 rounded bg-white dark:bg-blue-900/30 flex items-center justify-center border border-blue-100 dark:border-blue-800/50">
+                                <Cloud className="h-5 w-5 text-blue-500" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate text-blue-900 dark:text-blue-100">{file.name}</p>
+                                <p className="text-[10px] text-blue-600 dark:text-blue-400">Google Drive File</p>
+                              </div>
+                              <button 
+                                className="p-2 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                                onClick={() => window.open(file.url, '_blank')}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ) : file.type.startsWith('image/') ? (
+
                           <div className="relative rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 group/image">
                             <img 
                               src={file.url} 
