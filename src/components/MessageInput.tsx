@@ -414,7 +414,7 @@ export function MessageInput({
       } catch (err) {
         console.error("Upload/Send failed:", err);
       } finally {
-        clearInterval(progressInterval);
+        if (progressInterval) clearInterval(progressInterval);
         setLoading(false);
         setUploading(false);
         setUploadProgress(0);
