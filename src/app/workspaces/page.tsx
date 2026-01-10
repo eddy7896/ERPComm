@@ -62,6 +62,14 @@ export default function WorkspacesPage() {
     fetchWorkspaces();
   }, [router, user, authLoading]);
 
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Failed to logout");
+    } else {
+      router.push("/");
+    }
+  };
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
