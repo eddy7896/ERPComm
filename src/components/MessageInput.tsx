@@ -253,9 +253,21 @@ export function MessageInput({
           mentions.push(match[1]);
         }
 
-        for (const pending of pendingFiles) {
+          for (const pending of pendingFiles) {
+            if (pending.type === 'drive') {
+              uploadedFiles.push({
+                url: pending.url || '',
+                name: pending.name,
+                type: 'drive',
+                size: pending.size || 0
+              });
+              continue;
+            }
 
-        const fileExt = pending.file.name.split('.').pop();
+            if (!pending.file) continue;
+
+            const fileExt = pending.file.name.split('.').pop();
+
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${workspaceId}/${fileName}`;
 
