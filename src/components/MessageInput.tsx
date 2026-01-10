@@ -493,6 +493,52 @@ export function MessageInput({
   return (
     <div className="px-3 md:px-4 pb-4 md:pb-6 relative" {...getRootProps()}>
       <input {...getInputProps()} id="file-input" />
+      
+      <AnimatePresence>
+        {uploading && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-x-3 md:inset-x-4 inset-y-0 -top-2 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-[60] flex flex-col items-center justify-center rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-xl"
+          >
+            <div className="relative mb-4">
+              <motion.div
+                animate={{ 
+                  y: [0, -20, 0],
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 10, -10, 0]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="bg-blue-600 p-4 rounded-2xl shadow-lg shadow-blue-500/20"
+              >
+                <UploadCloud className="h-8 w-8 text-white" />
+              </motion.div>
+              <motion.div 
+                animate={{ opacity: [0, 1, 0], scale: [0.5, 1.5, 2] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="absolute inset-0 bg-blue-500 rounded-2xl -z-10"
+              />
+            </div>
+            <div className="text-center space-y-2 w-full max-w-[240px]">
+              <p className="text-sm font-bold tracking-tight">Uploading Attachments...</p>
+              <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${uploadProgress}%` }}
+                  className="h-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+                />
+              </div>
+              <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">{uploadProgress}% complete</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {isDragActive && (
         <div className="absolute inset-x-3 md:inset-x-4 inset-y-0 -top-2 bg-primary/10 border-2 border-dashed border-primary rounded-2xl z-50 flex items-center justify-center backdrop-blur-[2px] animate-in fade-in duration-200">
           <div className="flex flex-col items-center gap-2 text-primary">
