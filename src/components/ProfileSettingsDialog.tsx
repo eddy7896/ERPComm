@@ -57,6 +57,26 @@ export function ProfileSettingsDialog({ open, onOpenChange }: ProfileSettingsDia
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   const [badge, setBadge] = useState(profile?.badge || "");
+  const [openPicker] = useDrivePicker();
+
+  const handleOpenPicker = () => {
+    openPicker({
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+      developerKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "",
+      viewId: "DOCS_IMAGES",
+      showUploadView: true,
+      showUploadFolders: true,
+      supportDrives: true,
+      multiselect: false,
+      callbackFunction: (data) => {
+        if (data.action === "picked") {
+          const doc = data.docs[0];
+          setAvatarUrl(doc.url);
+          toast.success("Avatar selected from Google Drive!");
+        }
+      },
+    });
+  };
 
   const handleSave = async () => {
     if (!profile) return;
