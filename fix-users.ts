@@ -13,14 +13,21 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 async function fixUsers() {
   console.log('Fetching users...')
-  const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+  const { data, error: listError } = await supabase.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000
+  })
   
   if (listError) {
     console.error('Error listing users:', listError)
     return
   }
 
-  const demoUsers = users.filter(u => u.email?.endsWith('@enterprise.com'))
+  const users = data.users;
+  console.log(`Total users found: ${users.length}`)
+  users.forEach(u => console.log(`- ${u.email}`))
+
+  const demoUsers = users.filter(u => u.email?.toLowerCase().endsWith('@enterprise.com'))
   console.log(`Found ${demoUsers.length} demo users. Resetting passwords...`)
 
   for (const user of demoUsers) {
