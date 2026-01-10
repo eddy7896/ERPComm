@@ -695,7 +695,9 @@ class _MessageBubble extends StatelessWidget {
         runSpacing: 8,
         children: files.map((file) {
           final isImage = (file['type'] as String).startsWith('image/');
-          if (isImage) {
+          final isGoogleDrive = file['source'] == 'google_drive';
+          
+          if (isImage && !isGoogleDrive) {
             return ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
@@ -706,22 +708,47 @@ class _MessageBubble extends StatelessWidget {
               ),
             );
           }
+          
           return Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: ShadColors.secondary,
+              color: isGoogleDrive ? const Color(0xFF4285f4).withOpacity(0.05) : ShadColors.secondary,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: ShadColors.border),
+              border: Border.all(color: isGoogleDrive ? const Color(0xFF4285f4).withOpacity(0.2) : ShadColors.border),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.insert_drive_file, size: 20, color: ShadColors.mutedForeground),
-                const SizedBox(width: 8),
-                Text(
-                  file['name'],
-                  style: const TextStyle(fontSize: 12),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: isGoogleDrive ? const Color(0xFF4285f4).withOpacity(0.1) : ShadColors.background,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    isGoogleDrive ? Icons.add_to_drive : Icons.insert_drive_file, 
+                    size: 18, 
+                    color: isGoogleDrive ? const Color(0xFF4285f4) : ShadColors.mutedForeground,
+                  ),
                 ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      file['name'],
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
+                    if (isGoogleDrive)
+                      const Text(
+                        'Google Drive',
+                        style: TextStyle(fontSize: 10, color: Color(0xFF4285f4)),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.open_in_new, size: 14, color: isGoogleDrive ? const Color(0xFF4285f4) : ShadColors.mutedForeground),
               ],
             ),
           );
