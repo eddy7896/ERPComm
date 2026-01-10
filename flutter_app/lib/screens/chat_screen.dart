@@ -554,6 +554,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onCancelReply: () => setState(() => _replyingTo = null),
               onRemoveFile: (index) => setState(() => _attachedFiles.removeAt(index)),
               onPickGiphy: _pickGiphy,
+              onPickGoogleDrive: _pickGoogleDrive,
               showMentions: _showMentions,
               mentionQuery: _mentionQuery,
               workspaceMembers: _workspaceMembers,
